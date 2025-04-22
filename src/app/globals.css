@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/*https://redlib.freedit.eu/r/tailwindcss/comments/1hpvosi/hover_css_broken_in_tailwind_v4_need_help/*/
+@custom-variant hover (&:hover); 
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

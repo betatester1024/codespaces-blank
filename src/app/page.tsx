@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from "react";
+import { decode } from "@/lib/bpprocessing";
 
 // const { decode, encode } = require("dsabp-js")
 // const dsabp = require("dsabp-js")
-import * as dsabp from '@/lib/dsabp';
+// const dsabp = require("@/lib/dsabp");
 
 export default function Page() {
   const [inBlueprint, setInBlueprint] = useState<string>("");
@@ -12,8 +13,10 @@ export default function Page() {
   async function process(event:React.FormEvent<HTMLFormElement>) {
     // whoa there what the hell was that
     event.preventDefault();
+    let tArea = (event.target as HTMLFormElement).querySelector("textarea")!;
     console.log("waiting.");
-    console.log(await dsabp.decode(inBlueprint));
+    console.log(decode(tArea.value));
+    console.log("done");
     // console.log(inBlueprint);
   }
   return (
@@ -22,18 +25,4 @@ export default function Page() {
       <button type="submit" className="active:bg-gray-300 bg-gray-100 cursor-pointer hover:bg-gray-200">process</button>
     </form>
   )
-  // let out = {
-  //   bodyCtn:(
-  //     <form className="w-100 flex" action="javascript:process()">
-
-  //       <textarea id="inBlueprint"></textarea> 
-  //       <button>process</button>
-  //     </form>
-  //   ), 
-  //   headCtn:(
-  //     <script src="./script.js"></script>
-  //   )
-  // };
-  // console.log(out);
-  // return out;
 }
