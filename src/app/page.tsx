@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { decode } from "@/lib/bpprocessing";
+import { getCostSummary } from "@/lib/bpprocessing";
 
 // const { decode, encode } = require("dsabp-js")
 // const dsabp = require("dsabp-js")
@@ -15,7 +15,7 @@ export default function Page() {
     event.preventDefault();
     let tArea = (event.target as HTMLFormElement).querySelector("textarea")!;
     console.log("waiting.");
-    console.log(decode(tArea.value));
+    console.log(await getCostSummary(tArea.value));
     console.log("done");
     // console.log(inBlueprint);
   }

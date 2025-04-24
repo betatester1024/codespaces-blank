@@ -6,30 +6,68 @@ function incr(map: Map<any, any>, key:any, by:number=1) {
   map.set(key, found+by);
 }
 
-export async function decode(bString:string) {
-  let itemCt = new Map();
+// const zero:BigInt = BigInt(0);
+// const one :BigInt = BigInt(1);
+function countOnes(v: string) {
+  let count = 0;
+  for (let i=0; i<v.length; i++) {
+    if (v.charAt(i) === '1') {
+      count++;
+    }
+  }
+  // while (v != 0n) {
+  //   count += v & 1n;
+  //   v >>= 1n;
+  // }
+  return count;
+  // console.log("v=", v);
+  // let bits = 0; // Use bigint for bits
+  // while (v !== zero) {
+  //   if (BigInt(one & v) != (zero)) {
+  //     bits++;
+  //   }
+  //   v >>= one; // No need for explicit casting
+  // }
+  // console.log(Number(bits)); // Convert to number for logging
+  // return Number(bits); // Return as number
+}
+
+// https://blueyescat.github.io/dsabp-js/
+export async function getCostSummary(bString:string) {
+  let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
   let decoder = new Decoder();
   let bp = await decoder.decodeSync(bString);
   for (const cmd of bp.commands) {
     if (cmd instanceof BuildCmd) {
-      console.log(cmd.item.name)
-      incr(itemCt, cmd.item);
-    }
-    for (let key of itemCt.keys()) {
-      let it = itemCt.get(key);
-      console.log(it);
-      if (it.recipe != null) {
-        let inputs = it.recipe.input;
-        for (let i of inputs) {
-          incr(matsCost, i.item, i.count);
-        }
-      }
-      else incr(matsCost, it.id());
-    }
-    for (let key of matsCost.keys()) {
-      console.log("itemID", key, "x", matsCost.get(key))
+      // console.log("[C]", cmd.item.name, "cmdsz = ", cmd.bits ? countOnes(cmd.bits.toString()) : 1);
+      incr(itemCt, cmd.item, cmd.bits != null ? countOnes(cmd.bits.toString()) : 1);
     }
   }
-  return "aie";
+  console.log("\n\n");
+  for (let key of itemCt.keys()) {
+    let it = key;
+    console.log(it.name, "+", itemCt.get(key));
+    if (it.recipe != null) {
+      let inputs = it.recipe.input;
+      for (let i of inputs) {
+        incr(matsCost, i.item, i.count * itemCt.get(key)!);
+      }
+    }
+    else {
+      // if (typeof it.id != "function") {
+      //   // console.log("ITEM:", it, it.id);
+      // }
+      incr(matsCost, it.id, itemCt.get(key)!);
+    }
+  }
+  let out: {
+    it: typeof Item,
+    ct: Number;
+  }[] = [];
+  for (let key of matsCost.keys()) {
+    out.push({it: Item.getById(key), ct: matsCost.get(key)!});
+    // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
+  }
+  return JSON.stringify(out);
 }
