@@ -1,5 +1,6 @@
 'use client';
-
+// /<reference path="@/lib/utils.tsx"/>
+import {Button, Colour, byId} from "@/lib/utils"
 import { useState } from "react";
 import { getCostSummary } from "@/lib/bpprocessing";
 
@@ -19,10 +20,19 @@ export default function Page() {
     console.log("done");
     // console.log(inBlueprint);
   }
+
+  async function fillTemplateBP() {
+    let tArea = byId("inBlueprint") as HTMLTextAreaElement;
+    let rawDat = await fetch("/testbp.txt");
+    let str = await rawDat.text();
+    tArea.value = str;
+  }
   return (
-    <form className="w-100 flex" onSubmit={process}>
-      <textarea id="inBlueprint" className="bg-gray-200 rounded" onChange={(e) => setInBlueprint(e.target.value)}></textarea>
-      <button type="submit" className="active:bg-gray-300 bg-gray-100 cursor-pointer hover:bg-gray-200">process</button>
+    <form className="w-full flex" onSubmit={process}>
+      <textarea id="inBlueprint" className="bg-gray-200 grow" onChange={(e) => setInBlueprint(e.target.value)}></textarea>
+      <Button baseClr={Colour.GREY} type="submit" className="active:bg-gray-300 bg-gray-100 cursor-pointer hover:bg-gray-200">Process</Button> 
+      <Button baseClr={Colour.BLUE} onClick={fillTemplateBP} className="">Load test blueprint</Button>
+      {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
     </form>
   )
 }

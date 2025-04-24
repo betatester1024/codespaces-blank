@@ -32,6 +32,8 @@ function countOnes(v: string) {
   // return Number(bits); // Return as number
 }
 
+
+
 // https://blueyescat.github.io/dsabp-js/
 export async function getCostSummary(bString:string) {
   let itemCt : Map<any, number> = new Map();
@@ -62,11 +64,12 @@ export async function getCostSummary(bString:string) {
     }
   }
   let out: {
-    it: typeof Item,
-    ct: Number;
+    it: string,
+    ct: Number,
+    link: string
   }[] = [];
   for (let key of matsCost.keys()) {
-    out.push({it: Item.getById(key), ct: matsCost.get(key)!});
+    out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image});
     // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
   return JSON.stringify(out);
