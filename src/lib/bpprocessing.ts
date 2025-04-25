@@ -32,6 +32,11 @@ function countOnes(v: string) {
   // return Number(bits); // Return as number
 }
 
+export interface BoMEntry {
+  it: string,
+  ct: Number,
+  link: string
+}
 
 
 // https://blueyescat.github.io/dsabp-js/
@@ -43,6 +48,7 @@ export async function getCostSummary(bString:string) {
   for (const cmd of bp.commands) {
     if (cmd instanceof BuildCmd) {
       // console.log("[C]", cmd.item.name, "cmdsz = ", cmd.bits ? countOnes(cmd.bits.toString()) : 1);
+      console.log(cmd.item.name, cmd.bits?.toString());
       incr(itemCt, cmd.item, cmd.bits != null ? countOnes(cmd.bits.toString()) : 1);
     }
   }
@@ -63,14 +69,10 @@ export async function getCostSummary(bString:string) {
       incr(matsCost, it.id, itemCt.get(key)!);
     }
   }
-  let out: {
-    it: string,
-    ct: Number,
-    link: string
-  }[] = [];
+  let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
     out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image});
-    // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
+    console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
   return JSON.stringify(out);
 }
