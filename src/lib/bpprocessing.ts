@@ -95,6 +95,7 @@ function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
     case Item.SHIELD_GENERATOR:
       return new ConfigCmd({fixedAngle: config.fixedAngle});
     case Item.LOADER:
+    case Item.LOADER_NEW:
       return new ConfigCmd({loader: config.loader, filterItems:config.filterItems, filterMode:config.filterMode});
     case Item.ITEM_HATCH:
     case Item.ITEM_HATCH_STARTER:
@@ -126,13 +127,16 @@ export async function sortByItem(bString:string) {
     }
   }
   let cmds = bp.commands as (BuildCmd_A|ConfigCmd)[];
-  cmds.filter((i:any) => {
-    console.log(typeof i);
+  cmds = cmds.filter((i:any) => {
+    if (i instanceof ConfigCmd) {
+      console.log(i);
+    }
     return i instanceof BuildCmd;
   })
-  cmds.sort((i1:BuildCmd_A|ConfigCmd, i2:BuildCmd_A|ConfigCmd)=>{
+  cmds = cmds.sort((i1:BuildCmd_A|ConfigCmd, i2:BuildCmd_A|ConfigCmd)=>{
     i1 = i1 as BuildCmd_A;
     i2 = i2 as BuildCmd_A;
+    if (i1.item == null) console.log(i1);
     if (i1.item.id == i2.item.id) return i1.idx - i2.idx;
     else return i1.item.id - i2.item.id;
   });
@@ -144,5 +148,6 @@ export async function sortByItem(bString:string) {
       activeConfig = cmd.currConfig;
     }
   }
-  return new Encoder().encodeSync(bp);
+  bp.commands = cmds;
+  return JSON.stringify({bp:new Encoder().encodeSync(bp)});
 }
