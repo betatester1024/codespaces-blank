@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_Display, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const NotoSansDisplay = Noto_Sans_Display({
+  variable: "--font-notosans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const NotoSansMono = Noto_Sans_Mono({
+  variable: "--font-notomono",
   subsets: ["latin"],
 });
 
@@ -18,13 +18,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
-  // console.log("indata = ", inData);
   return (
     <html lang="en">
       <head>
       </head>
-      <body>
-        <b>layout starts here</b>
+      <body className="p-3">
         {children}
       </body>
     </html>

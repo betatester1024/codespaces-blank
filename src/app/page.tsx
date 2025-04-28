@@ -1,6 +1,6 @@
 'use client';
 // /<reference path="@/lib/utils.tsx"/>
-import {Button, Colour, byId, Lister} from "@/lib/utils"
+import {Button, Themes, byId, Lister, KeyedTable, Loader} from "@/lib/utils"
 import { useState, ReactNode } from "react";
 import { getCostSummary, BoMEntry } from "@/lib/bpprocessing";
 
@@ -10,23 +10,37 @@ import { getCostSummary, BoMEntry } from "@/lib/bpprocessing";
 
 export default function Page() {
   const [inBlueprint, setInBlueprint] = useState<string>("");
-  const [resState, setResState] = useState<ReactNode[][]>([]);
+  const [resState, setResState] = useState<KeyedTable>([]);
+  const [processError, setProcessError] = useState<string>();
+  const [resLoading, setResLoading] = useState<boolean>(false);
 
   async function process(event:React.FormEvent<HTMLFormElement>) {
-    // whoa there what the hell was that
     event.preventDefault();
     let tArea = (event.target as HTMLFormElement).querySelector("textarea")!;
-    console.log("waiting.");
+    setResLoading(true);
     let summary : BoMEntry[] = JSON.parse(await getCostSummary(tArea.value));
+    setResLoading(false);
     let formatted = [];
     for (let entry of summary) {
-      formatted.push([
-        <img src={"https://test.drednot.io/img/"+entry.link+".png"}></img>,
+      formatted.push({key:entry.link, eles:[
+        <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.link+".png"}></img>,
         <p>{entry.ct+""}</p>,
         <p>{entry.it}</p>
-      ])
+      ]});
     }
-    setResState(formatted);
+    if (summary.length > 0) {
+      setResState(formatted);
+      setProcessError(undefined);
+    }
+    else {
+      setResState([{
+        key:0,
+        eles:[
+          <p className={Themes.RED.textCls}>Blueprint processing error.</p>
+        ]
+      }]);
+      setProcessError("Blueprint processing error.");
+    }
     console.log("done");
     // console.log(inBlueprint);
   }
@@ -39,19 +53,26 @@ export default function Page() {
   }
 
   return (<>
-    <form className="w-full flex gap-1" onSubmit={process}>
-      <textarea id="inBlueprint" className="bg-gray-200 grow" onChange={(e) => setInBlueprint(e.target.value)}></textarea>
-      <Button baseClr={Colour.GREY} type="submit">Process</Button> 
-      <Button baseClr={Colour.BLUE} onClick={fillTemplateBP} className="">Load test blueprint</Button>
+    <form className="w-full flex gap-1 flex-wrap" onSubmit={process}>
+      <textarea id="inBlueprint" defaultValue={inBlueprint} className="bg-gray-200 grow-4 rounded-sm" 
+      onChange={(e) => setInBlueprint(e.target.value)}>
+      </textarea>
+      <Button theme={Themes.GREY} className="flex basis-[min-content] items-center" type="submit">
+        <Loader theme={Themes.GREY} active={resLoading}></Loader>
+        <span>Process</span>
+      </Button> 
+      <Button theme={Themes.BLUE} onClick={fillTemplateBP} className="">Load test blueprint</Button>
       {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
     </form>
-    <div className="w-full flex-col gap-1">
-      <div className="w-full">
-        <b className="text-blue-600">Results</b>
+    <div className={"w-full flex-col gap-1 "} >
+      <div className="w-full flex justify-center">
+        <p className="text-blue-500 text-lg">Blueprint scanner results:</p>
       </div>
       <div id="resArea">
-        hey!
-        <Lister baseClr={Colour.BLUE} rows={resState}/>
+        <Lister 
+          theme={processError ? Themes.RED : Themes.BLUE} 
+          className_c="p-2"
+          colLayout={processError ? "1fr" : "1fr 1fr 9fr"}>{resState}</Lister>
       </div>
     </div>
   </>)

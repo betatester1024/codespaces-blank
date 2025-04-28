@@ -44,7 +44,13 @@ export async function getCostSummary(bString:string) {
   let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
   let decoder = new Decoder();
-  let bp = await decoder.decodeSync(bString);
+  let bp = null;
+  try {
+    bp = decoder.decodeSync(bString);
+  } catch (e) {
+    console.log(e);
+    return JSON.stringify([]);
+  }
   for (const cmd of bp.commands) {
     if (cmd instanceof BuildCmd) {
       // console.log("[C]", cmd.item.name, "cmdsz = ", cmd.bits ? countOnes(cmd.bits.toString()) : 1);

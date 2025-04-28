@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-notosans);
+  --font-mono: var(--font-notomono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +25,65 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Noto Sans Display", sans-serif;
   transition: 0.2s ease;
 }
+
+* {
+  outline: 2px solid transparent;
+}
+
+*:focus {
+  outline: 2px solid var(--color-blue-600);
+  transition: outline 0.2s ease;
+}
+
+/* .animIn {
+	--secondaryAnim: scale-in-center 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+} */
+
+.spinner {
+  /* --secondaryAnim: none; */
+  animation: rotate 0.5s infinite;
+  --tfcn: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+  transition: width 0.2s var(--tfcn), height 0.2s var(--tfcn), opacity 0.1s var(--tfcn);
+}
+
+/* .animOut {
+  --secondaryAnim: scale-out-center 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+} */
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+/* 
+@keyframes scale-in-center {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 0;
+  }
+  100% {
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out-center {
+  0% {
+    width:initial;
+    width:initial;
+    opacity: 1;
+  }
+  100% {
+    width: 0%;
+    height: 0%;
+    opacity:0;
+  }
+} */
