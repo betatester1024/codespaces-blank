@@ -1,5 +1,6 @@
 'use server';
-import { Decoder, BuildCmd, Item } from '@/lib/dsabp.cjs';
+// import  from '@/lib/dsabp.cjs';
+import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig } from './dsabp';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
   let found = map.get(key) ?? 0;
@@ -38,19 +39,26 @@ export interface BoMEntry {
   link: string
 }
 
-
-// https://blueyescat.github.io/dsabp-js/
-export async function getCostSummary(bString:string) {
-  let itemCt : Map<any, number> = new Map();
-  let matsCost = new Map();
+function decode(bString:string) {
   let decoder = new Decoder();
+  if (bString.length == 0) return null;
   let bp = null;
   try {
     bp = decoder.decodeSync(bString);
   } catch (e) {
     console.log(e);
-    return JSON.stringify([]);
+    return null;
   }
+  if (bp.commands == null) return null;
+  return bp as Blueprint;
+}
+
+// https://blueyescat.github.io/dsabp-js/
+export async function getCostSummary(bString:string) {
+  let itemCt : Map<any, number> = new Map();
+  let matsCost = new Map();
+  let bp = decode(bString);
+  if (bp == null) return JSON.stringify([]);
   for (const cmd of bp.commands) {
     if (cmd instanceof BuildCmd) {
       // console.log("[C]", cmd.item.name, "cmdsz = ", cmd.bits ? countOnes(cmd.bits.toString()) : 1);
@@ -69,9 +77,6 @@ export async function getCostSummary(bString:string) {
       }
     }
     else {
-      // if (typeof it.id != "function") {
-      //   // console.log("ITEM:", it, it.id);
-      // }
       incr(matsCost, it.id, itemCt.get(key)!);
     }
   }
@@ -81,4 +86,63 @@ export async function getCostSummary(bString:string) {
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
   return JSON.stringify(out);
+}
+
+function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
+  switch (item) {
+    case Item.EXPANDO_BOX: 
+      return new ConfigCmd({angle: config.angle});
+    case Item.SHIELD_GENERATOR:
+      return new ConfigCmd({fixedAngle: config.fixedAngle});
+    case Item.LOADER:
+      return new ConfigCmd({loader: config.loader, filterItems:config.filterItems, filterMode:config.filterMode});
+    case Item.ITEM_HATCH:
+    case Item.ITEM_HATCH_STARTER:
+      return new ConfigCmd({filterItems:config.filterItems, filterMode:config.filterMode});
+    case Item.PUSHER:
+      return new ConfigCmd({pusher:config.pusher, filterItems:config.filterItems, filterMode:config.filterMode});
+    default: 
+      return new ConfigCmd();
+  }
+}
+
+class BuildCmd_A extends BuildCmd {
+  currConfig:ConfigCmd; idx:number
+};
+
+export async function sortByItem(bString:string) {
+  let bp = decode(bString);
+  if (!bp) return JSON.stringify([]);
+  let activeConfig = new ConfigCmd();
+  for (let i=0; i<bp.commands.length; i++) {
+    let cmd = bp.commands[i];
+    if (cmd instanceof ConfigCmd) {
+      activeConfig = cmd;
+    }
+    else if (cmd instanceof BuildCmd) {
+      let bcmd = cmd as BuildCmd_A;
+      bcmd.currConfig = activeConfig;
+      bcmd.idx = i;
+    }
+  }
+  let cmds = bp.commands as (BuildCmd_A|ConfigCmd)[];
+  cmds.filter((i:any) => {
+    console.log(typeof i);
+    return i instanceof BuildCmd;
+  })
+  cmds.sort((i1:BuildCmd_A|ConfigCmd, i2:BuildCmd_A|ConfigCmd)=>{
+    i1 = i1 as BuildCmd_A;
+    i2 = i2 as BuildCmd_A;
+    if (i1.item.id == i2.item.id) return i1.idx - i2.idx;
+    else return i1.item.id - i2.item.id;
+  });
+  activeConfig = new ConfigCmd;
+  for (let i=0; i<cmds.length; i++) {
+    let cmd = cmds[i] as BuildCmd_A;
+    if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
+      cmds.splice(i, 0, cmd.currConfig);
+      activeConfig = cmd.currConfig;
+    }
+  }
+  return new Encoder().encodeSync(bp);
 }

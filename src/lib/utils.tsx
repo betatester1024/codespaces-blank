@@ -12,17 +12,17 @@ export const Themes : {[x:string]:ColourTheme}= {
 };
 
 export function byId(id:string) {
-  return document.getElementById(id)!;
+  return document.getElementById(id);
 } 
 
 export function Button({ theme, children:content, className:extraClasses="", onClick:eCallBk, type="button"} : 
-  {theme:ColourTheme, children:ReactNode, onClick?:()=>any, className?:string, type?:string}) {
+  {theme:ColourTheme, children:ReactNode, onClick?:(event: React.MouseEvent<HTMLButtonElement, MouseEvent>)=>void, className?:string, type?:string}) {
   return (
     <button 
       type={type as ("submit" | "reset" | "button" | undefined)} 
       onClick={eCallBk}
       className={`${theme.textCls} ${theme.activeCls} ${theme.hoverCls} 
-      cursor-pointer rounded-sm p-2 transition-colors justify-center grow ${extraClasses}`}
+      cursor-pointer rounded-sm p-2 transition-colors justify-center grow flex items-center ${extraClasses}`}
     >
       {content}
     </button>
