@@ -1,6 +1,6 @@
 'use client';
 // /<reference path="@/lib/utils.tsx"/>
-import {Button, Themes, byId, Lister, KeyedTable, Loader} from "@/lib/utils"
+import {Button, Themes, byId, Lister, KeyedTable, Loader, Select, Option} from "@/lib/utils"
 import { useState } from "react";
 import { getCostSummary, BoMEntry, sortByItem } from "@/lib/bpprocessing";
 
@@ -65,16 +65,24 @@ export default function Page() {
     <form className="w-full flex gap-1 flex-wrap" onSubmit={process}>
       <textarea id="inBlueprint" className="bg-gray-200 grow-4 rounded-sm">
       </textarea>
-      <Loader theme={Themes.GREY} active={resLoading}></Loader>
       <Button theme={Themes.GREY} className="basis-[min-content]" type="submit">
+        <Loader theme={Themes.GREY} active={resLoading}></Loader>
         <span>Process</span>
-      </Button> 
-      <Button theme={Themes.GREEN} className="flex items-center" type="button" onClick={sortBP}>
-        <span>Sort</span>
       </Button> 
       <Button theme={Themes.BLUE} onClick={fillTemplateBP} className="">Load test blueprint</Button>
       {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
     </form>
+    <div id="options">
+      <Select theme={Themes.BLUE}>
+        <Option>def</Option>
+        <Option>def</Option>
+        <Option>def</Option>
+        <Option>def</Option>
+        <Option>def</Option>
+        <Option>def</Option>
+        <Option>def</Option>
+      </Select>
+    </div>
     <div className={"w-full flex-col gap-1 "} >
       <div className="w-full flex justify-center">
         <p className="text-blue-500 text-lg">Blueprint scanner results:</p>
