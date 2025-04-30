@@ -1,28 +1,29 @@
 "use client"
 
-import React, { ReactNode, useState } from "react";
+import { collectRoutesUsingEdgeRuntime } from "next/dist/build/utils";
+import React, { ReactNode, useEffect, useState } from "react";
 
-type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string};
+type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string};
 
 export const Themes : {[x:string]:ColourTheme}= {
   RED:  {
     textCls:"text-red-400", activeCls:"active:text-red-300", 
-    hoverCls:"hover:text-red-500 hover:bg-red-100",
-    bgCls:"bg-red-100"},
+    hoverCls:"hover:text-red-500 hover:bg-red-200",
+    bgCls:"bg-red-100", bg2:"bg-red-50" },
   GREEN:{
     textCls:"text-green-400", activeCls:"active:text-green-300", 
-    hoverCls:"hover:text-green-500 hover:bg-green-100",
-    bgCls:"bg-green-100"
+    hoverCls:"hover:text-green-500 hover:bg-green-200",
+    bgCls:"bg-green-100", bg2:"bg-green-50"
   },
   BLUE: {
     textCls:"text-blue-400", activeCls:"active:text-blue-300", 
-    hoverCls:"hover:text-blue-500 hover:bg-blue-100",
-    bgCls:"bg-blue-100"
+    hoverCls:"hover:text-blue-500 hover:bg-blue-200",
+    bgCls:"bg-blue-100", bg2:"bg-blue-50"
   },
   GREY: {
     textCls:"text-gray-400", activeCls:"active:text-gray-300", 
-    hoverCls:"hover:text-gray-500 hover:bg-gray-100",
-    bgCls:"bg-gray-100"
+    hoverCls:"hover:text-gray-500 hover:bg-gray-200",
+    bgCls:"bg-gray-100", bg2:"bg-gray-50"
   }
 };
 
@@ -36,8 +37,8 @@ export function Button({ theme, children:content, className:extraClasses="", onC
     <button 
       type={type as ("submit" | "reset" | "button" | undefined)} 
       onClick={eCallBk}
-      className={`${theme.textCls} ${theme.activeCls} ${theme.hoverCls} 
-      cursor-pointer rounded-sm p-2 transition-colors justify-center grow flex items-center ${extraClasses}`}
+      className={`${extraClasses} ${theme.textCls} ${theme.activeCls} ${theme.hoverCls} 
+      cursor-pointer rounded-sm p-2 transition-colors justify-center grow flex items-center `}
     >
       {content}
     </button>
@@ -80,11 +81,13 @@ export function Lister(
 }
 
 type OptionElement = React.ReactElement<OptionProps>;
-export function Select({theme:clrTheme, children, onChange} : 
-  {theme:ColourTheme, children:OptionElement[]|OptionElement, onChange?:(n:ReactNode)=>any}) {
-  function updateSearch() {
-    
-  }
+export function Select({theme:clrTheme, children, className, onChange} : 
+  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:ReactNode)=>any}) {
+  let [filter, setFilter] = useState<string>("");
+  let [active, setActive] = useState<boolean>(false);
+  let [sel, setSel] = useState<number>(-1);
+  let [inputReady, setInputReady] = useState<boolean>(false);
+
   let processedChildren = [];
   if ((children as OptionElement[]).length == null) {
     children = [children] as OptionElement[];
@@ -92,41 +95,101 @@ export function Select({theme:clrTheme, children, onChange} :
   children = children as OptionElement[];
   let options = [];
   for (let i=0; i<children.length; i++) {
+    console.log("searching", filter);
     let node = children[i];
     options.push(node.props.children);
-    processedChildren.push(
-      <div 
-        key={i} 
-        className={`${clrTheme.textCls} ${clrTheme.activeCls} ${clrTheme.hoverCls} transition-colors cursor-pointer`}
-        onClick={()=>{setSel(i); setActive(false);}}  
-      >
-        {node}
-      </div>
-    );
-  }
+    let regex = new RegExp("("+filter+")", "i")
+    let matched = null;
+    if (filter != "") matched = node.props.children.match(regex);
+    // if active and (search produces something or no search)
+    if (active && (filter != "" && matched || filter == "")) {
+      let foundIdx = node.props.children.search(regex);
+      console.log(foundIdx);
+      processedChildren.push(
+        <div 
+          key={JSON.stringify({idx:i, value:node.props.value})} 
+          className={`${clrTheme.textCls} ${clrTheme.activeCls} ${clrTheme.hoverCls} 
+          ${clrTheme.bgCls} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5`}
+          onMouseUp={()=>{console.log("selection made"); setSel(i); setActive(false);}}  
+        >
+          <span>{
+            matched ? 
+            <><span>{node.props.children.substring(0, foundIdx)}</span>
+            <b>{matched[1]}</b>
+            <span>{node.props.children.substring(foundIdx+matched[1].length)}</span></>
+            : node.props.children
+          }</span>
+        </div>
+      );
+    } // if match or no search
+  } // for options
 
-  let [active, setActive] = useState<boolean>(false);
-  let [sel, setSel] = useState<number>(-1);
+  let clickComplete = false;
   return (
-    <form className={`${clrTheme.textCls} outline-blue-300`}>
-      <input onInput={updateSearch} onClick={()=>{setActive(true)}} onBlur={()=>{setActive(false)}}
-        className={`w-[100%] ${clrTheme.textCls} ${clrTheme.hoverCls} cursor-pointer transition-colors`}
-        placeholder={sel >= 0 ? options[sel] : "Search..."}
-      />
+    <form className={`${clrTheme.textCls} outline-blue-600 rounded-md ${className}`}>
+      <div className="flex">
+        <input onInput={(event:React.FormEvent)=>{
+            let inp = event.target as HTMLInputElement; 
+            setFilter(inp.value);
+          }} onMouseDown={
+          (event:React.MouseEvent<Element>)=>{
+            let inp = event.target as HTMLInputElement;
+            if (!active) {
+              setActive(true);
+              event.preventDefault();
+              // event blocks hover event triggers
+              // and prevents one-click selection
+              // however do not block event for editing input selection after modal is open
+            }
+            else if (active && filter == "") {
+              setActive(false);
+            }
+          }}
+          onMouseUp= {
+            (event:React.MouseEvent<Element>)=>{
+              let inp = event.target as HTMLInputElement;
+              if (!clickComplete) {
+                clickComplete = true;
+                inp.focus();
+                setInputReady(true);
+              }
+              console.log("mu", clickComplete);
+            }
+          }
+          className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
+          transition-colors focusable duration-250 p-1.5 grow-3 rounded-r-none`}
+          placeholder={sel >= 0 ? options[sel] : "Search..."}
+        />
+        <Button className={`h-3px ${Themes.GREY.bgCls} 
+        ${active ? "rounded-l-none w-md" : "!p-0 w-0 overflow-clip"} max-w-[fit-content] !transition-all`} 
+        type="button" theme={Themes.GREY}>
+          <GIcon theme={clrTheme}>close</GIcon>
+        </Button>
+      </div>
       <div className={
-        `w-[100%] h-[fit-content] ${active ? "max-h-[100vh]" : "max-h-[0px]"} flex flex-col overflow-clip transition-all`}>
+        `w-[100%] h-[fit-content] ${active ? "max-h-[100vh]" : "max-h-[0px]"} flex flex-col 
+        overflow-clip transition-all duration-250 rounded-b-sm ${active?"outline-solid":""}`}>
         {processedChildren}
       </div>
-      <button className="hidden"/>
+      
     </form>
   )
 }
 
+export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
+  return <div className={"flex justify-center items-center "+className} >
+    <span className="gicons">
+      {children}
+    </span>
+  </div>
+}
+
 interface OptionProps {
-  children: string
+  children: string,
+  value?:any
 }
 export function Option(props : OptionProps) {
-  return <span>{props.children}</span>;
+  return <></>;
 }
 
 export function Loader(

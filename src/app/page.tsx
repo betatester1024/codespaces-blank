@@ -62,7 +62,7 @@ export default function Page() {
   }
 
   return (<>
-    <form className="w-full flex gap-1 flex-wrap" onSubmit={process}>
+    <form className="w-full flex gap-1 flex-wrap relative" onSubmit={process}>
       <textarea id="inBlueprint" className="bg-gray-200 grow-4 rounded-sm">
       </textarea>
       <Button theme={Themes.GREY} className="basis-[min-content]" type="submit">
@@ -73,14 +73,18 @@ export default function Page() {
       {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
     </form>
     <div id="options">
-      <Select theme={Themes.BLUE}>
+      <Select theme={Themes.BLUE} className="w-[100%]">
+        <Option>abcdefffff</Option>
+        <Option>abch</Option>
+        <Option>abcde</Option>
+        <Option>abc</Option>
+        <Option>abcd</Option>
         <Option>def</Option>
-        <Option>def</Option>
-        <Option>def</Option>
-        <Option>def</Option>
-        <Option>def</Option>
-        <Option>def</Option>
-        <Option>def</Option>
+        <Option>ghi</Option>
+        <Option>jkl</Option>
+        <Option>mnop</Option>
+        <Option>qrstzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz</Option>
+        <Option>u</Option>
       </Select>
     </div>
     <div className={"w-full flex-col gap-1 "} >
