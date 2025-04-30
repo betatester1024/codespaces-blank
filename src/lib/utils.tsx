@@ -1,29 +1,31 @@
 "use client"
 
+import { validateHeaderValue } from "http";
 import { collectRoutesUsingEdgeRuntime } from "next/dist/build/utils";
-import React, { ReactNode, useEffect, useState } from "react";
+import { useServerInsertedHTML } from "next/navigation";
+import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 
-type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string};
+type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string, bgStrong:string};
 
 export const Themes : {[x:string]:ColourTheme}= {
   RED:  {
     textCls:"text-red-400", activeCls:"active:text-red-300", 
-    hoverCls:"hover:text-red-500 hover:bg-red-200",
-    bgCls:"bg-red-100", bg2:"bg-red-50" },
+    hoverCls:"hover:text-red-500 hover:bg-red-200 focus:text-red-500 focus:bg-red-200",
+    bgCls:"bg-red-100", bg2:"bg-red-50", bgStrong:"bg-red-200"},
   GREEN:{
     textCls:"text-green-400", activeCls:"active:text-green-300", 
-    hoverCls:"hover:text-green-500 hover:bg-green-200",
-    bgCls:"bg-green-100", bg2:"bg-green-50"
+    hoverCls:"hover:text-green-500 hover:bg-green-200 focus:text-green-500 focus:bg-green-200",
+    bgCls:"bg-green-100", bg2:"bg-green-50", bgStrong:"bg-green-200"
   },
   BLUE: {
     textCls:"text-blue-400", activeCls:"active:text-blue-300", 
-    hoverCls:"hover:text-blue-500 hover:bg-blue-200",
-    bgCls:"bg-blue-100", bg2:"bg-blue-50"
+    hoverCls:"hover:text-blue-500 hover:bg-blue-200 focus:text-blue-500 focus:bg-blue-200",
+    bgCls:"bg-blue-100", bg2:"bg-blue-50", bgStrong:"bg-blue-200"
   },
   GREY: {
     textCls:"text-gray-400", activeCls:"active:text-gray-300", 
-    hoverCls:"hover:text-gray-500 hover:bg-gray-200",
-    bgCls:"bg-gray-100", bg2:"bg-gray-50"
+    hoverCls:"hover:text-gray-500 hover:bg-gray-200 focus:text-gray-500 focus:bg-gray-200",
+    bgCls:"bg-gray-100", bg2:"bg-gray-50", bgStrong:"bg-gray-200"
   }
 };
 
@@ -31,16 +33,22 @@ export function byId(id:string) {
   return document.getElementById(id);
 } 
 
-export function Button({ theme, children:content, className:extraClasses="", onClick:eCallBk, type="button"} : 
-  {theme:ColourTheme, children?:ReactNode, onClick?:(event: React.MouseEvent<HTMLButtonElement, MouseEvent>)=>void, className?:string, type?:string}) {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  theme:ColourTheme, 
+  children?:ReactNode, 
+  className?:string, 
+};
+
+export function Button(props:ButtonProps) {
   return (
     <button 
-      type={type as ("submit" | "reset" | "button" | undefined)} 
-      onClick={eCallBk}
-      className={`${extraClasses} ${theme.textCls} ${theme.activeCls} ${theme.hoverCls} 
+      type={props.type} 
+      tabIndex={props.tabIndex}
+      onClick={props.onClick}
+      className={`${props.className} ${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
       cursor-pointer rounded-sm p-2 transition-colors justify-center grow flex items-center `}
     >
-      {content}
+      {props.children}
     </button>
   );
 }
@@ -54,7 +62,6 @@ export function Lister(
 {theme:ColourTheme, colLayout?:string, children:KeyedTable, className?:string, className_c?:string}) {
   let items: ReactNode[] = [];
   for (let i=0; i<children.length; i++) {
-    console.log(children[i].key);
     let cols = [];
     for (let j=0; j<children[i].eles.length; j++) {
       cols.push(
@@ -83,34 +90,37 @@ export function Lister(
 type OptionElement = React.ReactElement<OptionProps>;
 export function Select({theme:clrTheme, children, className, onChange} : 
   {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:ReactNode)=>any}) {
-  let [filter, setFilter] = useState<string>("");
   let [active, setActive] = useState<boolean>(false);
+  let [filter, setFilter] = useState<string>("");
   let [sel, setSel] = useState<number>(-1);
-  let [inputReady, setInputReady] = useState<boolean>(false);
+  let [selIdx, setSelIdx] = useState<number>(0);
 
-  let processedChildren = [];
+  let matchOptns = [];
   if ((children as OptionElement[]).length == null) {
     children = [children] as OptionElement[];
   }
   children = children as OptionElement[];
-  let options = [];
+  let options= [];
+  let matchIdxes:number[] = [];
+  let matchingCt = 0;
   for (let i=0; i<children.length; i++) {
-    console.log("searching", filter);
+    // console.log("searching", filter);
     let node = children[i];
     options.push(node.props.children);
     let regex = new RegExp("("+filter+")", "i")
     let matched = null;
     if (filter != "") matched = node.props.children.match(regex);
-    // if active and (search produces something or no search)
-    if (active && (filter != "" && matched || filter == "")) {
+    // if active and (search produces something or no search) or not active (for animations)
+    if (active && (filter != "" && matched || filter == "") || !active) {
       let foundIdx = node.props.children.search(regex);
-      console.log(foundIdx);
-      processedChildren.push(
+      matchIdxes.push(i);
+      matchOptns.push(
         <div 
           key={JSON.stringify({idx:i, value:node.props.value})} 
-          className={`${clrTheme.textCls} ${clrTheme.activeCls} ${clrTheme.hoverCls} 
-          ${clrTheme.bgCls} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5`}
-          onMouseUp={()=>{console.log("selection made"); setSel(i); setActive(false);}}  
+          className={`${matchingCt == selIdx ? clrTheme.bgCls : ""} ${clrTheme.textCls} ${clrTheme.activeCls} 
+          ${clrTheme.bg2} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5 ${clrTheme.hoverCls} 
+          ${i==sel ? clrTheme.bgStrong :""} `}
+          onMouseUp={()=>{setSel(i); setActive(false);}}  
         >
           <span>{
             matched ? 
@@ -121,58 +131,117 @@ export function Select({theme:clrTheme, children, className, onChange} :
           }</span>
         </div>
       );
+      matchingCt++;
     } // if match or no search
   } // for options
 
+  let [inputVal, setInputVal] = useState<string>("");
+  useEffect(()=>{
+    if (!active) {
+      console.log("closed");
+      setInputVal(sel >= 0 ? options[sel] : "Select...");
+    }
+    else {
+      setFilter("");
+      setInputVal("");
+      setSelIdx(0);
+    }
+  }, [active])
+
+  function onKeyPress(event:ChangeEvent<HTMLInputElement>) {
+    setFilter(event.target.value);  
+    setInputVal(event.target.value);
+    setSelIdx(0);
+  }
+
+  function keydown(event:KeyboardEvent) {
+    if (!active) {
+      if (event.key == "Enter" || event.key == " ") {
+        setActive(true);
+        event.preventDefault();
+      }
+      return;
+    }
+    if (event.key == "ArrowUp") {
+      setSelIdx(selIdx-1);
+      event.preventDefault();
+    }
+    else if (event.key == "ArrowDown") {
+      setSelIdx(selIdx+1);
+      event.preventDefault();
+    }
+    if (event.key == "Enter") {
+      if (matchIdxes.length > 0) setSel(matchIdxes[selIdx]);
+      setActive(false);
+    }
+    if (event.key == "Escape") {
+      setActive(false);
+    }
+    console.log(selIdx);
+  }
+
+  useEffect(()=>{
+    if (matchOptns.length == 0) return;
+    if (selIdx < 0) setSelIdx(matchOptns.length - 1);
+    if (selIdx >= matchOptns.length) setSelIdx(0);
+  }, [selIdx])
+
+
   let clickComplete = false;
+  let input = 
+  <input value={inputVal} readOnly={!active} onKeyDown={keydown} onChange={onKeyPress}
+    onMouseDown={
+    (event:React.MouseEvent<Element>)=>{
+      if (!active) {
+        setActive(true);
+        event.preventDefault();
+        // event blocks hover event triggers
+        // and prevents one-click selection
+        // however do not block event for editing input selection after modal is open
+      }
+      else if (active && filter == "") {
+        setActive(false);
+      }
+    }}
+    onMouseUp= {
+      (event:React.MouseEvent<Element>)=>{
+        let inp = event.target as HTMLInputElement;
+        if (!clickComplete) {
+          clickComplete = true;
+          inp.focus();
+        }
+      }
+    }
+    className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
+      transition-colors duration-250 p-1.5 grow-3 rounded-r-none outline-none 
+      ${active ? "" : clrTheme.hoverCls} select-none`
+    }
+    placeholder="Search..."
+  />;
   return (
-    <form className={`${clrTheme.textCls} outline-blue-600 rounded-md ${className}`}>
-      <div className="flex">
-        <input onInput={(event:React.FormEvent)=>{
-            let inp = event.target as HTMLInputElement; 
-            setFilter(inp.value);
-          }} onMouseDown={
-          (event:React.MouseEvent<Element>)=>{
-            let inp = event.target as HTMLInputElement;
-            if (!active) {
-              setActive(true);
-              event.preventDefault();
-              // event blocks hover event triggers
-              // and prevents one-click selection
-              // however do not block event for editing input selection after modal is open
-            }
-            else if (active && filter == "") {
-              setActive(false);
-            }
-          }}
-          onMouseUp= {
-            (event:React.MouseEvent<Element>)=>{
-              let inp = event.target as HTMLInputElement;
-              if (!clickComplete) {
-                clickComplete = true;
-                inp.focus();
-                setInputReady(true);
-              }
-              console.log("mu", clickComplete);
-            }
-          }
-          className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
-          transition-colors focusable duration-250 p-1.5 grow-3 rounded-r-none`}
-          placeholder={sel >= 0 ? options[sel] : "Search..."}
-        />
-        <Button className={`h-3px ${Themes.GREY.bgCls} 
+    <div className={`${clrTheme.textCls} focus-within:outline-2 
+    relative ${active ? "outline-solid" : "outline-none" } rounded-md rounded-b-none ${className}`}
+    >
+      <div className="flex rounded-[inherit] overflow-clip">
+        {input}
+        <Button tabIndex={active ? 0 : -1} onClick={()=>{setActive(false)}} className={`h-3px ${Themes.GREY.bgCls} 
         ${active ? "rounded-l-none w-md" : "!p-0 w-0 overflow-clip"} max-w-[fit-content] !transition-all`} 
         type="button" theme={Themes.GREY}>
           <GIcon theme={clrTheme}>close</GIcon>
         </Button>
       </div>
-      <div className={
-        `w-[100%] h-[fit-content] ${active ? "max-h-[100vh]" : "max-h-[0px]"} flex flex-col 
-        overflow-clip transition-all duration-250 rounded-b-sm ${active?"outline-solid":""}`}>
-        {processedChildren}
+      <div tabIndex={-1} className={
+        `w-[100%] h-[fit-content] ${active ? "max-h-[50vh]" : "max-h-[0px]"} flex flex-col 
+        overflow-scroll absolute transition-all duration-350 rounded-b-sm 
+        ${active ? "outline-solid":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}>
+        { 
+          matchOptns.length == 0 ?
+            <span key="none" className={`p-1 pr-1.5 pl-1.5 ${Themes.RED.textCls} ${Themes.RED.hoverCls} ${Themes.RED.bg2}`}>No results found</span>
+          : matchOptns
+        }
       </div>
       
-    </form>
+    </div>
   )
 }
 

@@ -8,14 +8,12 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['localhost:3000'],
     },
   },
-  webpack: 
-    (config,
-      { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
-    ) => {
-      // Important: return the modified config
-      config.optimization.minimize = false;
-      return config
-    },
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack } ) => {
+    // Important: return the modified config
+    config.optimization.minimize = false;
+    return config
+  },
+  turbopack: {}
   /* config options here */
 };
 export default nextConfig;
