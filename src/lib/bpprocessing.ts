@@ -53,17 +53,30 @@ function decode(bString:string) {
   return bp as Blueprint;
 }
 
+export interface BuildEntry {
+  item:Item;
+  count:number
+};
 // https://blueyescat.github.io/dsabp-js/
-export async function getCostSummary(bString:string) {
+export async function getBlueprintSummary(bString:string) {
   let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
   let bp = decode(bString);
-  if (bp == null) return JSON.stringify([]);
-  for (const cmd of bp.commands) {
+  if (bp == null) return JSON.stringify({bom:[], order:[]});
+  let commands:BuildEntry[] = [];
+  for (const cmd of bp.commands!) {
     if (cmd instanceof BuildCmd) {
+      if (cmd.item == null) continue;
       // console.log("[C]", cmd.item.name, "cmdsz = ", cmd.bits ? countOnes(cmd.bits.toString()) : 1);
+      let blockCt = cmd.bits != null ? countOnes(cmd.bits.toString()) : 1;
+      if (commands.length != 0 && cmd.item == commands[commands.length-1].item) {
+        commands[commands.length-1].count += blockCt;
+      }
+      else {
+        commands.push({item:cmd.item, count:blockCt});
+      }
       console.log(cmd.item.name, cmd.bits?.toString());
-      incr(itemCt, cmd.item, cmd.bits != null ? countOnes(cmd.bits.toString()) : 1);
+      incr(itemCt, cmd.item, blockCt);
     }
   }
   console.log("\n\n");
@@ -82,10 +95,10 @@ export async function getCostSummary(bString:string) {
   }
   let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
-    out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image});
+    out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image!});
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  return JSON.stringify(out);
+  return JSON.stringify({bom:out, order:commands});
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
@@ -107,14 +120,21 @@ function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
   }
 }
 
-class BuildCmd_A extends BuildCmd {
-  currConfig:ConfigCmd; idx:number
+class BuildCmd_A extends BuildCmd 
+{
+  currConfig:ConfigCmd = new ConfigCmd(); 
+  idx:number = 0;
 };
 
 export async function sortByItem(bString:string) {
   let bp = decode(bString);
   if (!bp) return JSON.stringify([]);
   let activeConfig = new ConfigCmd();
+  if (bp.commands == null) { // no commands to sort!
+    return JSON.stringify({bp:new Encoder().encodeSync(bp)});
+  }
+
+  // store the active configuration for every command to be compressed later
   for (let i=0; i<bp.commands.length; i++) {
     let cmd = bp.commands[i];
     if (cmd instanceof ConfigCmd) {
@@ -127,16 +147,21 @@ export async function sortByItem(bString:string) {
     }
   }
   let cmds = bp.commands as (BuildCmd_A|ConfigCmd)[];
+  // remove all (now-redundant) config commands
   cmds = cmds.filter((i:any) => {
     if (i instanceof ConfigCmd) {
       console.log(i);
     }
     return i instanceof BuildCmd;
   })
+  // sort build commands by item, then by order
   cmds = cmds.sort((i1:BuildCmd_A|ConfigCmd, i2:BuildCmd_A|ConfigCmd)=>{
     i1 = i1 as BuildCmd_A;
     i2 = i2 as BuildCmd_A;
-    if (i1.item == null) console.log(i1);
+    if (i1.item == null || i2.item == null) {
+      console.log("ERROR ON NULL ITEM", i1, i2);
+      return -1;
+    } 
     if (i1.item.id == i2.item.id) return i1.idx - i2.idx;
     else return i1.item.id - i2.item.id;
   });

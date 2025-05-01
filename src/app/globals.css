@@ -91,3 +91,7 @@ body {
   -moz-font-feature-settings: 'liga';
   -moz-osx-font-smoothing: grayscale;
 }
+
+button:focus {
+  outline-style:solid;
+}

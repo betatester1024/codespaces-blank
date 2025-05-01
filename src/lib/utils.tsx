@@ -1,8 +1,6 @@
 "use client"
 
-import { validateHeaderValue } from "http";
-import { collectRoutesUsingEdgeRuntime } from "next/dist/build/utils";
-import { useServerInsertedHTML } from "next/navigation";
+import { getRandomValues } from "crypto";
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 
 type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string, bgStrong:string};
@@ -10,21 +8,21 @@ type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:str
 export const Themes : {[x:string]:ColourTheme}= {
   RED:  {
     textCls:"text-red-400", activeCls:"active:text-red-300", 
-    hoverCls:"hover:text-red-500 hover:bg-red-200 focus:text-red-500 focus:bg-red-200",
+    hoverCls:"hover:text-red-500 hover:!bg-red-200 focus:text-red-500 focus:bg-red-200",
     bgCls:"bg-red-100", bg2:"bg-red-50", bgStrong:"bg-red-200"},
   GREEN:{
     textCls:"text-green-400", activeCls:"active:text-green-300", 
-    hoverCls:"hover:text-green-500 hover:bg-green-200 focus:text-green-500 focus:bg-green-200",
+    hoverCls:"hover:text-green-500 hover:!bg-green-200 focus:text-green-500 focus:bg-green-100",
     bgCls:"bg-green-100", bg2:"bg-green-50", bgStrong:"bg-green-200"
   },
   BLUE: {
     textCls:"text-blue-400", activeCls:"active:text-blue-300", 
-    hoverCls:"hover:text-blue-500 hover:bg-blue-200 focus:text-blue-500 focus:bg-blue-200",
+    hoverCls:"hover:text-blue-500 hover:!bg-blue-200 focus:text-blue-500 focus:bg-blue-100",
     bgCls:"bg-blue-100", bg2:"bg-blue-50", bgStrong:"bg-blue-200"
   },
   GREY: {
     textCls:"text-gray-400", activeCls:"active:text-gray-300", 
-    hoverCls:"hover:text-gray-500 hover:bg-gray-200 focus:text-gray-500 focus:bg-gray-200",
+    hoverCls:"hover:text-gray-500 hover:!bg-gray-200 focus:text-gray-500 focus:bg-gray-100",
     bgCls:"bg-gray-100", bg2:"bg-gray-50", bgStrong:"bg-gray-200"
   }
 };
@@ -46,41 +44,37 @@ export function Button(props:ButtonProps) {
       tabIndex={props.tabIndex}
       onClick={props.onClick}
       className={`${props.className} ${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
-      cursor-pointer rounded-sm p-2 transition-colors justify-center grow flex items-center `}
+      cursor-pointer rounded-sm p-2 transition-colors justify-center flex items-center `}
     >
       {props.children}
     </button>
   );
 }
 
-export type KeyedTable = {
-  key:any,
-  eles:ReactNode[]
-}[];
 export function Lister(
 {theme, colLayout:gtc, children, className:extraClasses="", className_c} : 
-{theme:ColourTheme, colLayout?:string, children:KeyedTable, className?:string, className_c?:string}) {
+{theme:ColourTheme, colLayout?:string, children:ReactNode[][], className?:string, className_c?:string}) {
   let items: ReactNode[] = [];
   for (let i=0; i<children.length; i++) {
     let cols = [];
-    for (let j=0; j<children[i].eles.length; j++) {
+    for (let j=0; j<children[i].length; j++) {
       cols.push(
         <div key={j} className={className_c}>
-          {children[i].eles[j]}
+          {children[i][j]}
         </div>
       );
     }
     items.push(<div 
-      key={children[i].key}
+      key={i}
       className={`grid grid-cols-subgrid ${theme.textCls} ${theme.hoverCls} transition-colors duration-100`} 
-      style={{gridColumn: `span ${children[0].eles.length}`}}>
+      style={{gridColumn: `span ${children[0].length}`}}>
       {cols}
     </div>);
   }
   return (
     <div 
       className={"w-full grid grid-cols-3 "+extraClasses} 
-      style={{ gridTemplateColumns: gtc ?? `repeat(${children.length == 0 ? 0 : children[0].eles.length}, 1fr)` }}
+      style={{ gridTemplateColumns: gtc ?? `repeat(${children.length == 0 ? 0 : children[0].length}, 1fr)` }}
     >
       {items}
     </div>
@@ -89,11 +83,13 @@ export function Lister(
 
 type OptionElement = React.ReactElement<OptionProps>;
 export function Select({theme:clrTheme, children, className, onChange} : 
-  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:ReactNode)=>any}) {
+  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:any)=>any}) {
   let [active, setActive] = useState<boolean>(false);
   let [filter, setFilter] = useState<string>("");
-  let [sel, setSel] = useState<number>(-1);
-  let [selIdx, setSelIdx] = useState<number>(0);
+  // INDEXED TO ACTUAL CHILD IDX
+  let [selIdx, setSelIdx] = useState<number>(-1);
+  // FOR SEARCH ONLY - NOT INDEXED TO ACTUAL CHILD IDX - MUST CONVERT USING MATCH MATCHIDXES
+  let [hoveringIdx, setHoveringIdx] = useState<number>(0); 
 
   let matchOptns = [];
   if ((children as OptionElement[]).length == null) {
@@ -101,26 +97,31 @@ export function Select({theme:clrTheme, children, className, onChange} :
   }
   children = children as OptionElement[];
   let options= [];
+  let optnValues = [];
+
+  // for search only
   let matchIdxes:number[] = [];
+  
   let matchingCt = 0;
   for (let i=0; i<children.length; i++) {
-    // console.log("searching", filter);
     let node = children[i];
     options.push(node.props.children);
+    optnValues.push(node.props.value);
     let regex = new RegExp("("+filter+")", "i")
     let matched = null;
+    // do not match if no filter
     if (filter != "") matched = node.props.children.match(regex);
-    // if active and (search produces something or no search) or not active (for animations)
-    if (active && (filter != "" && matched || filter == "") || !active) {
+    //if (search produces something or no search) -- preserve for active dialogs for animations
+    if (filter != "" && matched || filter == "") {
       let foundIdx = node.props.children.search(regex);
       matchIdxes.push(i);
       matchOptns.push(
         <div 
           key={JSON.stringify({idx:i, value:node.props.value})} 
-          className={`${matchingCt == selIdx ? clrTheme.bgCls : ""} ${clrTheme.textCls} ${clrTheme.activeCls} 
+          className={`${matchingCt == hoveringIdx ? clrTheme.bgCls : ""} ${clrTheme.textCls} ${clrTheme.activeCls} 
           ${clrTheme.bg2} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5 ${clrTheme.hoverCls} 
-          ${i==sel ? clrTheme.bgStrong :""} `}
-          onMouseUp={()=>{setSel(i); setActive(false);}}  
+          ${i==selIdx ? clrTheme.bgStrong :""} `}
+          onMouseUp={()=>{setSelIdx(i); setActive(false);}}  
         >
           <span>{
             matched ? 
@@ -138,20 +139,24 @@ export function Select({theme:clrTheme, children, className, onChange} :
   let [inputVal, setInputVal] = useState<string>("");
   useEffect(()=>{
     if (!active) {
-      console.log("closed");
-      setInputVal(sel >= 0 ? options[sel] : "Select...");
+      setFilter(options[selIdx]);
+      setInputVal(selIdx >= 0 ? options[selIdx] : "Select...");
     }
     else {
       setFilter("");
       setInputVal("");
-      setSelIdx(0);
+      setHoveringIdx(0);
     }
   }, [active])
+
+  useEffect(()=>{
+    if (onChange) onChange(optnValues[selIdx])
+  }, [selIdx])
 
   function onKeyPress(event:ChangeEvent<HTMLInputElement>) {
     setFilter(event.target.value);  
     setInputVal(event.target.value);
-    setSelIdx(0);
+    setHoveringIdx(0);
   }
 
   function keydown(event:KeyboardEvent) {
@@ -163,67 +168,65 @@ export function Select({theme:clrTheme, children, className, onChange} :
       return;
     }
     if (event.key == "ArrowUp") {
-      setSelIdx(selIdx-1);
+      setHoveringIdx(hoveringIdx-1);
       event.preventDefault();
     }
     else if (event.key == "ArrowDown") {
-      setSelIdx(selIdx+1);
+      setHoveringIdx(hoveringIdx+1);
       event.preventDefault();
     }
     if (event.key == "Enter") {
-      if (matchIdxes.length > 0) setSel(matchIdxes[selIdx]);
+      if (matchIdxes.length > 0) setSelIdx(matchIdxes[hoveringIdx]);
       setActive(false);
+      event.preventDefault();
     }
     if (event.key == "Escape") {
       setActive(false);
     }
-    console.log(selIdx);
+  }
+
+  function onMouseDown(event:React.MouseEvent<Element>) {
+    if (!active) {
+      setActive(true);
+      event.preventDefault();
+      // event blocks hover event triggers
+      // and prevents one-click selection
+      // however do not block event for editing input selection after modal is open
+    }
+    else if (active && filter == "") {
+      setActive(false);
+    }
+  }
+  function onMouseUp(event:React.MouseEvent<Element>) {
+    let inp = event.target as HTMLInputElement;
+    if (!clickComplete) { // do not focus input until mouse released
+      clickComplete = true;
+      inp.focus();
+    }
   }
 
   useEffect(()=>{
     if (matchOptns.length == 0) return;
-    if (selIdx < 0) setSelIdx(matchOptns.length - 1);
-    if (selIdx >= matchOptns.length) setSelIdx(0);
-  }, [selIdx])
+    if (hoveringIdx < 0) setHoveringIdx(matchOptns.length - 1);
+    if (hoveringIdx >= matchOptns.length) setHoveringIdx(0);
+  }, [hoveringIdx])
 
 
   let clickComplete = false;
-  let input = 
-  <input value={inputVal} readOnly={!active} onKeyDown={keydown} onChange={onKeyPress}
-    onMouseDown={
-    (event:React.MouseEvent<Element>)=>{
-      if (!active) {
-        setActive(true);
-        event.preventDefault();
-        // event blocks hover event triggers
-        // and prevents one-click selection
-        // however do not block event for editing input selection after modal is open
-      }
-      else if (active && filter == "") {
-        setActive(false);
-      }
-    }}
-    onMouseUp= {
-      (event:React.MouseEvent<Element>)=>{
-        let inp = event.target as HTMLInputElement;
-        if (!clickComplete) {
-          clickComplete = true;
-          inp.focus();
-        }
-      }
-    }
-    className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
-      transition-colors duration-250 p-1.5 grow-3 rounded-r-none outline-none 
-      ${active ? "" : clrTheme.hoverCls} select-none`
-    }
-    placeholder="Search..."
-  />;
   return (
     <div className={`${clrTheme.textCls} focus-within:outline-2 
-    relative ${active ? "outline-solid" : "outline-none" } rounded-md rounded-b-none ${className}`}
+    relative ${active ? "outline-solid" : "outline-none" } rounded-md rounded-b-none ${className??""}`}
     >
       <div className="flex rounded-[inherit] overflow-clip">
-        {input}
+      <input value={inputVal} readOnly={!active} onKeyDown={keydown} onChange={onKeyPress}
+          onMouseDown={onMouseDown}
+          onMouseUp= {onMouseUp}
+          className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
+            transition-colors duration-250 p-1.5 grow-3 rounded-r-none outline-none 
+            ${active ? "" : clrTheme.hoverCls} select-none`
+          }
+          placeholder="Search..."
+        />
         <Button tabIndex={active ? 0 : -1} onClick={()=>{setActive(false)}} className={`h-3px ${Themes.GREY.bgCls} 
         ${active ? "rounded-l-none w-md" : "!p-0 w-0 overflow-clip"} max-w-[fit-content] !transition-all`} 
         type="button" theme={Themes.GREY}>
@@ -240,13 +243,12 @@ export function Select({theme:clrTheme, children, className, onChange} :
           : matchOptns
         }
       </div>
-      
     </div>
   )
 }
 
 export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
-  return <div className={"flex justify-center items-center "+className} >
+  return <div className={theme.textCls + "flex justify-center items-center "+className} >
     <span className="gicons">
       {children}
     </span>
@@ -264,6 +266,7 @@ export function Option(props : OptionProps) {
 export function Loader(
   {theme, active=false} : 
   {theme:ColourTheme, active?:boolean}) {
+  console.log("äctive=",active);
   return (
     <div style={{transform:(active ? "" : "translateX(20px)")}} className="transition-transform">
       <svg className={(active ? "w-[20px] h-[20px] opacity-100 mr-2" : "w-[0px] opacity-0" )
