@@ -15,23 +15,30 @@ export default function Page() {
   const [processing, setProcessing] = useState<boolean>(false);
   const [loadingBP, setLoadingBP] = useState<boolean>(false);
   const [resBP, setResBP] = useState<string>("");
+  const [command, setCommand] = useState<ProcessingOptns>();
 
   async function process(event:React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     let tArea = (event.target as HTMLFormElement).querySelector("textarea")!;
-    setProcessing(true);
-    switch (command) {
-      case ProcessingOptns.SORT: 
-        await sortBP(tArea.value);
-        break;
-    };
-    let summary : {bom:BoMEntry[], order:BuildEntry[]} = JSON.parse(await getBlueprintSummary(tArea.value));
+    let bp = tArea.value;
+    let summary : {bom:BoMEntry[], order:BuildEntry[]};
+    try {
+      setProcessing(true);
+      switch (command) {
+        case ProcessingOptns.SORT: 
+          bp = await sortBP(tArea.value);
+          break;
+      };
+      summary = JSON.parse(await getBlueprintSummary(bp));
+    } catch (e) {
+      summary = {bom:[], order:[]};
+    }
     setProcessing(false);
     let bomformatted = [];
     for (let entry of summary.bom) {
       bomformatted.push([
         <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.link+".png"}></img>,
-        <p>{entry.ct+""}</p>,
+        <p>{entry.ct.toLocaleString()}</p>,
         <p>{entry.it}</p>
       ]);
     }
@@ -39,7 +46,7 @@ export default function Page() {
     for (let entry of summary.order) {
       buildformatted.push([
         <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.item.image+".png"}></img>,
-        <p>{entry.count+""}</p>,
+        <p>{entry.count.toLocaleString()}</p>,
         <p>{entry.item.name}</p>
       ]);
     }
@@ -61,6 +68,7 @@ export default function Page() {
   async function sortBP(value:string) {
     let summary = JSON.parse(await sortByItem(value));
     setResBP(summary.bp);
+    return summary.bp;
   }
 
   async function fillTemplateBP() {
@@ -77,15 +85,15 @@ export default function Page() {
     SORT, DISPLAY
   }
 
-  let command : ProcessingOptns = ProcessingOptns.DISPLAY;
   function updateProcessCommand(n:ProcessingOptns) {
-    command = n;
+    setCommand(n);
   }
 
   return (<>
     <form onSubmit={process}>
       <div className="flex gap-1 flex-wrap relative items-center">
-        <textarea id="inBlueprint" className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} grow-4 rounded-sm`}>
+        <textarea id="inBlueprint" placeholder="DSA:..." 
+        className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} p-1 grow-4 rounded-sm font-mono`}>
         </textarea>
         <Button type="button" theme={Themes.BLUE} onClick={fillTemplateBP} className="h-[fit-content]">
           <Loader theme={Themes.BLUE} active={loadingBP}></Loader>
@@ -104,10 +112,10 @@ export default function Page() {
         </Button> 
       </div>
     </form>
-    <div className={"w-full flex gap-1 flex-wrap"} >
+    <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
       {
         bomSummary.length == 0 ? <></> : 
-        <div className="grow">
+        <div className={`grow rounded-md outline-[2px] m-2 p-2 overflow-scroll max-h-[70vh] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
           <div className="w-full flex justify-center">
             <p className="text-blue-500 text-lg">Materials required</p>
           </div>
@@ -121,7 +129,7 @@ export default function Page() {
       }
       {
         buildSummary.length == 0 ? <></> : 
-        <div className="grow">
+        <div className={`grow rounded-md outline-[2px] m-2 p-2 overflow-scroll max-h-[70vh] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
           <div className="w-full flex justify-center">
             <p className="text-blue-500 text-lg">Build order</p>
           </div>
@@ -135,7 +143,7 @@ export default function Page() {
       }
     </div>
     <textarea value={resBP} readOnly={true} placeholder="Result blueprint here..."
-      className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} w-[100%] mt-2 rounded-sm`}></textarea>
+      className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} w-[100%] font-mono p-1 mt-2 rounded-sm`}></textarea>
   </>)
 }
 

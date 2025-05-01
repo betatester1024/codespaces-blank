@@ -75,14 +75,11 @@ export async function getBlueprintSummary(bString:string) {
       else {
         commands.push({item:cmd.item, count:blockCt});
       }
-      console.log(cmd.item.name, cmd.bits?.toString());
       incr(itemCt, cmd.item, blockCt);
     }
   }
-  console.log("\n\n");
   for (let key of itemCt.keys()) {
     let it = key;
-    console.log(it.name, "+", itemCt.get(key));
     if (it.recipe != null) {
       let inputs = it.recipe.input;
       for (let i of inputs) {
@@ -149,9 +146,6 @@ export async function sortByItem(bString:string) {
   let cmds = bp.commands as (BuildCmd_A|ConfigCmd)[];
   // remove all (now-redundant) config commands
   cmds = cmds.filter((i:any) => {
-    if (i instanceof ConfigCmd) {
-      console.log(i);
-    }
     return i instanceof BuildCmd;
   })
   // sort build commands by item, then by order

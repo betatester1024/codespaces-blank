@@ -3,12 +3,12 @@ import { Noto_Sans_Display, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
 
 const NotoSansDisplay = Noto_Sans_Display({
-  variable: "--font-notosans",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
 const NotoSansMono = Noto_Sans_Mono({
-  variable: "--font-notomono",
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 

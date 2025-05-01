@@ -66,7 +66,7 @@ export function Lister(
     }
     items.push(<div 
       key={i}
-      className={`grid grid-cols-subgrid ${theme.textCls} ${theme.hoverCls} transition-colors duration-100`} 
+      className={`grid grid-cols-subgrid ${theme.textCls} ${theme.hoverCls} transition-colors duration-250`} 
       style={{gridColumn: `span ${children[0].length}`}}>
       {cols}
     </div>);
@@ -231,6 +231,11 @@ export function Select({theme:clrTheme, children, className, onChange} :
         ${active ? "rounded-l-none w-md" : "!p-0 w-0 overflow-clip"} max-w-[fit-content] !transition-all`} 
         type="button" theme={Themes.GREY}>
           <GIcon theme={clrTheme}>close</GIcon>
+        </Button>
+        <Button tabIndex={-1} className={`pointer-events-none
+        ${!active ? "" : "opacity-0"} absolute top-0 bottom-0 right-0 max-w-[fit-content] !transition-all`} 
+        type="button" theme={Themes.BLUE}>
+          <GIcon theme={clrTheme} className="text-xl">arrow_drop_down</GIcon>
         </Button>
       </div>
       <div tabIndex={-1} className={
