@@ -81,6 +81,11 @@ export function Lister(
   )
 }
 
+function escapeRegExp(str:string) {
+  if (!str) return "";
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 type OptionElement = React.ReactElement<OptionProps>;
 export function Select({theme:clrTheme, children, className, onChange} : 
   {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:any)=>any}) {
@@ -107,7 +112,8 @@ export function Select({theme:clrTheme, children, className, onChange} :
     let node = children[i];
     options.push(node.props.children);
     optnValues.push(node.props.value);
-    let regex = new RegExp("("+filter+")", "i")
+    //@ts-ignore
+    let regex = new RegExp("("+escapeRegExp(filter)+")", "i")
     let matched = null;
     // do not match if no filter
     if (filter != "") matched = node.props.children.match(regex);
@@ -253,7 +259,7 @@ export function Select({theme:clrTheme, children, className, onChange} :
 }
 
 export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
-  return <div className={theme.textCls + "flex justify-center items-center "+className} >
+  return <div className={theme.textCls + " flex justify-center items-center "+className} >
     <span className="gicons">
       {children}
     </span>
@@ -271,7 +277,6 @@ export function Option(props : OptionProps) {
 export function Loader(
   {theme, active=false} : 
   {theme:ColourTheme, active?:boolean}) {
-  console.log("äctive=",active);
   return (
     <div style={{transform:(active ? "" : "translateX(20px)")}} className="transition-transform">
       <svg className={(active ? "w-[20px] h-[20px] opacity-100 mr-2" : "w-[0px] opacity-0" )

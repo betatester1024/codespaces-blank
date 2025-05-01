@@ -1,6 +1,6 @@
 'use server';
 // import  from '@/lib/dsabp.cjs';
-import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig } from './dsabp';
+import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode } from './dsabp';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
   let found = map.get(key) ?? 0;
@@ -57,12 +57,26 @@ export interface BuildEntry {
   item:Item;
   count:number
 };
+
+export interface BPSummary {
+  bom:BoMEntry[],
+  order:BuildEntry[];
+  width:number,
+  height:number,
+  cmdCt:number
+}
+
 // https://blueyescat.github.io/dsabp-js/
+
 export async function getBlueprintSummary(bString:string) {
+  return JSON.stringify(await getSummaryJSON(bString));
+}
+
+async function getSummaryJSON(bString:string) : Promise<BPSummary> {
   let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
   let bp = decode(bString);
-  if (bp == null) return JSON.stringify({bom:[], order:[]});
+  if (bp == null) return {bom:[], order:[], width:0, height:0, cmdCt:0};
   let commands:BuildEntry[] = [];
   for (const cmd of bp.commands!) {
     if (cmd instanceof BuildCmd) {
@@ -95,7 +109,7 @@ export async function getBlueprintSummary(bString:string) {
     out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image!});
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  return JSON.stringify({bom:out, order:commands});
+  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length};
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
@@ -123,7 +137,14 @@ class BuildCmd_A extends BuildCmd
   idx:number = 0;
 };
 
-export async function sortByItem(bString:string) {
+export interface sortOptions {
+  sortY:boolean,
+  safeMode:boolean,
+  restoreMode:boolean
+}
+
+export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false}) {
+  console.log("config=", config);
   let bp = decode(bString);
   if (!bp) return JSON.stringify([]);
   let activeConfig = new ConfigCmd();
@@ -135,6 +156,10 @@ export async function sortByItem(bString:string) {
   for (let i=0; i<bp.commands.length; i++) {
     let cmd = bp.commands[i];
     if (cmd instanceof ConfigCmd) {
+      if (config.safeMode) {
+        cmd.filterMode = FilterMode.BLOCK_ALL;
+        cmd.pusher = {maxBeamLength:0};
+      }
       activeConfig = cmd;
     }
     else if (cmd instanceof BuildCmd) {
@@ -146,7 +171,14 @@ export async function sortByItem(bString:string) {
   let cmds = bp.commands as (BuildCmd_A|ConfigCmd)[];
   // remove all (now-redundant) config commands
   cmds = cmds.filter((i:any) => {
-    return i instanceof BuildCmd;
+    if (i instanceof BuildCmd) {
+      if (config.restoreMode) 
+        return i.item == Item.LOADER_NEW || i.item == Item.PUSHER || 
+               i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
+               i.item == Item.LOADER;
+      else return true;
+    }
+    else return false;
   })
   // sort build commands by item, then by order
   cmds = cmds.sort((i1:BuildCmd_A|ConfigCmd, i2:BuildCmd_A|ConfigCmd)=>{
@@ -156,10 +188,15 @@ export async function sortByItem(bString:string) {
       console.log("ERROR ON NULL ITEM", i1, i2);
       return -1;
     } 
-    if (i1.item.id == i2.item.id) return i1.idx - i2.idx;
+    if (i1.item.id == i2.item.id) {
+      if (config.sortY && i1.y! != i2.y!) {
+        return i1.y! - i2.y!;
+      }
+      return i1.idx - i2.idx;
+    }
     else return i1.item.id - i2.item.id;
   });
-  activeConfig = new ConfigCmd;
+  activeConfig = new ConfigCmd();
   for (let i=0; i<cmds.length; i++) {
     let cmd = cmds[i] as BuildCmd_A;
     if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
