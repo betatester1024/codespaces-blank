@@ -50,24 +50,27 @@ export interface BPSummary {
   order:BuildEntry[];
   width:number,
   height:number,
-  cmdCt:number
+  cmdCt:number,
+  RCDCost:number
 }
 
-const starterShip = [
-  {it:Item.HELM_STARTER, ct:1},
-  {it:Item.ITEM_HATCH_STARTER, ct:1},
-  {it:Item.ITEM_EJECTOR, ct:1},
-  {it:Item.TURRET_REMOTE_STARTER, ct:2},
-  {it:Item.THRUSTER_STARTER, ct:2},
-  {it:Item.BLOCK, ct:2},
-  {it:Item.BLOCK_LADDER, ct:3},
-  {it:Item.BLOCK_WALKWAY, ct:2},
-  {it:Item.BLOCK_ITEM_NET, ct:3},
-  {it:Item.EXPANDO_BOX, ct:1},
-  {it:Item.FABRICATOR_STARTER, ct:1},
-  {it:Item.FLUID_TANK, ct:2},
-  {it:Item.NAV_UNIT, ct:1},
-]
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0};
+
+// const starterShip = [
+//   {it:Item.HELM_STARTER, ct:1},
+//   {it:Item.ITEM_HATCH_STARTER, ct:1},
+//   {it:Item.ITEM_EJECTOR, ct:1},
+//   {it:Item.TURRET_REMOTE_STARTER, ct:2},
+//   {it:Item.THRUSTER_STARTER, ct:2},
+//   {it:Item.BLOCK, ct:2},
+//   {it:Item.BLOCK_LADDER, ct:3},
+//   {it:Item.BLOCK_WALKWAY, ct:2},
+//   {it:Item.BLOCK_ITEM_NET, ct:3},
+//   {it:Item.EXPANDO_BOX, ct:1},
+//   {it:Item.FABRICATOR_STARTER, ct:1},
+//   {it:Item.FLUID_TANK, ct:2},
+//   {it:Item.NAV_UNIT, ct:1},
+// ]
 
 // https://blueyescat.github.io/dsabp-js/
 
@@ -76,10 +79,25 @@ export async function getBlueprintSummary(bString:string, starterQ:boolean) {
 }
 
 async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSummary> {
+  let currStarter = [
+    {it:Item.HELM_STARTER, ct:1},
+    {it:Item.ITEM_HATCH_STARTER, ct:1},
+    {it:Item.ITEM_EJECTOR, ct:1},
+    {it:Item.TURRET_REMOTE_STARTER, ct:2},
+    {it:Item.THRUSTER_STARTER, ct:2},
+    {it:Item.BLOCK, ct:2},
+    {it:Item.BLOCK_LADDER, ct:3},
+    {it:Item.BLOCK_WALKWAY, ct:2},
+    {it:Item.BLOCK_ITEM_NET, ct:3},
+    {it:Item.EXPANDO_BOX, ct:1},
+    {it:Item.FABRICATOR_STARTER, ct:1},
+    {it:Item.FLUID_TANK, ct:2},
+    {it:Item.NAV_UNIT, ct:1},
+  ];
   let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
   let bp = decode(bString);
-  if (bp == null) return {bom:[], order:[], width:0, height:0, cmdCt:0};
+  if (bp == null) return errorSummary;
   let commands:BuildEntry[] = [];
   for (const cmd of bp.commands!) {
     if (cmd instanceof BuildCmd) {
@@ -95,13 +113,17 @@ async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSumm
       incr(itemCt, cmd.item, blockCt);
     }
   }
+  let itemsUsed = 0;
   for (let i=0; i<commands.length; i++) {
     let cmd = commands[i];
+    itemsUsed += cmd.count;
     if (starterQ) {
-      let foundItem = starterShip.find((v:{it:Item, ct:number})=>{return v.it == cmd.item});
+      
+      let foundItem = currStarter.find((v:{it:Item, ct:number})=>{return v.it == cmd.item});
       if (foundItem) {
-        cmd.count -= foundItem.ct;
-        cmd.count = Math.max(0, cmd.count);
+        let delta = Math.min(cmd.count, foundItem.ct);
+        cmd.count -= delta;
+        foundItem.ct -= delta;
       }
     }
     if (cmd.item == Item.PUSHER || cmd.item == Item.ITEM_HATCH || cmd.item == Item.LOADER_NEW || cmd.item == Item.LOADER) {
@@ -132,7 +154,7 @@ async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSumm
     out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image!});
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length};
+  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10)};
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
@@ -224,6 +246,12 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
   let lastBuildCmd : BuildCmd_A = cmds[0] as BuildCmd_A;
   for (let i=0; i<cmds.length; i++) {
     let cmd = cmds[i] as BuildCmd_A;
+    if (cmd.item == Item.EXPANDO_BOX && config.alignExpandoes) {
+      cmd.currConfig.angle! %= 90;
+      if (Math.abs(cmd.currConfig.angle!) < 5) {
+        cmd.currConfig.angle = 0;
+      }
+    }
     if (lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
       compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
       let dist = 0;

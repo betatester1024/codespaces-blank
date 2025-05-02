@@ -1,7 +1,7 @@
 "use client"
 
 import { getRandomValues } from "crypto";
-import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
+import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 
 type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string, bgStrong:string};
 
@@ -41,6 +41,7 @@ export function Button(props:ButtonProps) {
   return (
     <button 
       type={props.type} 
+      id={props.id}
       tabIndex={props.tabIndex}
       onClick={props.onClick}
       className={`${props.className} ${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
@@ -48,6 +49,30 @@ export function Button(props:ButtonProps) {
     >
       {props.children}
     </button>
+  );
+}
+
+
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  theme:ColourTheme, 
+  className?:string, 
+  children?:ReactNode,
+  ctnClassName?:string
+};
+
+export function Input(props:InputProps) {
+  return (
+    <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName}`}><input 
+      type={props.type}
+      id={props.id}
+      tabIndex={props.tabIndex}
+      defaultChecked={props.defaultChecked}
+      placeholder={props.placeholder}
+      // onClick={props.onClick}
+      onChange={props.onChange}
+      className={`${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
+      rounded-sm p-2 transition-colors justify-center flex items-center ${props.className}`}
+    />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
 }
 
