@@ -1,6 +1,6 @@
 'use server';
 // import  from '@/lib/dsabp.cjs';
-import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode } from './dsabp';
+import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode, BuildBits } from './dsabp';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
   let found = map.get(key) ?? 0;
@@ -16,21 +16,7 @@ function countOnes(v: string) {
       count++;
     }
   }
-  // while (v != 0n) {
-  //   count += v & 1n;
-  //   v >>= 1n;
-  // }
   return count;
-  // console.log("v=", v);
-  // let bits = 0; // Use bigint for bits
-  // while (v !== zero) {
-  //   if (BigInt(one & v) != (zero)) {
-  //     bits++;
-  //   }
-  //   v >>= one; // No need for explicit casting
-  // }
-  // console.log(Number(bits)); // Convert to number for logging
-  // return Number(bits); // Return as number
 }
 
 export interface BoMEntry {
@@ -177,10 +163,11 @@ class BuildCmd_A extends BuildCmd
 export interface sortOptions {
   sortY:boolean,
   safeMode:boolean,
-  restoreMode:boolean
+  restoreMode:boolean,
+  alignExpandoes:boolean
 }
 
-export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false}) {
+export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false, alignExpandoes:true}) {
   console.log("config=", config);
   let bp = decode(bString);
   if (!bp) return JSON.stringify([]);
@@ -234,13 +221,40 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
     else return i1.item.id - i2.item.id;
   });
   activeConfig = new ConfigCmd();
+  let lastBuildCmd : BuildCmd_A = cmds[0] as BuildCmd_A;
   for (let i=0; i<cmds.length; i++) {
     let cmd = cmds[i] as BuildCmd_A;
-    if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
+    if (lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
+      compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
+      let dist = 0;
+      let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
+      dist = x2>x1 ? x2-x1+lastBuildCmd.bits!.toString().length-1 : x1-x2+cmd.bits!.toString().length-1;
+      if (dist <= 64) {
+        lastBuildCmd.bits = new BuildBits(
+          (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+          : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+        ); 
+        console.log("optimised!", lastBuildCmd.bits);
+        cmds.splice(i, 1);
+        i--;
+      }
+
+    }
+    else if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
       cmds.splice(i, 0, cmd.currConfig);
       activeConfig = cmd.currConfig;
     }
   }
   bp.commands = cmds;
   return JSON.stringify({bp:new Encoder().encodeSync(bp)});
+}
+
+function compatibleItem(it: Item, config1:ConfigCmd, config2:ConfigCmd) {
+  return configFrag(it, config1).equals(configFrag(it, config2));
+}
+
+function zeroes(n:number) {
+  let str = "";
+  for (let i=0; i<n; i++) str += "0";
+  return str;
 }

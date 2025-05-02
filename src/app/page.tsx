@@ -1,4 +1,5 @@
 'use client';
+import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon} from "@/lib/utils"
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
@@ -19,6 +20,7 @@ export default function Page() {
   const [command, setCommand] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
   const [starterQ, setStarterQ] = useState<boolean>(true);
+  const [aExpandoes, setSnap] = useState<boolean>(true);
 
   useEffect(()=>{
     process();
@@ -32,17 +34,18 @@ export default function Page() {
     let summary : BPSummary|null = null;
     try {
       setProcessing(true);
+      let sMode=false, rMode=false;
       switch (command) {
         case ProcessingOptns.SORT: 
-          bp = await sortBP(tArea.value, {sortY:sortY, safeMode:false, restoreMode:false});
           break;
         case ProcessingOptns.SORT_SAFE:
-          bp = await sortBP(tArea.value, {sortY:sortY, safeMode:true, restoreMode:false});
+          sMode = true;
           break;
         case ProcessingOptns.SORT_RESTORE:
-          bp = await sortBP(tArea.value, {sortY:sortY, safeMode:false, restoreMode:true});
+          rMode = true;
           break;
       };
+      bp = await sortBP(tArea.value, {sortY:sortY, safeMode:sMode, restoreMode:rMode, alignExpandoes:aExpandoes});
       summary = (JSON.parse(await getBlueprintSummary(bp, starterQ)));
     } catch (e) {
     }
@@ -82,9 +85,9 @@ export default function Page() {
     }
     setTimeout(()=>{
       let out = byId("outBlueprint") as HTMLTextAreaElement;
-      out.focus();
+      // out.focus();
       out.select();
-      location.href="#outBlueprint";
+      // location.href="#outBlueprint";
     }, 200);
   }
 
@@ -121,8 +124,8 @@ export default function Page() {
     setCommand(n);
   }
 
-  return (<div className="flex-col pb-[50vh]">
-    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
+  return (<div className="flex flex-col pb-[50vh]">
+    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}} className="m-2">
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
         className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} p-1 grow-4 rounded-sm font-mono`}>
@@ -153,6 +156,12 @@ export default function Page() {
             className="cursor-pointer"/>
             <label htmlFor="starterQ" className="inline-block h-[100%] ml-1 cursor-pointer"> From starter?</label>
           </div>
+          <div className={`text-md ${Themes.BLUE.textCls} h-[100%] p-2`}>
+            <input type="checkbox" defaultChecked={true} id="boxQ" 
+            onChange={(event:ChangeEvent<HTMLInputElement>) => {setSnap(event.target.checked);}} 
+            className="cursor-pointer"/>
+            <label htmlFor="boxQ" className="inline-block h-[100%] ml-1 cursor-pointer"> Snap boxes?</label>
+          </div>
         </div>
         <Button theme={Themes.GREY} className="basis-[min-content]" type="submit">
           <Loader theme={Themes.GREY} active={processing}></Loader>
@@ -167,10 +176,16 @@ export default function Page() {
       <p>Blueprint height (EXTERNC): <b>{asyncSumm.height}</b> = <b>+{asyncSumm.width <= 8 ? "N/A" : asyncSumm.height-8}</b> blocks from starter</p>
       <p className={asyncSumm.cmdCt > 1000 ? Themes.RED.textCls : ""}>{asyncSumm.cmdCt.toLocaleString()} commands </p>
     </div>
+    {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
+      <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+        value={resBP} readOnly={true} placeholder="Result blueprint here..."
+        className={`align-self-stretch summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+      </textarea>
+    {/* </div> */}
     <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
       {
         bomSummary.length == 0 ? <></> : 
-        <div className={`grow rounded-md outline-[2px] m-2 p-2 overflow-scroll max-h-[70vh] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+        <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
           <div className="w-full flex justify-center">
             <p className="text-blue-500 text-lg">Materials required</p>
           </div>
@@ -184,23 +199,19 @@ export default function Page() {
       }
       {
         buildSummary.length == 0 ? <></> : 
-        <div className={`grow rounded-md outline-[2px] m-2 p-2 overflow-scroll max-h-[70vh] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+        <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
           <div className="w-full flex justify-center">
-            <p className="text-blue-500 text-lg">Build order {starterQ ? "(adjusted for starter items)" : ""}</p>
+            <p className="text-blue-500 text-lg">Build order {starterQ && !processing ? "(adjusted for starter items)" : ""}</p>
           </div>
           <div>
             <Lister 
-              theme={processError ? Themes.RED : Themes.BLUE} 
+              theme={Themes.BLUE} 
               className_c="p-2"
               colLayout={"50px 1fr 2fr 9fr"}>{buildSummary}</Lister>
           </div>
         </div>
       }
     </div>
-    <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
-      value={resBP} readOnly={true} placeholder="Result blueprint here..."
-      className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} w-[100%] font-mono p-1 mt-2 rounded-sm`}>
-    </textarea>
   </div>)
 }
 
