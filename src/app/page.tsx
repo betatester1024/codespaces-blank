@@ -1,7 +1,7 @@
 'use client';
 // /<reference path="@/lib/utils.tsx"/>
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon} from "@/lib/utils"
-import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, getBlueprintSummary, BPSummary, sortOptions } from "@/lib/bpprocessing";
 
 // const { decode, encode } = require("dsabp-js")
@@ -18,6 +18,11 @@ export default function Page() {
   const [asyncSumm, setSummary] = useState<BPSummary>({bom:[], order:[], width:0, height:0, cmdCt:0});
   const [command, setCommand] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
+  const [starterQ, setStarterQ] = useState<boolean>(true);
+
+  useEffect(()=>{
+    process();
+  }, [starterQ, sortY])
 
   async function process() {
     // event.preventDefault();
@@ -38,7 +43,7 @@ export default function Page() {
           bp = await sortBP(tArea.value, {sortY:sortY, safeMode:false, restoreMode:true});
           break;
       };
-      summary = (JSON.parse(await getBlueprintSummary(bp)));
+      summary = (JSON.parse(await getBlueprintSummary(bp, starterQ)));
     } catch (e) {
     }
     if (!summary) {
@@ -59,6 +64,7 @@ export default function Page() {
       buildformatted.push([
         <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.item.image+".png"}></img>,
         <p>{entry.count.toLocaleString()}</p>,
+        <p>{entry.equalsStr}</p>,
         <p>{entry.item.name}</p>
       ]);
     }
@@ -134,10 +140,20 @@ export default function Page() {
           <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore pusher, loader and hatch settings</Option>
           <Option value={ProcessingOptns.DISPLAY}>No action</Option>
         </Select>
-        <div className={`text-md ${Themes.BLUE.textCls} h-[100%] p-2`}>
-          <input type="checkbox" id="sortY" onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} className="cursor-pointer"/>
-          <label htmlFor="sortY" className="inline-block h-[100%] ml-1 cursor-pointer"> Sort by Y-value?</label>
+        <div className="flex-col">
+          <div className={`text-md ${Themes.BLUE.textCls} h-[100%] p-2`}>
+            <input type="checkbox" id="sortY" 
+            onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} 
+            className="cursor-pointer"/>
+            <label htmlFor="sortY" className="inline-block h-[100%] ml-1 cursor-pointer"> Sort by Y-coord?</label>
           </div>
+          <div className={`text-md ${Themes.BLUE.textCls} h-[100%] p-2`}>
+            <input type="checkbox" defaultChecked={true} id="starterQ" 
+            onChange={(event:ChangeEvent<HTMLInputElement>) => {setStarterQ(event.target.checked);}} 
+            className="cursor-pointer"/>
+            <label htmlFor="starterQ" className="inline-block h-[100%] ml-1 cursor-pointer"> From starter?</label>
+          </div>
+        </div>
         <Button theme={Themes.GREY} className="basis-[min-content]" type="submit">
           <Loader theme={Themes.GREY} active={processing}></Loader>
           <span>Process</span>
@@ -145,10 +161,10 @@ export default function Page() {
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
-      <span>INTERNC= <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
+      <span>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
       <p>Cannon dimensions: <b>{(asyncSumm.width/3).toFixed(1)}x{(asyncSumm.height/3).toFixed(1)}</b></p>
-      <p>Blueprint width (EXTERNC): <b>{asyncSumm.width}</b></p>
-      <p>Blueprint height (EXTERNC):<b>{asyncSumm.height}</b></p>
+      <p>Blueprint width (EXTERNC): &nbsp;<b>{asyncSumm.width}</b> = <b>+{asyncSumm.width < 11 ? "N/A" : asyncSumm.width-11}</b> blocks from starter</p>
+      <p>Blueprint height (EXTERNC): <b>{asyncSumm.height}</b> = <b>+{asyncSumm.width <= 8 ? "N/A" : asyncSumm.height-8}</b> blocks from starter</p>
       <p className={asyncSumm.cmdCt > 1000 ? Themes.RED.textCls : ""}>{asyncSumm.cmdCt.toLocaleString()} commands </p>
     </div>
     <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
@@ -170,13 +186,13 @@ export default function Page() {
         buildSummary.length == 0 ? <></> : 
         <div className={`grow rounded-md outline-[2px] m-2 p-2 overflow-scroll max-h-[70vh] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
           <div className="w-full flex justify-center">
-            <p className="text-blue-500 text-lg">Build order</p>
+            <p className="text-blue-500 text-lg">Build order {starterQ ? "(adjusted for starter items)" : ""}</p>
           </div>
           <div>
             <Lister 
               theme={processError ? Themes.RED : Themes.BLUE} 
               className_c="p-2"
-              colLayout={"50px 1fr 9fr"}>{buildSummary}</Lister>
+              colLayout={"50px 1fr 2fr 9fr"}>{buildSummary}</Lister>
           </div>
         </div>
       }
