@@ -27,6 +27,7 @@ body {
   color: var(--foreground);
   font-family: "Noto Sans Display", sans-serif;
   transition: 0.2s ease;
+  scroll-behavior: smooth;
 }
 
 * {

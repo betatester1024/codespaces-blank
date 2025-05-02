@@ -87,8 +87,8 @@ function escapeRegExp(str:string) {
 }
 
 type OptionElement = React.ReactElement<OptionProps>;
-export function Select({theme:clrTheme, children, className, onChange} : 
-  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:any)=>any}) {
+export function Select({theme:clrTheme, children, className, onChange, onSubmit} : 
+  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:any)=>any, onSubmit?:(e:ReactElement)=>any}) {
   let [active, setActive] = useState<boolean>(false);
   let [filter, setFilter] = useState<string>("");
   // INDEXED TO ACTUAL CHILD IDX
@@ -184,7 +184,9 @@ export function Select({theme:clrTheme, children, className, onChange} :
     if (event.key == "Enter") {
       if (matchIdxes.length > 0) setSelIdx(matchIdxes[hoveringIdx]);
       setActive(false);
-      event.preventDefault();
+      if (!event.ctrlKey) {
+        event.preventDefault()
+      }
     }
     if (event.key == "Escape") {
       setActive(false);
@@ -219,7 +221,7 @@ export function Select({theme:clrTheme, children, className, onChange} :
 
 
   let clickComplete = false;
-  return (
+  let out = (
     <div className={`${clrTheme.textCls} focus-within:outline-2 
     relative ${active ? "outline-solid" : "outline-none" } rounded-md rounded-b-none ${className??""}`}
     >
@@ -229,7 +231,7 @@ export function Select({theme:clrTheme, children, className, onChange} :
           onMouseUp= {onMouseUp}
           className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
             transition-colors duration-250 p-1.5 grow-3 rounded-r-none outline-none 
-            ${active ? "" : clrTheme.hoverCls} select-none`
+            ${active ? "" : clrTheme.hoverCls} select-none pr-7`
           }
           placeholder="Search..."
         />
@@ -255,7 +257,8 @@ export function Select({theme:clrTheme, children, className, onChange} :
         }
       </div>
     </div>
-  )
+  );
+  return out;
 }
 
 export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {

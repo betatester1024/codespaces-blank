@@ -1,7 +1,7 @@
 'use client';
 // /<reference path="@/lib/utils.tsx"/>
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon} from "@/lib/utils"
-import { ChangeEvent, ReactNode, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, getBlueprintSummary, BPSummary, sortOptions } from "@/lib/bpprocessing";
 
 // const { decode, encode } = require("dsabp-js")
@@ -19,9 +19,10 @@ export default function Page() {
   const [command, setCommand] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
 
-  async function process(event:React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    let tArea = (event.target as HTMLFormElement).querySelector("textarea")!;
+  async function process() {
+    // event.preventDefault();
+    console.log("processing command", command);
+    let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
     let summary : BPSummary|null = null;
     try {
@@ -73,7 +74,12 @@ export default function Page() {
         ]]);
       setProcessError("Blueprint processing error.");
     }
-    
+    setTimeout(()=>{
+      let out = byId("outBlueprint") as HTMLTextAreaElement;
+      out.focus();
+      out.select();
+      location.href="#outBlueprint";
+    }, 200);
   }
 
   async function sortBP(value:string, config?:sortOptions) {
@@ -105,11 +111,12 @@ export default function Page() {
   }
 
   function updateProcessCommand(n:ProcessingOptns) {
+    console.log("command set!", n);
     setCommand(n);
   }
 
-  return (<div className="flex-col">
-    <form onSubmit={process}>
+  return (<div className="flex-col pb-[50vh]">
+    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
         className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} p-1 grow-4 rounded-sm font-mono`}>
@@ -121,11 +128,11 @@ export default function Page() {
         {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
-        <Select theme={Themes.BLUE} className="grow-1" onChange={updateProcessCommand}>
+        <Select theme={Themes.BLUE} className="grow-1" onChange={updateProcessCommand} onSubmit={process}>
           <Option value={ProcessingOptns.SORT}>Sort by item</Option>
           <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable pushers, loaders and hatches</Option>
           <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore pusher, loader and hatch settings</Option>
-          <Option value={ProcessingOptns.DISPLAY}>Display</Option>
+          <Option value={ProcessingOptns.DISPLAY}>No action</Option>
         </Select>
         <div className={`text-md ${Themes.BLUE.textCls} h-[100%] p-2`}>
           <input type="checkbox" id="sortY" onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} className="cursor-pointer"/>
@@ -174,8 +181,10 @@ export default function Page() {
         </div>
       }
     </div>
-    <textarea value={resBP} readOnly={true} placeholder="Result blueprint here..."
-      className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} w-[100%] font-mono p-1 mt-2 rounded-sm`}></textarea>
+    <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+      value={resBP} readOnly={true} placeholder="Result blueprint here..."
+      className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} w-[100%] font-mono p-1 mt-2 rounded-sm`}>
+    </textarea>
   </div>)
 }
 
