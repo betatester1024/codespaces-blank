@@ -110,14 +110,14 @@ function escapeRegExp(str:string) {
   if (!str) return "";
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
-
+let zIdx = 1;
 type OptionElement = React.ReactElement<OptionProps>;
-export function Select({theme:clrTheme, children, className, onChange, onSubmit} : 
-  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, onChange?:(n:any)=>any, onSubmit?:(e:ReactElement)=>any}) {
+export function Select({theme:clrTheme, children, className, defaultIdx, onChange, onSubmit} : 
+  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, defaultIdx?:number, onChange?:(n:any)=>any, onSubmit?:(e:ReactElement)=>any}) {
   let [active, setActive] = useState<boolean>(false);
   let [filter, setFilter] = useState<string>("");
   // INDEXED TO ACTUAL CHILD IDX
-  let [selIdx, setSelIdx] = useState<number>(-1);
+  let [selIdx, setSelIdx] = useState<number>(defaultIdx!=undefined ? defaultIdx : -1);
   // FOR SEARCH ONLY - NOT INDEXED TO ACTUAL CHILD IDX - MUST CONVERT USING MATCH MATCHIDXES
   let [hoveringIdx, setHoveringIdx] = useState<number>(0); 
 
@@ -174,6 +174,7 @@ export function Select({theme:clrTheme, children, className, onChange, onSubmit}
       setInputVal(selIdx >= 0 ? options[selIdx] : "Select...");
     }
     else {
+      zIdx++;
       setFilter("");
       setInputVal("");
       setHoveringIdx(0);
@@ -273,8 +274,9 @@ export function Select({theme:clrTheme, children, className, onChange, onSubmit}
       </div>
       <div tabIndex={-1} className={
         `w-[100%] h-[fit-content] ${active ? "max-h-[50vh]" : "max-h-[0px]"} flex flex-col 
-        overflow-scroll absolute transition-all duration-350 rounded-b-sm 
-        ${active ? "outline-solid":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}>
+        overflow-scroll absolute transition-all duration-350 rounded-b-sm shadow-lg/40
+        ${active ? "outline-solid":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}
+        style={{zIndex:zIdx}}>
         { 
           matchOptns.length == 0 ?
             <span key="none" className={`p-1 pr-1.5 pl-1.5 ${Themes.RED.textCls} ${Themes.RED.hoverCls} ${Themes.RED.bg2}`}>No results found</span>

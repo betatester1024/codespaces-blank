@@ -4,12 +4,22 @@ import "./page.css";
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input} from "@/lib/utils"
 import { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, getBlueprintSummary, BPSummary, sortOptions } from "@/lib/bpprocessing";
+import { setFlagsFromString } from "v8";
+import { buildCostForm, matsCostForm } from "@/lib/formcreator";
 
 // const { decode, encode } = require("dsabp-js")
 // const dsabp = require("dsabp-js")
 // const dsabp = require("@/lib/dsabp");
 
-let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0};
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:true};
+
+enum ProcessingOptns  {
+  SORT, DISPLAY, SORT_SAFE, SORT_RESTORE
+}
+
+enum FormOptns {
+  MATSCOST, BUILD
+}
 
 export default function Page() {
   const [bomSummary, setBomSummary] = useState<ReactNode[][]>([]);
@@ -23,8 +33,10 @@ export default function Page() {
   const [sortY, setsortY] = useState<boolean>(false);
   const [starterQ, setStarterQ] = useState<boolean>(true);
   const [aExpandoes, setSnap] = useState<boolean>(true);
+  const [outForm, setOutForm] = useState<string>("");
   const [calcRes, setCalcRes] = useState<string>("");
   const [calcOpen, setCalcOpen] = useState<boolean>(false);
+  const [form, setForm] = useState<FormOptns>();
   function handleKeyDown(event:KeyboardEvent<HTMLBodyElement>) {
     console.log("calcOpen", calcOpen);
     if (event.key == "=" && !calcOpen) {
@@ -42,13 +54,17 @@ export default function Page() {
 
   useEffect(()=>{
     let ele = byId("calcRes") as HTMLParagraphElement;
-    console.log("reset");
+    console.log("Calculation performed!");
     ele.classList.remove("animHighlight");
     setTimeout(()=>{ele.classList.add("animHighlight");}, 100);
   }, [calcRes])
 
   useEffect(()=> {
-    byId("calc")?.focus();
+    let calcInp = byId("calc") as HTMLInputElement;
+    calcInp.focus();
+    if (!calcOpen) {
+      calcInp.value = "";
+    }
   }, [calcOpen])
 
   // useEffect(() => {
@@ -85,7 +101,19 @@ export default function Page() {
       };
       if (command != ProcessingOptns.DISPLAY && command != undefined) 
         bp = await sortBP(tArea.value, {sortY:sortY, safeMode:sMode, restoreMode:rMode, alignExpandoes:aExpandoes});
-      summary = (JSON.parse(await getBlueprintSummary(bp, starterQ)));
+      summary = await getBlueprintSummary(bp, starterQ);
+
+      let formRes = "";
+      // form
+      switch (form) {
+        case FormOptns.MATSCOST:
+          formRes = matsCostForm(summary, true).form;
+          break;
+        case FormOptns.BUILD:
+          formRes = buildCostForm(summary);
+          break;
+      }
+      setOutForm(formRes);
     } catch (e) {
     }
     if (!summary) {
@@ -96,9 +124,9 @@ export default function Page() {
     let bomformatted = [];
     for (let entry of summary.bom) {
       bomformatted.push([
-        <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.link+".png"}></img>,
+        <img className="w-[2.5rem]" src={"https://test.drednot.io/img/"+entry.it.image!+".png"}></img>,
         <p>{entry.ct.toLocaleString()}</p>,
-        <p>{entry.it}</p>
+        <p>{entry.it.name}</p>
       ]);
     }
     let buildformatted=  [];
@@ -110,16 +138,12 @@ export default function Page() {
         <p>{entry.item.name}</p>
       ]);
     }
-    if (summary.bom.length > 0) {
+    if (!summary.error) {
       setBomSummary(bomformatted);
       setBuildSummary(buildformatted);
       setProcessError(undefined);
     }
     else {
-      setBuildSummary([])
-      setBomSummary([[
-          <p className={Themes.RED.textCls}>Blueprint processing error.</p>
-        ]]);
       setProcessError("Blueprint processing error.");
     }
     setTimeout(()=>{
@@ -154,13 +178,13 @@ export default function Page() {
     console.log("loaded!");
   }
 
-  enum ProcessingOptns  {
-    SORT, DISPLAY, SORT_SAFE, SORT_RESTORE
-  }
-
   function updateProcessCommand(n:ProcessingOptns) {
     console.log("command set!", n);
     setCommand(n);
+  }
+
+  function updateFormCommand(n:FormOptns) {
+    setForm(n);
   }
 
   function runCalc() {
@@ -186,12 +210,18 @@ export default function Page() {
         {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
-        <Select theme={Themes.BLUE} className="grow-1" onChange={updateProcessCommand} onSubmit={process}>
-          <Option value={ProcessingOptns.SORT}>Sort by item</Option>
-          <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable pushers, loaders and hatches</Option>
-          <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore pusher, loader and hatch settings</Option>
-          <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>
-        </Select>
+        <div className="flex flex-col items-left grow">
+          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={3} onChange={updateProcessCommand} onSubmit={process}>
+            <Option value={ProcessingOptns.SORT}>Sort by item</Option>
+            <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable pushers, loaders and hatches</Option>
+            <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore pusher, loader and hatch settings</Option>
+            <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>
+          </Select>
+          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateFormCommand} onSubmit={process}>
+            <Option value={FormOptns.BUILD}>Build cost breakdown</Option>
+            <Option value={FormOptns.MATSCOST}>Materials cost only</Option>
+          </Select>
+        </div>
         <div className="flex flex-col items-left">
           <Input theme={Themes.BLUE} type="checkbox" id="sortY" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} 
@@ -210,49 +240,61 @@ export default function Page() {
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
-      <span>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
-      <p>Cannon dimensions: <b>{(asyncSumm.width/3).toFixed(1)}x{(asyncSumm.height/3).toFixed(1)}</b></p>
-      <p>Blueprint width (EXTERNC): &nbsp;<b>{asyncSumm.width}</b> = <b>+{asyncSumm.width < 11 ? "N/A" : asyncSumm.width-11}</b> blocks from starter</p>
-      <p>Blueprint height (EXTERNC): <b>{asyncSumm.height}</b> = <b>+{asyncSumm.width <= 8 ? "N/A" : asyncSumm.height-8}</b> blocks from starter</p>
-      <p className={asyncSumm.cmdCt > 1000 ? Themes.RED.textCls : ""}>{asyncSumm.cmdCt.toLocaleString()} commands </p>
-      <p>RCD cost: <b>{asyncSumm.RCDCost}</b> flux</p>
+      {
+        processError ? <span className={Themes.RED.textCls}>Blueprint processing error.</span> : <>
+        <span>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
+        <p>Cannon dimensions: <b>{(asyncSumm.width/3).toFixed(1)}x{(asyncSumm.height/3).toFixed(1)}</b></p>
+        <p>Blueprint width (EXTERNC): &nbsp;<b>{asyncSumm.width}</b> = <b>+{asyncSumm.width < 11 ? "N/A" : asyncSumm.width-11}</b> blocks from starter</p>
+        <p>Blueprint height (EXTERNC): <b>{asyncSumm.height}</b> = <b>+{asyncSumm.width <= 8 ? "N/A" : asyncSumm.height-8}</b> blocks from starter</p>
+        <p className={asyncSumm.cmdCt > 1000 ? Themes.RED.textCls : ""}>{asyncSumm.cmdCt.toLocaleString()} commands </p>
+        <p>RCD cost: <b>{asyncSumm.RCDCost}</b> flux</p> </>
+      }
     </div>
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
-      <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
-        value={resBP} readOnly={true} placeholder="Result blueprint here..."
-        className={`align-self-stretch summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
-      </textarea>
+      <div className="flex">
+        <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+          value={resBP} readOnly={true} placeholder="Result blueprint here..."
+          className={`grow-1 summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+        </textarea>
+        <textarea id="outForm" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+          value={outForm} readOnly={true} placeholder="Output form here..."
+          className={`grow-1 summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+        </textarea>
+      </div>
     {/* </div> */}
-    <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
-      {
-        bomSummary.length == 0 ? <></> : 
-        <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
-          <div className="w-full flex justify-center">
-            <p className="text-blue-500 text-lg">Materials required</p>
+    {  
+      
+      <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
+        {
+          processError ? <></> : 
+          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+            <div className="w-full flex justify-center">
+              <p className="text-blue-500 text-lg">Materials required</p>
+            </div>
+            <div id="resArea">
+              <Lister 
+                theme={processError ? Themes.RED : Themes.BLUE} 
+                className_c="p-2"
+                colLayout={processError ? "1fr" : "50px 1fr 9fr"}>{bomSummary}</Lister>
+            </div>
           </div>
-          <div id="resArea">
-            <Lister 
-              theme={processError ? Themes.RED : Themes.BLUE} 
-              className_c="p-2"
-              colLayout={processError ? "1fr" : "50px 1fr 9fr"}>{bomSummary}</Lister>
+        }
+        {
+          processError ? <></> : 
+          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+            <div className="w-full flex justify-center">
+              <p className="text-blue-500 text-lg">Build order {starterQ && !processing ? "(adjusted for starter items)" : ""}</p>
+            </div>
+            <div>
+              <Lister 
+                theme={Themes.BLUE} 
+                className_c="p-2"
+                colLayout={"50px 1fr 2fr 9fr"}>{buildSummary}</Lister>
+            </div>
           </div>
-        </div>
-      }
-      {
-        buildSummary.length == 0 ? <></> : 
-        <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
-          <div className="w-full flex justify-center">
-            <p className="text-blue-500 text-lg">Build order {starterQ && !processing ? "(adjusted for starter items)" : ""}</p>
-          </div>
-          <div>
-            <Lister 
-              theme={Themes.BLUE} 
-              className_c="p-2"
-              colLayout={"50px 1fr 2fr 9fr"}>{buildSummary}</Lister>
-          </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   </div>
   <div id="calcCtn" onClick={(event:MouseEvent<HTMLDivElement>)=>{if ((event.target as HTMLDivElement).id == "calcCtn") setCalcOpen(false);}} 
     className={`w-full h-full absolute bg-gray-200/75 top-0 flex items-center 

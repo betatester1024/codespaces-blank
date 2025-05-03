@@ -1,4 +1,4 @@
-'use server';
+'use client';
 // import  from '@/lib/dsabp.cjs';
 import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode, BuildBits } from './dsabp';
 
@@ -20,9 +20,8 @@ function countOnes(v: string) {
 }
 
 export interface BoMEntry {
-  it: string,
-  ct: Number,
-  link: string
+  it: Item,
+  ct: number,
 }
 
 function decode(bString:string) {
@@ -51,10 +50,11 @@ export interface BPSummary {
   width:number,
   height:number,
   cmdCt:number,
-  RCDCost:number
+  RCDCost:number,
+  error:boolean
 }
 
-let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0};
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:true};
 
 // const starterShip = [
 //   {it:Item.HELM_STARTER, ct:1},
@@ -75,7 +75,7 @@ let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0};
 // https://blueyescat.github.io/dsabp-js/
 
 export async function getBlueprintSummary(bString:string, starterQ:boolean) {
-  return JSON.stringify(await getSummaryJSON(bString, starterQ));
+  return await getSummaryJSON(bString, starterQ);
 }
 
 async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSummary> {
@@ -151,10 +151,10 @@ async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSumm
   }
   let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
-    out.push({it: Item.getById(key).name, ct: matsCost.get(key)!, link: Item.getById(key).image!});
+    out.push({it: Item.getById(key), ct: matsCost.get(key)!});
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10)};
+  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10), error:false};
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
