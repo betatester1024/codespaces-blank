@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --experimental-build-mode=compile",
+    "build-gen": "next build --experimental-build-mode=generate-env",
     "start": "next start",
     "lint": "next lint"
   },
