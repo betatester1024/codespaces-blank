@@ -15,6 +15,7 @@ const NotoSansMono = Noto_Sans_Mono({
 export const metadata: Metadata = {
   title: "BetaOS ProDSA Tools",
   description: "Blueprint editor and valuator for BetaOS ProDSA, a subsidiary of BetaOS Services.",
+  icons: "https://prodsatools.vercel.app/icon.png"
 };
 
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
