@@ -25,7 +25,7 @@ export default function Page() {
   const [aExpandoes, setSnap] = useState<boolean>(true);
   const [calcRes, setCalcRes] = useState<string>("");
   const [calcOpen, setCalcOpen] = useState<boolean>(false);
-  function handleKeyDown(event:KeyboardEvent<HTMLDivElement>) {
+  function handleKeyDown(event:KeyboardEvent<HTMLBodyElement>) {
     console.log("calcOpen", calcOpen);
     if (event.key == "=" && !calcOpen) {
       setCalcOpen(true);
@@ -173,7 +173,7 @@ export default function Page() {
     }
   }
 
-  return (<div onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-3">
+  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-3">
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}} className="m-2">
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
@@ -267,7 +267,7 @@ export default function Page() {
       </div>
     </div>
   </div>
-  </div>)
+  </body>)
 }
 
 
