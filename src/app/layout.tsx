@@ -15,13 +15,14 @@ const NotoSansMono = Noto_Sans_Mono({
 export const metadata: Metadata = {
   title: "BetaOS ProDSA Tools",
   description: "Blueprint editor and valuator for BetaOS ProDSA, a subsidiary of BetaOS Services.",
-  icons: "https://prodsatools.vercel.app/icon.png"
+  icons: "/icon.png"
 };
 
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/icon.png"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
       {children}
