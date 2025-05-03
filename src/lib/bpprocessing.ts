@@ -188,6 +188,7 @@ export interface sortOptions {
   restoreMode:boolean,
   alignExpandoes:boolean
 }
+Item;
 
 export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false, alignExpandoes:true}) {
   console.log("config=", config);
@@ -197,6 +198,7 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
   if (bp.commands == null) { // no commands to sort!
     return JSON.stringify({bp:new Encoder().encodeSync(bp)});
   }
+  // console.log(Item);
 
   // store the active configuration for every command to be compressed later
   for (let i=0; i<bp.commands.length; i++) {
@@ -231,7 +233,8 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
     i1 = i1 as BuildCmd_A;
     i2 = i2 as BuildCmd_A;
     if (i1.item == null || i2.item == null) {
-      console.log("ERROR ON NULL ITEM", i1, i2);
+      console.log(i1, i2);
+      console.log("ERROR ON NULL ITEM", i1.item?.name, i2.item?.name);
       return -1;
     } 
     if (i1.item.id == i2.item.id) {

@@ -10,7 +10,8 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack } ) => {
     // Important: return the modified config
-    config.optimization.minimize = true;
+    config.optimization.minimize = false;
+    // config.optimization.minimizer = [];
     return config
   },
   turbopack: {}
