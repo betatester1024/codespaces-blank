@@ -67,6 +67,7 @@ export function Input(props:InputProps) {
       id={props.id}
       tabIndex={props.tabIndex}
       defaultChecked={props.defaultChecked}
+      defaultValue={props.defaultValue}
       placeholder={props.placeholder}
       // onClick={props.onClick}
       onChange={props.onChange}

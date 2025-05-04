@@ -281,8 +281,8 @@ export default function Page() {
         </Button> 
       </div>
       <div className="flex pt-2 pb-2 gap-2">
-        <Input id="firstItems" placeholder="First items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
-        <Input id="lastItems" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
+        <Input id="firstItems" defaultValue="block, starter" placeholder="First items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
+        <Input id="lastItems" defaultValue="expando, recycler" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
