@@ -51,10 +51,10 @@ export interface BPSummary {
   height:number,
   cmdCt:number,
   RCDCost:number,
-  error:boolean
+  error:string|undefined
 }
 
-let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:true};
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Blueprint decode error."};
 
 // const starterShip = [
 //   {it:Item.HELM_STARTER, ct:1},
@@ -74,11 +74,11 @@ let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, err
 
 // https://blueyescat.github.io/dsabp-js/
 
-export async function getBlueprintSummary(bString:string, starterQ:boolean) {
-  return await getSummaryJSON(bString, starterQ);
-}
+// export async function getBlueprintSummary(bString:string, starterQ:boolean) {
+//   return await getSummaryJSON(bString, starterQ);
+// }
 
-async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSummary> {
+export async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSummary> {
   let currStarter = [
     {it:Item.HELM_STARTER, ct:1},
     {it:Item.ITEM_HATCH_STARTER, ct:1},
@@ -96,6 +96,7 @@ async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSumm
   ];
   let itemCt : Map<any, number> = new Map();
   let matsCost = new Map();
+  if (bString == "") return {bom:[],order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"No blueprint provided."};
   let bp = decode(bString);
   if (bp == null) return errorSummary;
   let commands:BuildEntry[] = [];
@@ -154,7 +155,7 @@ async function getSummaryJSON(bString:string, starterQ:boolean) : Promise<BPSumm
     out.push({it: Item.getById(key), ct: matsCost.get(key)!});
     console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10), error:false};
+  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10), error:undefined};
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
@@ -186,17 +187,19 @@ export interface sortOptions {
   sortY:boolean,
   safeMode:boolean,
   restoreMode:boolean,
-  alignExpandoes:boolean
+  alignExpandoes:boolean,
+  firstItems:Item[],
+  lastItems:Item[],
 }
 Item;
 
-export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false, alignExpandoes:true}) {
+export async function sortByItem(bString:string, config:sortOptions={sortY:false, safeMode:false, restoreMode:false, alignExpandoes:true, firstItems:[], lastItems:[]}) {
   console.log("config=", config);
   let bp = decode(bString);
-  if (!bp) return JSON.stringify([]);
+  if (!bp) return {bp:""};
   let activeConfig = new ConfigCmd();
   if (bp.commands == null) { // no commands to sort!
-    return JSON.stringify({bp:new Encoder().encodeSync(bp)});
+    return {bp:new Encoder().encodeSync(bp)};
   }
   // console.log(Item);
 
@@ -237,6 +240,29 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
       console.log("ERROR ON NULL ITEM", i1.item?.name, i2.item?.name);
       return -1;
     } 
+
+    let idxF1 = config.firstItems.indexOf(i1.item!);
+    let idxF2 = config.firstItems.indexOf(i2.item!);
+    let idxL1 = config.lastItems.indexOf(i1.item!);
+    let idxL2 = config.lastItems.indexOf(i2.item!);
+    if (idxF1 >= 0 && idxF2 < 0) {
+      return -1;
+    }
+    else if (idxF1 >= 0 && idxF2 >= 0 && idxF1 != idxF2) {
+      return idxF1 - idxF2;
+    }
+    else if (idxF1 < 0 && idxF2 >= 0) {
+      return 1;
+    }
+    else if (idxL1 >= 0 && idxL2 < 0) {
+      return 1;
+    }
+    else if (idxL1 >= 0 && idxL2 >= 0 && idxL1 != idxL2) {
+      return idxL1 - idxL2;
+    }
+    else if (idxL1 < 0 && idxL2 >= 0) {
+      return -1;
+    }
     if (i1.item.id == i2.item.id) {
       if (config.sortY && i1.y! != i2.y!) {
         return i1.y! - i2.y!;
@@ -255,7 +281,8 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
         cmd.currConfig.angle = 0;
       }
     }
-    if (lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
+    if (i != 0 && lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && 
+      cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
       compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
       let dist = 0;
       let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
@@ -265,7 +292,7 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
           (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
           : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
         ); 
-        console.log("optimised!", lastBuildCmd.bits);
+        console.log("optimised!", lastBuildCmd.bits.toString());
         cmds.splice(i, 1);
         i--;
       }
@@ -277,7 +304,7 @@ export async function sortByItem(bString:string, config:sortOptions={sortY:false
     }
   }
   bp.commands = cmds;
-  return JSON.stringify({bp:new Encoder().encodeSync(bp)});
+  return {bp:new Encoder().encodeSync(bp)};
 }
 
 function compatibleItem(it: Item, config1:ConfigCmd, config2:ConfigCmd) {

@@ -106,7 +106,7 @@ export function Lister(
   )
 }
 
-function escapeRegExp(str:string) {
+export function escapeRegExp(str:string) {
   if (!str) return "";
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }

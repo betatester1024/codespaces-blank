@@ -1,20 +1,25 @@
 'use client';
 import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
-import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input} from "@/lib/utils"
+import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp} from "@/lib/utils"
 import { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
-import { BoMEntry, sortByItem, BuildEntry, getBlueprintSummary, BPSummary, sortOptions } from "@/lib/bpprocessing";
+import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortOptions, getSummaryJSON } from "@/lib/bpprocessing";
 import { setFlagsFromString } from "v8";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
+import { Item } from "@/lib/dsabp";
 
 // const { decode, encode } = require("dsabp-js")
 // const dsabp = require("dsabp-js")
 // const dsabp = require("@/lib/dsabp");
 
-let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:true};
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"No blueprint provided"};
 
 enum ProcessingOptns  {
   SORT, DISPLAY, SORT_SAFE, SORT_RESTORE
+
+}
+function isSort(a:ProcessingOptns|undefined) {
+  return a == ProcessingOptns.SORT || a == ProcessingOptns.SORT_SAFE || a == ProcessingOptns.SORT_RESTORE;
 }
 
 enum FormOptns {
@@ -36,6 +41,8 @@ export default function Page() {
   const [outForm, setOutForm] = useState<string>("");
   const [calcRes, setCalcRes] = useState<string>("");
   const [calcOpen, setCalcOpen] = useState<boolean>(false);
+  const [firstDisp, setFirst] = useState<Item[]>([]);
+  const [lastDisp, setLast] = useState<Item[]>([]);
   const [form, setForm] = useState<FormOptns>();
   function handleKeyDown(event:KeyboardEvent<HTMLBodyElement>) {
     console.log("calcOpen", calcOpen);
@@ -85,7 +92,8 @@ export default function Page() {
     console.log("processing command", command);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
-    let summary : BPSummary|null = null;
+    let summary : BPSummary;
+    let processed = false;
     try {
       setProcessing(true);
       let sMode=false, rMode=false;
@@ -99,9 +107,33 @@ export default function Page() {
           rMode = true;
           break;
       };
-      if (command != ProcessingOptns.DISPLAY && command != undefined) 
-        bp = await sortBP(tArea.value, {sortY:sortY, safeMode:sMode, restoreMode:rMode, alignExpandoes:aExpandoes});
-      summary = await getBlueprintSummary(bp, starterQ);
+      let firstStrs = (byId("firstItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
+      let lastStrs = (byId("lastItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
+      let firstItms = new Set<Item>(), lastItms = new Set<Item>();
+      for (let st of firstStrs)
+        Item.getMap().forEach(
+          (v:Item, _key:string, _map:Map<string, Item>)=>{
+            if (st.length != 0 && v.name.match(new RegExp(escapeRegExp(st), "i")))
+              firstItms.add(v);
+          });
+      for (let st of lastStrs)
+        Item.getMap().forEach(
+          (v:Item, _key:string, _map:Map<string, Item>)=>{
+            if (st.length != 0 && v.name.match(new RegExp(escapeRegExp(st), "i"))) lastItms.add(v);
+          });
+      setFirst(Array.from(firstItms));
+      setLast(Array.from(lastItms));
+      if (isSort(command)) {
+        bp = await sortBP(tArea.value, {
+          sortY:sortY, 
+          safeMode:sMode, 
+          restoreMode:rMode, 
+          alignExpandoes:aExpandoes, 
+          firstItems:Array.from(firstItms),
+          lastItems:Array.from(lastItms)});
+        processed = true;
+      }
+      summary = await getSummaryJSON(bp, starterQ);
 
       let formRes = "";
       // form
@@ -115,9 +147,10 @@ export default function Page() {
       }
       setOutForm(formRes);
     } catch (e) {
+      summary = errorSummary;
     }
-    if (!summary) {
-      summary = (errorSummary);
+    if (!bp && processed) {
+      summary.error = "Sort operation failed.";
     }
     setSummary(summary);
     setProcessing(false);
@@ -141,11 +174,8 @@ export default function Page() {
     if (!summary.error) {
       setBomSummary(bomformatted);
       setBuildSummary(buildformatted);
-      setProcessError(undefined);
     }
-    else {
-      setProcessError("Blueprint processing error.");
-    }
+    setProcessError(summary.error);
     setTimeout(()=>{
       let out = byId("outBlueprint") as HTMLTextAreaElement;
       // out.focus();
@@ -155,9 +185,21 @@ export default function Page() {
   }
 
   async function sortBP(value:string, config?:sortOptions) {
-    let summary = JSON.parse(await sortByItem(value, config));
+    let summary = await sortByItem(value, config);
     setResBP(summary.bp);
     return summary.bp;
+  }
+
+  function itemsToHTML(arr:Item[]) {
+    let out = [];
+    for (let i=0; i<arr.length; i++) {
+      let it = arr[i];
+      out.push(<span className="flex items-center gap-1" key={i}>
+        <img src={"https://drednot.io/img/"+it.image+".png"}/>
+        <span>{it.name}</span>
+      </span>);
+    }
+    return out;
   }
 
   async function fillTemplateBP() {
@@ -238,10 +280,25 @@ export default function Page() {
           <span>Process</span>
         </Button> 
       </div>
+      <div className="flex pt-2 pb-2 gap-2">
+        <Input id="firstItems" placeholder="First items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
+        <Input id="lastItems" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
+      </div>
     </form>
     <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
       {
-        processError ? <span className={Themes.RED.textCls}>Blueprint processing error.</span> : <>
+        processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
+        {isSort(command) ? 
+          <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
+            <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
+              <span>First:</span>
+              <div className="summaryContainer flex flex-wrap gap-2 outline-[2px]">{itemsToHTML(firstDisp)}</div>
+            </div>
+            <div className="mt-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
+              <span>Last:</span>
+              <div className="summaryContainer flex flex-wrap gap-2 outline-[2px]">{itemsToHTML(lastDisp)}</div>
+            </div>
+          </div> : <></>}
         <span>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
         <p>Cannon dimensions: <b>{(asyncSumm.width/3).toFixed(1)}x{(asyncSumm.height/3).toFixed(1)}</b></p>
         <p>Blueprint width (EXTERNC): &nbsp;<b>{asyncSumm.width}</b> = <b>+{asyncSumm.width < 11 ? "N/A" : asyncSumm.width-11}</b> blocks from starter</p>
