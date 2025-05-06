@@ -163,6 +163,7 @@ function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
     case Item.EXPANDO_BOX: 
       return new ConfigCmd({angle: config.angle});
     case Item.SHIELD_GENERATOR:
+    case Item.ITEM_EJECTOR:
       return new ConfigCmd({fixedAngle: config.fixedAngle});
     case Item.LOADER:
     case Item.LOADER_NEW:
