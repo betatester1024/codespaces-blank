@@ -3,7 +3,7 @@ import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp} from "@/lib/utils"
 import { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
-import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortOptions, getSummaryJSON } from "@/lib/bpprocessing";
+import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
 import { setFlagsFromString } from "v8";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
 import { Item } from "@/lib/dsabp";
@@ -12,7 +12,7 @@ import { Item } from "@/lib/dsabp";
 // const dsabp = require("dsabp-js")
 // const dsabp = require("@/lib/dsabp");
 
-let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"No blueprint provided"};
+let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Error processing blueprint."};
 
 enum ProcessingOptns  {
   SORT, DISPLAY, SORT_SAFE, SORT_RESTORE
@@ -38,6 +38,7 @@ export default function Page() {
   const [sortY, setsortY] = useState<boolean>(false);
   const [starterQ, setStarterQ] = useState<boolean>(true);
   const [aExpandoes, setSnap] = useState<boolean>(true);
+  const [repairMode, setRepairMode] = useState<boolean>(false);
   const [outForm, setOutForm] = useState<string>("");
   const [calcRes, setCalcRes] = useState<string>("");
   const [calcOpen, setCalcOpen] = useState<boolean>(false);
@@ -130,10 +131,14 @@ export default function Page() {
           restoreMode:rMode, 
           alignExpandoes:aExpandoes, 
           firstItems:Array.from(firstItms),
-          lastItems:Array.from(lastItms)});
+          lastItems:Array.from(lastItms)
+        });
         processed = true;
       }
-      summary = await getSummaryJSON(bp, starterQ);
+      let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
+      let repairBP = repairMode ? tArea2.value : "";
+      console.log("inbp", bp.slice(0, 300));
+      summary = await getSummaryJSON(bp, starterQ, repairBP);
 
       let formRes = "";
       // form
@@ -147,6 +152,7 @@ export default function Page() {
       }
       setOutForm(formRes);
     } catch (e) {
+      console.log(e);
       summary = errorSummary;
     }
     if (!bp && processed) {
@@ -184,7 +190,7 @@ export default function Page() {
     }, 200);
   }
 
-  async function sortBP(value:string, config?:sortOptions) {
+  async function sortBP(value:string, config?:sortConfig) {
     let summary = await sortByItem(value, config);
     setResBP(summary.bp);
     return summary.bp;
@@ -243,12 +249,20 @@ export default function Page() {
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}} className="m-2">
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
-        className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} p-1 grow-4 rounded-sm font-mono`}>
+          className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls}`}>
         </textarea>
-        <Button type="button" theme={Themes.BLUE} onClick={fillTemplateBP} className="h-[fit-content]">
-          <Loader theme={Themes.BLUE} active={loadingBP}></Loader>
-          Load test blueprint
-        </Button>
+        <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
+        className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} shrink transition-all overflow-clip 
+        ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
+        </textarea> 
+        <div className="flex flex-col">
+          <Button type="button" theme={Themes.BLUE} onClick={fillTemplateBP} className="h-[fit-content]">
+            <Loader theme={Themes.BLUE} active={loadingBP}></Loader>
+            Load test blueprint
+          </Button>
+          <Input theme={Themes.GREEN} type="checkbox" onChange={(event:ChangeEvent<HTMLInputElement>) => {setRepairMode(event.target.checked);}}
+          ctnClassName="cursor-pointer" id="repairMode">Enter repair mode?</Input>
+        </div>
         {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">

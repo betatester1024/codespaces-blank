@@ -12,6 +12,10 @@
   outline-style: --var(--tw-outline-style);
 }
 
+textarea {
+  @apply p-1 grow-4 rounded-sm font-mono;
+}
+
 .animHighlight {
   animation: highlight 5s both;
 }

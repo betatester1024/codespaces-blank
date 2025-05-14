@@ -1,6 +1,5 @@
 "use client"
 
-import { getRandomValues } from "crypto";
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 
 type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string, bgStrong:string};
@@ -57,7 +56,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   theme:ColourTheme, 
   className?:string, 
   children?:ReactNode,
-  ctnClassName?:string
+  ctnClassName?:string,
+  id:string
 };
 
 export function Input(props:InputProps) {
