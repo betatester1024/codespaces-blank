@@ -8,15 +8,15 @@ interface costData {
   value:number,
   formattedName:string|null,
 }
-const valuation : Map<Item, costData> = new Map([
+export const priceTab : Map<Item, costData> = new Map([
   [Item.RES_METAL,        {value: 1/17, formattedName:"Iron"}],
-  [Item.RES_GUNPOWDER,    {value: 1/20, formattedName:"Exp"}],
+  [Item.RES_GUNPOWDER,    {value: 1/20, formattedName:"Explosives"}],
   [Item.RES_FLUX,         {value: 1,    formattedName:"Flux"}],
   [Item.RES_HYPER_RUBBER, {value: 0.8,  formattedName:"Rubber"}],
   [Item.BLOCK_ICE_GLASS,  {value: 1/4,  formattedName:"Ice"}],
-  [Item.TURRET_REMOTE,    {value: 2,    formattedName:"Cannon, standard"}],
   [Item.SHIELD_GENERATOR, {value: 3,    formattedName:"Generator"}],
   [Item.SHIELD_PROJECTOR, {value: 16,   formattedName:"Projector"}],
+  [Item.TURRET_REMOTE,    {value: 2,    formattedName:"Cannon, standard"}],
   [Item.TURRET_BURST,     {value: 20,   formattedName:"Cannon, burst"}],
   [Item.TURRET_AUTO,      {value: 50,   formattedName:"Cannon, machine"}],
   [Item.TURRET_OBTUSE,    {value: 20,   formattedName:"Cannon, obtuse"}],
@@ -31,6 +31,13 @@ const valuation : Map<Item, costData> = new Map([
   [Item.NAV_UNIT, {value: 0, formattedName:null}],
 ]);
 
+export const sizeTab = [
+  {sz: 100, cost: 0.5, szName:"Tiny"},
+  {sz: 900, cost: 0.3, szName:"Small"},
+  {sz: 2500, cost:0.25, szName:"Medium"},
+  {sz: 6085, cost: 0.2, szName:"Large"}
+]
+
 function f(n:number, dprec:number=1) {
   return n.toLocaleString("en-CA", {maximumFractionDigits:dprec, minimumFractionDigits:dprec})
 }
@@ -43,8 +50,8 @@ export function matsCostForm(bpsumm:BPSummary|null, header:boolean) {
   let totalValue = 0;
   let costBreakdown = "";
   for (let entry of bpsumm.bom) {
-    if (valuation.get(entry.it)) {
-      let data = valuation.get(entry.it)!;
+    if (priceTab.get(entry.it)) {
+      let data = priceTab.get(entry.it)!;
       totalValue += data.value * entry.ct;
       if (data.formattedName != null) {
         costBreakdown += "-# "+data.formattedName +" cost: " + f(data.value * entry.ct) + " flux\n";
@@ -91,11 +98,13 @@ export function buildCostForm(bpsumm:BPSummary|null) {
   }
   let matsCostData = matsCostForm(bpsumm, false);
   let area = bpsumm.height * bpsumm.width;
-  let multRate = 0;
-  if (area < 100) multRate = 0.5;
-  else if (area <= 900) multRate = 0.3;
-  else if (area <= 2500) multRate = 0.25;
-  else multRate = 0.2;
+  let multRate = 999;
+  for (let i=0; i<sizeTab.length; i++) {
+    if (sizeTab[i].sz > area) {
+      multRate = sizeTab[i].cost;
+      break;
+    }
+  }
   let subtotal = matsCostData.cost + bpsumm.RCDCost;
   let totalCost = subtotal * (1+multRate);
   let roundDelta = Math.round(totalCost) - totalCost;

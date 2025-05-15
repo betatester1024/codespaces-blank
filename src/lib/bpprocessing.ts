@@ -1,8 +1,5 @@
 'use client';
-import { Bodoni_Moda } from 'next/font/google';
-// import  from '@/lib/dsabp.cjs';
 import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode, BuildBits } from './dsabp';
-import { syncBuiltinESMExports } from 'module';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
   let found = map.get(key) ?? 0;

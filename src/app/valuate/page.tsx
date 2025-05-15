@@ -1,6 +1,6 @@
 "use client";
 
-import { Themes, Button, byId } from "@/lib/utils";
+import { Themes, Button, byId, Header } from "@/lib/utils";
 import "@/app/page.css";
 import { FormEvent, ReactNode, useState } from "react";
 import { buildCostForm } from "@/lib/formcreator";
@@ -17,10 +17,7 @@ export default function Page() {
   const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Valuate" to start...</>);
 
   return <body className="p-3 flex flex-col gap-2" >
-    <header className="flex flex-col justify-left">
-      <h1 className={`${Themes.BLUE.textCls} text-2xl`}>Blueprint Valuator</h1>
-      <p className={Themes.BLUE.textCls}>Tools by BetaOS ProDSA</p>
-    </header>
+    <Header title="Blueprint Valuator" subtitle="Tools by BetaOS ProDSA"/>
     <form className="flex gap-1" onSubmit={(event:FormEvent<HTMLFormElement>)=>{
       event.preventDefault();
       valuate();

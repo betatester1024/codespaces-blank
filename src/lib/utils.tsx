@@ -1,6 +1,7 @@
 "use client"
 
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
+import { Item } from "./dsabp";
 
 type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgMain:string, bgLight:string, bgStrong:string};
 
@@ -36,6 +37,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?:string, 
 };
 
+export function Header(props:{title:string, subtitle:string}) {
+  return    <header className="flex flex-col justify-left">
+      <h1 className={`${Themes.BLUE.textCls} text-2xl`}>{props.title}</h1>
+      <p className={Themes.BLUE.textCls}>{props.subtitle}</p>
+    </header>
+}
+
 export function Button(props:ButtonProps) {
   return (
     <button 
@@ -60,6 +68,10 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   id:string
 };
 
+export function Title(props:{theme:ColourTheme, children?:ReactNode, extraClasses?:string}) {
+  return <h1 className={`text-lg font-medium ${props.theme.textCls} ${props.extraClasses}`}>{props.children}</h1>
+}
+
 export function Input(props:InputProps) {
   return (
     <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName}`}><input 
@@ -76,6 +88,10 @@ export function Input(props:InputProps) {
       rounded-sm p-2 transition-colors justify-center flex items-center ${props.className}`}
     />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
+}
+
+export function ItemImg(params:{children:Item}) {
+  return <img src={"https://drednot.io/img/"+params.children.image+".png"}/>
 }
 
 export function Lister(
@@ -100,7 +116,7 @@ export function Lister(
   }
   return (
     <div 
-      className={"w-full grid grid-cols-3 "+extraClasses} 
+      className={theme.textCls + " w-full grid grid-cols-3 "+extraClasses} 
       style={{ gridTemplateColumns: gtc ?? `repeat(${children.length == 0 ? 0 : children[0].length}, 1fr)` }}
     >
       {items}
