@@ -2,7 +2,7 @@
 import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp} from "@/lib/utils"
-import { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
 import { Item } from "@/lib/dsabp";
@@ -44,7 +44,7 @@ export default function Page() {
   const [firstDisp, setFirst] = useState<Item[]>([]);
   const [lastDisp, setLast] = useState<Item[]>([]);
   const [formType, setFormType] = useState<FormOptns>();
-  function handleKeyDown(event:KeyboardEvent<HTMLBodyElement>) {
+  function handleKeyDown(this:Document, event:KeyboardEvent) {
     console.log("calcOpen", calcOpen);
     if (event.key == "=" && !calcOpen) {
       setCalcOpen(true);
@@ -58,6 +58,10 @@ export default function Page() {
       setCalcOpen(false);
     }
   }
+
+  useEffect(()=>{
+    document.addEventListener("keydown", handleKeyDown)
+  }, [])
 
   useEffect(()=>{
     let ele = byId("calcRes") as HTMLParagraphElement;
@@ -255,8 +259,7 @@ export default function Page() {
   function toStackString(val:number) {
     return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
-
-  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col gap-2 pb-[50vh] p-5">
+  return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
@@ -274,7 +277,7 @@ export default function Page() {
           <Input theme={Themes.GREEN} type="checkbox" checked={repairMode} onChange={(event:ChangeEvent<HTMLInputElement>) => {setRepairMode(event.target.checked);}}
           ctnClassName="cursor-pointer" id="repairMode">Enter repair mode?</Input>
         </div>
-        {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
+        {/* <Link href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
         <div className="flex flex-col items-left grow">
@@ -394,7 +397,7 @@ export default function Page() {
       </div>
     </div>
   </div>
-  </body>)
+  </div>)
 }
 
 

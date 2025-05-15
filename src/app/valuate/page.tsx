@@ -16,7 +16,7 @@ export default function Page() {
 
   const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Valuate" to start...</>);
 
-  return <body className="p-3 flex flex-col gap-2" >
+  return <div className="p-3 flex flex-col gap-2" >
     <Header title="Blueprint Valuator" subtitle="Tools by BetaOS ProDSA"/>
     <form className="flex gap-1" onSubmit={(event:FormEvent<HTMLFormElement>)=>{
       event.preventDefault();
@@ -28,5 +28,5 @@ export default function Page() {
     <div className={`${Themes.BLUE.textCls} border-[2px] p-3 rounded-md`} id="formOut">
       {summaryOut}
     </div>
-  </body>
+  </div>
 }

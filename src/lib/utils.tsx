@@ -68,8 +68,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   id:string
 };
 
-export function Title(props:{theme:ColourTheme, children?:ReactNode, extraClasses?:string}) {
-  return <h1 className={`text-lg font-medium ${props.theme.textCls} ${props.extraClasses}`}>{props.children}</h1>
+export function Title({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourTheme, children?:ReactNode, extraClasses?:string}) {
+  return <h1 className={`text-lg font-medium ${theme.textCls} ${extraClasses}`}>{children}</h1>
 }
 
 export function Input(props:InputProps) {
@@ -95,8 +95,8 @@ export function ItemImg(params:{children:Item}) {
 }
 
 export function Lister(
-{theme, colLayout:gtc, children, className:extraClasses="", className_c} : 
-{theme:ColourTheme, colLayout?:string, children:ReactNode[][], className?:string, className_c?:string}) {
+{theme=Themes.BLUE, colLayout:gtc, children, className:extraClasses="", className_c} : 
+{theme?:ColourTheme, colLayout?:string, children:ReactNode[][], className?:string, className_c?:string}) {
   let items: ReactNode[] = [];
   for (let i=0; i<children.length; i++) {
     let cols = [];

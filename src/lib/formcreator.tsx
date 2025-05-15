@@ -1,5 +1,7 @@
 "use client"; 
 import { ReactNode } from "react";
+import Link from "next/link";
+
 import { BPSummary } from "./bpprocessing";
 import { Item } from "./dsabp";
 import { GIcon, Lister, Themes } from "./utils";
@@ -118,13 +120,13 @@ export function buildCostForm(bpsumm:BPSummary|null) {
     Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>
     <small>Subject to the 
       <div className="ml-1 inline-flex gap-1">
-        <a href="https://betaos-prodsa.glitch.me/terms" target="_blank">BetaOS ProDSA Terms and Conditions</a>
+        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">BetaOS ProDSA Terms and Conditions</Link>
         <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
       </div>.
     Your minimum deposit is {totalCost > 2500 ? <b>75%</b> : <b>50%</b>}.
     </small>
     <div className="flex gap-1">
-      <a href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </a>
+      <Link href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </Link>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>;
