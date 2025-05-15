@@ -32,7 +32,7 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
           <Link href="/valuate">Ship cost calculator</Link>
           <Link href="/rates">ProDSA Rates</Link>
           <Link href="/">ProDSA PrecisionEdit Tools</Link>
-          <Link href="//dsc.gg/ProDSA">Order ships from BetaOS ProDSA today!</Link>
+          <Link href="//dsc.gg/ProDSA" target="_blank">Order ships from BetaOS ProDSA today!</Link>
           <span>Site design by BetaOS ProDSA</span>
         </footer>
       </body>
