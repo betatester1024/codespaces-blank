@@ -180,6 +180,13 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
     }
     
   }
+  let rcdcost = Math.ceil(itemsUsed/10);
+  commands.unshift({count:rcdcost, equalsStr:rcdcost < 16 ? "" : `~${Math.ceil(rcdcost/16)}stk`, item:Item.RES_FLUX});
+  
+  let loaderIdx = commands.findIndex((it:BuildEntry)=>{return (it.item == Item.LOADER_NEW);});
+  if (loaderIdx >= 0) {
+    commands.splice(loaderIdx, 0, {count: 0, equalsStr:"Place doors, launchers and other non-RCDables here...", item:Item.DOOR});
+  }
   for (let key of itemCt.keys()) {
     let it = key;
     if (it.recipe != null) {
@@ -199,7 +206,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
   }
   console.log("test");
   console.log("output", out, commands);
-  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:Math.ceil(itemsUsed/10), error:undefined};
+  return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:rcdcost, error:undefined};
 }
 
 function configFrag(item:any, config:ConfigCmd) : ConfigCmd{
