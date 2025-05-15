@@ -1,7 +1,7 @@
 'use client';
 import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
-import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp} from "@/lib/utils"
+import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp, Header} from "@/lib/utils"
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
@@ -260,6 +260,8 @@ export default function Page() {
     return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
   return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
+    <title>ProDSA PrecisionEdit Tools | BetaOS ProDSA</title>
+    <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by BetaOS ProDSA - thanks to libraries from @blueyescat"></Header>
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 

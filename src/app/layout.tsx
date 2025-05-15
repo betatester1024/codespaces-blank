@@ -29,9 +29,11 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
       <body>
         {children}
         <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center`}>
-          <Link href="/valuate">Ship cost estimator</Link>
+          <Link href="/valuate">Ship cost calculator</Link>
           <Link href="/rates">ProDSA Rates</Link>
+          <Link href="/">ProDSA PrecisionEdit Tools</Link>
           <Link href="//dsc.gg/ProDSA">Order ships from BetaOS ProDSA today!</Link>
+          <span>Site design by BetaOS ProDSA</span>
         </footer>
       </body>
     </html>

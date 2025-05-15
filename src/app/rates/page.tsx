@@ -39,7 +39,9 @@ export default function Page() {
     [<ItemImg>{Item.SHIP_EMBIGGENER}</ItemImg>, <span>Ship upgrades</span>, <span>650 flux/hr</span>],
   ];
 
-  return <div className="p-3 flex flex-col gap-2" >
+  return <>
+  <title>Construction, Repair, Insurance and Design Rates | BetaOS ProDSA</title>
+  <div className="p-3 flex flex-col gap-2" >
     <Header title="Construction, Repair, Insurance and Design Rates" subtitle="For all BetaOS ProDSA jobs"/>
     <Lister className="border-[2px] p-2 rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">{itemCosts}</Lister>
     <div className="flex gap-1 flex-wrap" style={{gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr 1fr 1fr"}}>
@@ -59,5 +61,5 @@ export default function Page() {
     <div>
       <Title></Title>
     </div>
-  </div>
+  </div></>;
 }
