@@ -209,7 +209,7 @@ export default function Page() {
       let it = arr[i];
       out.push(<span className="flex items-center gap-1" key={i}>
         <img src={"https://drednot.io/img/"+it.image+".png"}/>
-        <span>{it.name}</span>
+        {/* {arr.length <= 5 ? <span>{it.name}</span> : <></>} */}
       </span>);
     }
     return out;
@@ -256,7 +256,7 @@ export default function Page() {
     return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
 
-  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-5">
+  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col gap-2 pb-[50vh] p-5">
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
@@ -317,11 +317,11 @@ export default function Page() {
           <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
             <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
               <span>First:</span>
-              <div className="summaryContainer flex flex-wrap gap-2 outline-[2px]">{itemsToHTML(firstDisp)}</div>
+              <div className="summaryContainer flex flex-wrap gap-2 border-[2px]">{itemsToHTML(firstDisp)}</div>
             </div>
             <div className="mt-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
               <span>Last:</span>
-              <div className="summaryContainer flex flex-wrap gap-2 outline-[2px]">{itemsToHTML(lastDisp)}</div>
+              <div className="summaryContainer flex flex-wrap gap-2 border-[2px]">{itemsToHTML(lastDisp)}</div>
             </div>
           </div> : <></>}
         <span className={Themes.GREEN.textCls}>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
@@ -346,10 +346,10 @@ export default function Page() {
     {/* </div> */}
     {  
       
-      <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
+      <div className={"w-full flex flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
         {
           processError ? <></> : 
-          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
+          <div className={`summaryContainer border-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
               <p className="text-blue-500 text-lg">Materials required</p>
             </div>
@@ -363,7 +363,7 @@ export default function Page() {
         }
         {
           processError ? <></> : 
-          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
+          <div className={`summaryContainer border-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
               <p className="text-blue-500 text-lg">Build order&nbsp;
                 {starterQ && !processing ? "(adjusted for starter items)" : ""} 

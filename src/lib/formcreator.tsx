@@ -107,11 +107,17 @@ export function buildCostForm(bpsumm:BPSummary|null) {
     BetaOS ProDSA Labour Markup ({multRate * 100}%): {f(subtotal * multRate, 3)} flux<br/>
     <small>Rounding: {roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux</small><br/>
     Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>
-
-    <p className="flex gap-1">
+    <small>Subject to the 
+      <div className="ml-1 inline-flex gap-1">
+        <a href="https://betaos-prodsa.glitch.me/terms" target="_blank">BetaOS ProDSA Terms and Conditions</a>
+        <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
+      </div>.
+    Your minimum deposit is {totalCost > 2500 ? <b>75%</b> : <b>50%</b>}.
+    </small>
+    <div className="flex gap-1">
       <a href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </a>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
-    </p>
+    </div>
   </div>;
   let out = `## Cost breakdown
 Raw materials cost: ${f(matsCostData.cost, 2)} flux

@@ -127,7 +127,6 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
   let subtractMode = true;
   let bp2 = decode(subtractBP);
   if (!bp2) subtractMode = false; 
-  console.log("smode",subtractMode);
   // let sCommands : BuildCmd_A[] = [];
   // if (subtractMode) sCommands = addConfigInfo(bp2!.commands!, noConfig) as BuildCmd_A[];
  
@@ -138,7 +137,6 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
       for (let cmd of commands) {
         if (cmd.item == sCmd.item) { // don't even bother to check shape
           let delta = Math.min(cmd.count, sCmd.count);
-          console.log("sub", cmd.item.name, delta);
           cmd.count -= delta;
           sCmd.count -= delta;
         }
@@ -202,10 +200,8 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
   let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
     out.push({it: Item.getById(key), ct: matsCost.get(key)!});
-    console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
+    // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
-  console.log("test");
-  console.log("output", out, commands);
   return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:rcdcost, error:undefined};
 }
 
