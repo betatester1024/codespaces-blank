@@ -258,15 +258,15 @@ function addConfigInfo(inCmds:BPCmd[], config:sortConfig) {
   for (let i=0; i<inCmds.length; i++) {
     let cmd = inCmds[i];
     if (cmd instanceof ConfigCmd) {
-      if (config.safeMode) {
-        cmd.filterMode = FilterMode.BLOCK_ALL;
-        cmd.pusher = {maxBeamLength:0};
-      }
       activeConfig = cmd;
     }
     else if (cmd instanceof BuildCmd) {
       let bcmd = cmd as BuildCmd_A;
       bcmd.currConfig = activeConfig;
+      if (config.safeMode && bcmd.item != Item.PUSHER) {
+        bcmd.currConfig.filterMode = FilterMode.BLOCK_ALL;
+        // cmd.pusher = {maxBeamLength:0};
+      }
       bcmd.idx = i;
     }
   }
@@ -297,7 +297,7 @@ export async function sortByItem(bString:string,
   let cmds2 : BuildCmd_A[] = [];
   if (config.restoreMode) 
     cmds = cmds.filter((i:any) => {
-      return i.item == Item.LOADER_NEW || i.item == Item.PUSHER || 
+      return i.item == Item.LOADER_NEW || 
               i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
               i.item == Item.LOADER;
     })

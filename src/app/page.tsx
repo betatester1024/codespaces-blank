@@ -281,8 +281,8 @@ export default function Page() {
         <div className="flex flex-col items-left grow">
           <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateProcessCommand} onSubmit={process}>
             <Option value={ProcessingOptns.SORT}>Sort by item</Option>
-            <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable pushers, loaders and hatches</Option>
-            <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore pusher, loader and hatch settings</Option>
+            <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable loaders and hatches</Option>
+            <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore loader and hatch settings</Option>
             <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>
           </Select>
           <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateFormCommand} onSubmit={process}>
