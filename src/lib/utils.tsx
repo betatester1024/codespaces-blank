@@ -291,8 +291,8 @@ export function Select({theme:clrTheme, children, className, defaultIdx, onChang
 }
 
 export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
-  return <div className={theme.textCls + " flex justify-center items-center "+className} >
-    <span className="gicons">
+  return <div className={theme.textCls + " inline-flex justify-center items-center "+className} >
+    <span className="gicons no-underline">
       {children}
     </span>
   </div>

@@ -5,11 +5,15 @@
   flex-grow: 1;
   border-radius: var(--radius-md);
   outline-width: 2px;
-  margin: calc(2*var(--spacing));
+  /* margin: calc(2*var(--spacing)); */
   padding: calc(2*var(--spacing));
   overflow-y: scroll;
   max-height: 70vh;
   outline-style: --var(--tw-outline-style);
+}
+
+a {
+  text-decoration-line: underline;
 }
 
 @theme {

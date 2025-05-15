@@ -1,7 +1,8 @@
 "use client"; 
-import { NodeNextRequest } from "next/dist/server/base-http/node";
+import { ReactNode } from "react";
 import { BPSummary } from "./bpprocessing";
 import { Item } from "./dsabp";
+import { GIcon, Lister, Themes } from "./utils";
 
 interface costData {
   value:number,
@@ -35,30 +36,45 @@ function f(n:number, dprec:number=1) {
 }
 export function matsCostForm(bpsumm:BPSummary|null, header:boolean) {
   if (!bpsumm || bpsumm.error) {
-    return {cost:0, form:"No blueprint summary."};
+    return {cost:0, form:"No blueprint summary.", html:<p className={Themes.RED.textCls}>No blueprint summary.</p>};
   }
   let out = "";
+  let list : ReactNode[][] = [];
   let totalValue = 0;
   let costBreakdown = "";
   for (let entry of bpsumm.bom) {
-    console.log(entry.it == Item.NAV_UNIT);
     if (valuation.get(entry.it)) {
       let data = valuation.get(entry.it)!;
       totalValue += data.value * entry.ct;
       if (data.formattedName != null) {
         costBreakdown += "-# "+data.formattedName +" cost: " + f(data.value * entry.ct) + " flux\n";
+        list.push([
+          <img src={"https://drednot.io/img/"+entry.it.image+".png"}/>,
+          <span>{entry.it.name}</span>,
+          <span>{f(entry.ct)}</span>,
+          <b> ={f(data.value*entry.ct)} flux</b>
+        ]);
       }
     }
     else {
       costBreakdown += `**Valuation failure: Item ${entry.it.name}**\n`
+      list.push([
+        <p className={Themes.RED.textCls}>Valuation failure</p>,
+        <b>{entry.it.name}</b>
+      ])
     }
   }
   if (header) out += `## Materials cost breakdown, form A1
 Total materials cost: ${f(totalValue, 2)} flux\n`;
   out += costBreakdown;
   out += `RCD cost: ${bpsumm.RCDCost} flux`;
-  return {cost:totalValue, form:out};
+  return {cost:totalValue, form:out, html:<>
+    <Lister theme={Themes.BLUE} colLayout="50px 2fr 1fr 2fr" className_c="p-2" className="font-mono">
+      {list}
+    </Lister>
+  </>};
 }
+
 
 /*
 BetaOS ProDSA Labour Rates
@@ -71,7 +87,7 @@ Insurance: 15%
 */
 export function buildCostForm(bpsumm:BPSummary|null) {
   if (!bpsumm || bpsumm.error) {
-    return "No blueprint summary."
+    return {cost: 0, form:"No blueprint summary.", html:<p className={Themes.RED.textCls}>No blueprint summary.</p>};
   }
   let matsCostData = matsCostForm(bpsumm, false);
   let area = bpsumm.height * bpsumm.width;
@@ -83,6 +99,20 @@ export function buildCostForm(bpsumm:BPSummary|null) {
   let subtotal = matsCostData.cost + bpsumm.RCDCost;
   let totalCost = subtotal * (1+multRate);
   let roundDelta = Math.round(totalCost) - totalCost;
+  let htmlOut = <div>
+    <p className="font-mono text-lg">Raw materials cost: {f(matsCostData.cost, 2)} flux</p>
+    <div className="pl-1 m-1 border-l-[3px] rounded-[3px]">{matsCostData.html}</div>
+    <hr className="border-[1px] rounded-[1px] mt-2 mb-2"/>
+    <p className="font-mono text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
+    BetaOS ProDSA Labour Markup ({multRate * 100}%): {f(subtotal * multRate, 3)} flux<br/>
+    <small>Rounding: {roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux</small><br/>
+    Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>
+
+    <p className="flex gap-1">
+      <a href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </a>
+      <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
+    </p>
+  </div>;
   let out = `## Cost breakdown
 Raw materials cost: ${f(matsCostData.cost, 2)} flux
 ${matsCostData.form}
@@ -91,5 +121,5 @@ ${matsCostData.form}
 BetaOS ProDSA Labour Markup (${multRate * 100}%): ${f(subtotal * multRate, 3)} flux
 -# Rounding: ${roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux
 Total job cost: **${f(Math.round(totalCost), 3)} flux**`;
-  return out;
+  return {cost: totalCost, form:out, html:htmlOut};
 }

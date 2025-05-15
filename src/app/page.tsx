@@ -4,7 +4,6 @@ import "./page.css";
 import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp} from "@/lib/utils"
 import { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
-import { setFlagsFromString } from "v8";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
 import { Item } from "@/lib/dsabp";
 
@@ -155,7 +154,7 @@ export default function Page() {
           formRes = matsCostForm(summary, true).form;
           break;
         case FormOptns.BUILD:
-          formRes = buildCostForm(summary);
+          formRes = buildCostForm(summary).form;
           break;
       }
       setOutForm(formRes);
@@ -257,8 +256,8 @@ export default function Page() {
     return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
 
-  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-3">
-    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}} className="m-2">
+  return (<body onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-5">
+    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
           className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls}`}>
@@ -311,7 +310,7 @@ export default function Page() {
         <Input id="lastItems" defaultValue="expando, recycler" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
       </div>
     </form>
-    <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
+    <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md border-[2px]`}>
       {
         processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
         {isSort(cmdType) ? 
@@ -334,7 +333,7 @@ export default function Page() {
       }
     </div>
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
-      <div className="flex">
+      <div className="flex gap-2">
         <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={resBP} readOnly={true} placeholder="Result blueprint here..."
           className={`grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
