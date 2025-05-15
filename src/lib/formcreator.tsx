@@ -22,6 +22,7 @@ export const priceTab : Map<Item, costData> = new Map([
   [Item.TURRET_BURST,     {value: 20,   formattedName:"Cannon, burst"}],
   [Item.TURRET_AUTO,      {value: 50,   formattedName:"Cannon, machine"}],
   [Item.TURRET_OBTUSE,    {value: 20,   formattedName:"Cannon, obtuse"}],
+  [Item.TURRET_ACUTE,     {value: 20,   formattedName:"Cannon, acute"}],
   [Item.TURRET_CONTROLLER_NEW, {value: 3, formattedName:"Controller, turret"}],
   [Item.MUNITIONS_SUPPLY_UNIT, {value: 2, formattedName:"MSU"}],
   [Item.HELM_STARTER,     {value: 0,    formattedName:null}],
