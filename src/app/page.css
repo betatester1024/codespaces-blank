@@ -12,6 +12,11 @@
   outline-style: --var(--tw-outline-style);
 }
 
+@theme {
+  --color-lime-500: #00cc00;
+  /* --color-lime-400: #00cc00; */
+}
+
 textarea {
   @apply p-1 grow-4 rounded-sm font-mono;
 }

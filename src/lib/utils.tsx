@@ -2,27 +2,27 @@
 
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 
-type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgCls:string, bg2:string, bgStrong:string};
+type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgMain:string, bgLight:string, bgStrong:string};
 
 export const Themes : {[x:string]:ColourTheme}= {
   RED:  {
     textCls:"text-red-400", activeCls:"active:text-red-300", 
     hoverCls:"hover:text-red-500 hover:!bg-red-200 focus:text-red-500 focus:bg-red-200",
-    bgCls:"bg-red-100", bg2:"bg-red-50", bgStrong:"bg-red-200"},
+    bgMain:"bg-red-100", bgLight:"bg-red-50", bgStrong:"bg-red-200"},
   GREEN:{
-    textCls:"text-green-400", activeCls:"active:text-green-300", 
-    hoverCls:"hover:text-green-500 hover:!bg-green-200 focus:text-green-500 focus:bg-green-100",
-    bgCls:"bg-green-100", bg2:"bg-green-50", bgStrong:"bg-green-200"
+    textCls:"text-lime-500", activeCls:"active:text-lime-300", 
+    hoverCls:"hover:text-lime-500 hover:!bg-lime-200 focus:text-lime-500 focus:bg-lime-100",
+    bgMain:"bg-lime-100", bgLight:"bg-lime-50", bgStrong:"bg-lime-200"
   },
   BLUE: {
     textCls:"text-blue-400", activeCls:"active:text-blue-300", 
     hoverCls:"hover:text-blue-500 hover:!bg-blue-200 focus:text-blue-500 focus:bg-blue-100",
-    bgCls:"bg-blue-100", bg2:"bg-blue-50", bgStrong:"bg-blue-200"
+    bgMain:"bg-blue-100", bgLight:"bg-blue-50", bgStrong:"bg-blue-200"
   },
   GREY: {
     textCls:"text-gray-400", activeCls:"active:text-gray-300", 
     hoverCls:"hover:text-gray-500 hover:!bg-gray-200 focus:text-gray-500 focus:bg-gray-100",
-    bgCls:"bg-gray-100", bg2:"bg-gray-50", bgStrong:"bg-gray-200"
+    bgMain:"bg-gray-100", bgLight:"bg-gray-50", bgStrong:"bg-gray-200"
   }
 };
 
@@ -67,11 +67,12 @@ export function Input(props:InputProps) {
       id={props.id}
       tabIndex={props.tabIndex}
       defaultChecked={props.defaultChecked}
+      checked = {props.checked}
       defaultValue={props.defaultValue}
       placeholder={props.placeholder}
       // onClick={props.onClick}
       onChange={props.onChange}
-      className={`${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
+      className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
       rounded-sm p-2 transition-colors justify-center flex items-center ${props.className}`}
     />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
@@ -150,9 +151,9 @@ export function Select({theme:clrTheme, children, className, defaultIdx, onChang
       matchOptns.push(
         <div 
           key={JSON.stringify({idx:i, value:node.props.value})} 
-          className={`${matchingCt == hoveringIdx ? clrTheme.bgCls : ""} ${clrTheme.textCls} ${clrTheme.activeCls} 
-          ${clrTheme.bg2} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5 ${clrTheme.hoverCls} 
-          ${i==selIdx ? clrTheme.bgStrong :""} `}
+          className={`${matchingCt == hoveringIdx ? clrTheme.bgMain : ""} ${clrTheme.textCls} ${clrTheme.activeCls} 
+          ${clrTheme.bgLight} transition-colors cursor-pointer p-1 pr-1.5 pl-1.5 ${clrTheme.hoverCls} 
+          ${i==selIdx ? "border-l-[4px]" :""} `}
           onMouseUp={()=>{setSelIdx(i); setActive(false);}}  
         >
           <span>{
@@ -256,13 +257,13 @@ export function Select({theme:clrTheme, children, className, defaultIdx, onChang
       <input value={inputVal} readOnly={!active} onKeyDown={keydown} onChange={onKeyPress}
           onMouseDown={onMouseDown}
           onMouseUp= {onMouseUp}
-          className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bg2} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
+          className={`w-[100%] ${clrTheme.textCls} ${clrTheme.bgLight} text-lg ${active && filter != "" ? "" : "cursor-pointer"} 
             transition-colors duration-250 p-1.5 grow-3 rounded-r-none outline-none 
             ${active ? "" : clrTheme.hoverCls} select-none pr-7`
           }
           placeholder="Search..."
         />
-        <Button tabIndex={active ? 0 : -1} onClick={()=>{setActive(false)}} className={`h-3px ${Themes.GREY.bgCls} 
+        <Button tabIndex={active ? 0 : -1} onClick={()=>{setActive(false)}} className={`h-3px ${Themes.GREY.bgMain} 
         ${active ? "rounded-l-none w-md" : "!p-0 w-0 overflow-clip"} max-w-[fit-content] !transition-all`} 
         type="button" theme={Themes.GREY}>
           <GIcon theme={clrTheme}>close</GIcon>
@@ -280,7 +281,7 @@ export function Select({theme:clrTheme, children, className, defaultIdx, onChang
         style={{zIndex:zIdx}}>
         { 
           matchOptns.length == 0 ?
-            <span key="none" className={`p-1 pr-1.5 pl-1.5 ${Themes.RED.textCls} ${Themes.RED.hoverCls} ${Themes.RED.bg2}`}>No results found</span>
+            <span key="none" className={`p-1 pr-1.5 pl-1.5 ${Themes.RED.textCls} ${Themes.RED.hoverCls} ${Themes.RED.bgLight}`}>No results found</span>
           : matchOptns
         }
       </div>

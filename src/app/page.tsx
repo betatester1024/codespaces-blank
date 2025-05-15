@@ -34,7 +34,7 @@ export default function Page() {
   const [loadingBP, setLoadingBP] = useState<boolean>(false);
   const [resBP, setResBP] = useState<string>("");
   const [asyncSumm, setSummary] = useState<BPSummary>(errorSummary);
-  const [command, setCommand] = useState<ProcessingOptns>();
+  const [cmdType, setComd] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
   const [starterQ, setStarterQ] = useState<boolean>(true);
   const [aExpandoes, setSnap] = useState<boolean>(true);
@@ -44,7 +44,7 @@ export default function Page() {
   const [calcOpen, setCalcOpen] = useState<boolean>(false);
   const [firstDisp, setFirst] = useState<Item[]>([]);
   const [lastDisp, setLast] = useState<Item[]>([]);
-  const [form, setForm] = useState<FormOptns>();
+  const [formType, setFormType] = useState<FormOptns>();
   function handleKeyDown(event:KeyboardEvent<HTMLBodyElement>) {
     console.log("calcOpen", calcOpen);
     if (event.key == "=" && !calcOpen) {
@@ -73,7 +73,15 @@ export default function Page() {
     if (!calcOpen) {
       calcInp.value = "";
     }
-  }, [calcOpen])
+  }, [calcOpen]);
+
+  useEffect(()=>{
+    if (repairMode) setStarterQ(false);
+  }, [repairMode])
+
+  useEffect(()=>{
+    process();
+  }, [cmdType, formType])
 
   // useEffect(() => {
   //   document.addEventListener('keydown', handleKeyDown);
@@ -90,7 +98,7 @@ export default function Page() {
 
   async function process() {
     // event.preventDefault();
-    console.log("processing command", command);
+    console.log("processing command", cmdType);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
     let summary : BPSummary;
@@ -98,7 +106,7 @@ export default function Page() {
     try {
       setProcessing(true);
       let sMode=false, rMode=false;
-      switch (command) {
+      switch (cmdType) {
         case ProcessingOptns.SORT: 
           break;
         case ProcessingOptns.SORT_SAFE:
@@ -124,7 +132,7 @@ export default function Page() {
           });
       setFirst(Array.from(firstItms));
       setLast(Array.from(lastItms));
-      if (isSort(command)) {
+      if (isSort(cmdType)) {
         bp = await sortBP(tArea.value, {
           sortY:sortY, 
           safeMode:sMode, 
@@ -142,7 +150,7 @@ export default function Page() {
 
       let formRes = "";
       // form
-      switch (form) {
+      switch (formType) {
         case FormOptns.MATSCOST:
           formRes = matsCostForm(summary, true).form;
           break;
@@ -228,31 +236,35 @@ export default function Page() {
 
   function updateProcessCommand(n:ProcessingOptns) {
     console.log("command set!", n);
-    setCommand(n);
+    setComd(n);
   }
 
   function updateFormCommand(n:FormOptns) {
-    setForm(n);
+    setFormType(n);
   }
 
   function runCalc() {
     let input = byId("calc") as HTMLInputElement;
     try {
       let val = eval(input.value);
-      setCalcRes(val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":""));
+      setCalcRes(toStackString(val));
     } catch (e:any) {
       setCalcRes("Error: " + e.toString());
     }
+  }
+
+  function toStackString(val:number) {
+    return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
 
   return (<body onKeyDown={handleKeyDown}><div className="flex flex-col pb-[50vh] p-3">
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}} className="m-2">
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
-          className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls}`}>
+          className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls}`}>
         </textarea>
         <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
-        className={`${Themes.GREY.bgCls} ${Themes.BLUE.textCls} shrink transition-all overflow-clip 
+        className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink transition-all overflow-clip 
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 
         <div className="flex flex-col">
@@ -260,7 +272,7 @@ export default function Page() {
             <Loader theme={Themes.BLUE} active={loadingBP}></Loader>
             Load test blueprint
           </Button>
-          <Input theme={Themes.GREEN} type="checkbox" onChange={(event:ChangeEvent<HTMLInputElement>) => {setRepairMode(event.target.checked);}}
+          <Input theme={Themes.GREEN} type="checkbox" checked={repairMode} onChange={(event:ChangeEvent<HTMLInputElement>) => {setRepairMode(event.target.checked);}}
           ctnClassName="cursor-pointer" id="repairMode">Enter repair mode?</Input>
         </div>
         {/* <a href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
@@ -282,15 +294,15 @@ export default function Page() {
           <Input theme={Themes.BLUE} type="checkbox" id="sortY" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} 
           ctnClassName="cursor-pointer">Sort by Y-coord?</Input>
-          <Input theme={Themes.BLUE} type="checkbox" defaultChecked={true} id="starterQ" 
+          <Input theme={Themes.BLUE} type="checkbox" checked={starterQ} id="starterQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setStarterQ(event.target.checked);}} 
           ctnClassName="cursor-pointer">From starter?</Input>
-          <Input theme={Themes.BLUE} type="checkbox" defaultChecked={true} id="boxQ" 
+          <Input theme={Themes.BLUE} type="checkbox" checked={aExpandoes}id="boxQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setSnap(event.target.checked);}} 
           ctnClassName="cursor-pointer">Snap boxes?</Input>
         </div>
-        <Button theme={Themes.GREY} className="basis-[min-content]" type="submit">
-          <Loader theme={Themes.GREY} active={processing}></Loader>
+        <Button theme={Themes.GREEN} className="basis-[min-content]" type="submit">
+          <Loader theme={Themes.GREEN} active={processing}></Loader>
           <span>Process</span>
         </Button> 
       </div>
@@ -302,7 +314,7 @@ export default function Page() {
     <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md outline-[2px] m-2`}>
       {
         processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
-        {isSort(command) ? 
+        {isSort(cmdType) ? 
           <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
             <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
               <span>First:</span>
@@ -313,23 +325,23 @@ export default function Page() {
               <div className="summaryContainer flex flex-wrap gap-2 outline-[2px]">{itemsToHTML(lastDisp)}</div>
             </div>
           </div> : <></>}
-        <span>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
+        <span className={Themes.GREEN.textCls}>INTERNC: <b>{asyncSumm.width <= 2 ? "N/A" : (asyncSumm.width-2) + "x"+ (asyncSumm.height-2)}</b></span> 
         <p>Cannon dimensions: <b>{(asyncSumm.width/3).toFixed(1)}x{(asyncSumm.height/3).toFixed(1)}</b></p>
         <p>Blueprint width (EXTERNC): &nbsp;<b>{asyncSumm.width}</b> = <b>+{asyncSumm.width < 11 ? "N/A" : asyncSumm.width-11}</b> blocks from starter</p>
         <p>Blueprint height (EXTERNC): <b>{asyncSumm.height}</b> = <b>+{asyncSumm.width <= 8 ? "N/A" : asyncSumm.height-8}</b> blocks from starter</p>
         <p className={asyncSumm.cmdCt > 1000 ? Themes.RED.textCls : ""}>{asyncSumm.cmdCt.toLocaleString()} commands </p>
-        <p>RCD cost: <b>{asyncSumm.RCDCost}</b> flux</p> </>
+        <p className={Themes.GREEN.textCls}>RCD cost: <b>{toStackString(asyncSumm.RCDCost)}</b> flux</p> </>
       }
     </div>
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
       <div className="flex">
         <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={resBP} readOnly={true} placeholder="Result blueprint here..."
-          className={`grow-1 summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+          className={`grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
         </textarea>
         <textarea id="outForm" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={outForm} readOnly={true} placeholder="Output form here..."
-          className={`grow-1 summaryContainer ${Themes.GREY.bgCls} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+          className={`grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
         </textarea>
       </div>
     {/* </div> */}
@@ -338,7 +350,7 @@ export default function Page() {
       <div className={"w-full flex-col md:grid gap-1"} style={{gridTemplateColumns:"1fr 1fr"}}>
         {
           processError ? <></> : 
-          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
               <p className="text-blue-500 text-lg">Materials required</p>
             </div>
@@ -352,9 +364,12 @@ export default function Page() {
         }
         {
           processError ? <></> : 
-          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}>
+          <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
-              <p className="text-blue-500 text-lg">Build order {starterQ && !processing ? "(adjusted for starter items)" : ""}</p>
+              <p className="text-blue-500 text-lg">Build order&nbsp;
+                {starterQ && !processing ? "(adjusted for starter items)" : ""} 
+                {repairMode && !processing ? "(adjusted for repair mode)" : ""}
+              </p>
             </div>
             <div>
               <Lister 
