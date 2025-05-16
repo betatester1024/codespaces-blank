@@ -26,7 +26,7 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
         <meta property="og:description" content="Blueprint editor and valuator for BetaOS ProDSA, a subsidiary of BetaOS Services."/>
         <meta property="og:image" content="https://prodsatools.vercel.app/icon.png"/>
       </head>
-      <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} antialiased !font-nsd`}>
+      <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} antialiased`}>
         {children}
         <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center`}>
           <Link href="/valuate">Ship cost calculator</Link>

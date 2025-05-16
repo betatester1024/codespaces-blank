@@ -25,7 +25,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
+  font-family: "Noto Sans Display", var(--font-nsd), sans-serif;
   transition: 0.2s ease;
   scroll-behavior: smooth;
 }
@@ -71,6 +71,22 @@ body {
   'GRAD' 0,
   'opsz' 24
 }
+
+
+@font-face {
+  font-family: "Noto Sans Display";
+  font-style: normal;
+  /* font-weight:  */
+  src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:ital,wght@0,100..900;1,100..900&display=swap');
+}
+
+@font-face {
+  font-family: "Noto Sans Display";
+  font-style: normal;
+  /* font-weight:  */
+  src: url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:ital,wght@0,100..900;1,100..900&display=swap');
+}
+
 
 /* fallback */
 @font-face {

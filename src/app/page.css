@@ -23,7 +23,7 @@ a {
 
 textarea {
   @apply p-1 grow-4 rounded-sm;
-  /* font-family: var(--font-nsm); */
+  font-family: var(--font-nsm);
 }
 
 .animHighlight {
