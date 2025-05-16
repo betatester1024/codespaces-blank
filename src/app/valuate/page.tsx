@@ -1,6 +1,7 @@
 "use client";
 
-import { Themes, Button, byId, Header } from "@/lib/utils";
+import { Button, byId, Header } from "@/lib/utils";
+import { Themes } from "@/lib/Themes";
 import "@/app/page.css";
 import { FormEvent, ReactNode, useState } from "react";
 import { buildCostForm } from "@/lib/formcreator";
@@ -23,7 +24,7 @@ export default function Page() {
       event.preventDefault();
       valuate();
     }}>
-      <textarea placeholder="DSA:..." id="inBlueprint" className={`${Themes.BLUE.textCls} ${Themes.BLUE.bgMain}`}></textarea>
+      <textarea placeholder="DSA:..." id="inBlueprint" className={`font-nsm ${Themes.BLUE.textCls} ${Themes.BLUE.bgMain}`}></textarea>
       <Button theme={Themes.GREEN}>Valuate!</Button>
     </form>
     <div className={`${Themes.BLUE.textCls} border-[2px] p-3 rounded-md`} id="formOut">

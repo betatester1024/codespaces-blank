@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* --font-sans: var(--font-sans); */
-  /* --font-mono: var(--font-mono); */
+  /* --font-nsd: var(--font-nsd); */
+  /* --font-nsm: "Noto Sans Mono"; */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,7 +25,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Noto Sans Display", sans-serif;
+  font-family: var(--font-sans), sans-serif;
   transition: 0.2s ease;
   scroll-behavior: smooth;
 }

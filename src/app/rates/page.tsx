@@ -2,7 +2,8 @@
 
 import { Item } from "@/lib/dsabp";
 import { priceTab, sizeTab } from "@/lib/formcreator";
-import { Header, ItemImg, Lister, Themes, Title } from "@/lib/utils";
+import { Header, ItemImg, Lister, Title } from "@/lib/utils";
+import { Themes } from "@/lib/Themes";
 
 function f(n:number, dprec:number=1) {
   return n.toLocaleString("en-CA", {maximumFractionDigits:dprec, minimumFractionDigits:dprec})

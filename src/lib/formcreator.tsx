@@ -4,7 +4,8 @@ import Link from "next/link";
 
 import { BPSummary } from "./bpprocessing";
 import { Item } from "./dsabp";
-import { GIcon, Lister, Themes } from "./utils";
+import { GIcon, Lister } from "./utils";
+import { Themes } from "./Themes";
 
 interface costData {
   value:number,
@@ -79,7 +80,7 @@ Total materials cost: ${f(totalValue, 2)} flux\n`;
   out += costBreakdown;
   out += `RCD cost: ${bpsumm.RCDCost} flux`;
   return {cost:totalValue, form:out, html:<>
-    <Lister theme={Themes.BLUE} colLayout="50px 2fr 1fr 2fr" className_c="p-2" className="font-mono">
+    <Lister theme={Themes.BLUE} colLayout="50px 2fr 1fr 2fr" className_c="p-2" className="font-nsm">
       {list}
     </Lister>
   </>};
@@ -112,10 +113,10 @@ export function buildCostForm(bpsumm:BPSummary|null) {
   let totalCost = subtotal * (1+multRate);
   let roundDelta = Math.round(totalCost) - totalCost;
   let htmlOut = <div>
-    <p className="font-mono text-lg">Raw materials cost: {f(matsCostData.cost, 2)} flux</p>
+    <p className="font-nsm text-lg">Raw materials cost: {f(matsCostData.cost, 2)} flux</p>
     <div className="pl-1 m-1 border-l-[3px] rounded-[3px]">{matsCostData.html}</div>
     <hr className="border-[1px] rounded-[1px] mt-2 mb-2"/>
-    <p className="font-mono text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
+    <p className="font-nsm text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
     BetaOS ProDSA Labour Markup ({multRate * 100}%): {f(subtotal * multRate, 3)} flux<br/>
     <small>Rounding: {roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux</small><br/>
     Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>

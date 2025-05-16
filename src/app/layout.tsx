@@ -1,16 +1,16 @@
-"use client";
-import { Noto_Sans_Display, Noto_Sans_Mono } from "next/font/google";
 import "./globals.css";
-import { Themes } from "@/lib/utils";
+import { Themes } from "@/lib/Themes";
 import Link from "next/link";
 
+import { Noto_Sans_Display, Noto_Sans_Mono } from "next/font/google";
+
 const NotoSansDisplay = Noto_Sans_Display({
-  variable: "--font-sans",
+  variable: "--font-nsd",
   subsets: ["latin"],
 });
 
 const NotoSansMono = Noto_Sans_Mono({
-  variable: "--font-mono",
+  variable: "--font-nsm",
   subsets: ["latin"],
 });
 
@@ -26,13 +26,13 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
         <meta property="og:description" content="Blueprint editor and valuator for BetaOS ProDSA, a subsidiary of BetaOS Services."/>
         <meta property="og:image" content="https://prodsatools.vercel.app/icon.png"/>
       </head>
-      <body>
+      <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} antialiased !font-nsd`}>
         {children}
         <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center`}>
           <Link href="/valuate">Ship cost calculator</Link>
           <Link href="/rates">ProDSA Rates</Link>
           <Link href="/">ProDSA PrecisionEdit Tools</Link>
-          <Link href="//dsc.gg/ProDSA" target="_blank">Order ships from BetaOS ProDSA today!</Link>
+          <Link href="//dsc.gg/ProDSA" target="_blank" className={Themes.GREEN.textCls}>Order ships from BetaOS ProDSA today!</Link>
           <span>Site design by BetaOS ProDSA</span>
         </footer>
       </body>

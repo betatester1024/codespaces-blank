@@ -1,7 +1,8 @@
 'use client';
 import "./page.css";
 // /<reference path="@/lib/utils.tsx"/>
-import {Button, Themes, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp, Header} from "@/lib/utils"
+import {Button, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp, Header} from "@/lib/utils"
+import { Themes } from "@/lib/Themes";
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
 import { buildCostForm, matsCostForm } from "@/lib/formcreator";
@@ -265,10 +266,10 @@ export default function Page() {
     <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
-          className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls}`}>
+          className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm`}>
         </textarea>
         <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
-        className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink transition-all overflow-clip 
+        className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink font-nsm transition-all overflow-clip 
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 
         <div className="flex flex-col">
@@ -315,7 +316,7 @@ export default function Page() {
         <Input id="lastItems" defaultValue="expando, recycler" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
       </div>
     </form>
-    <div className={`${Themes.BLUE.textCls} font-mono p-2 rounded-md border-[2px]`}>
+    <div className={`${Themes.BLUE.textCls} font-nsm p-2 rounded-md border-[2px]`}>
       {
         processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
         {isSort(cmdType) ? 
@@ -341,11 +342,11 @@ export default function Page() {
       <div className="flex gap-2">
         <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={resBP} readOnly={true} placeholder="Result blueprint here..."
-          className={`grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+          className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
         </textarea>
         <textarea id="outForm" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={outForm} readOnly={true} placeholder="Output form here..."
-          className={`grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-mono p-1 mt-2 rounded-sm`}>
+          className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
         </textarea>
       </div>
     {/* </div> */}
@@ -391,11 +392,11 @@ export default function Page() {
     justify-center transition-all ${calcOpen ? "opacity-100 pointer-events-all" : "opacity-0 pointer-events-none"}`}>
     <div className="top-5 w-[90%] h-[fit-content] bg-gray-200 p-3 rounded-md"> 
       <form onSubmit={(event:FormEvent<HTMLFormElement>)=>{event.preventDefault(); runCalc();}} className="flex gap-2">
-        <Input id="calc" theme={Themes.BLUE} ctnClassName="grow" className={`font-xl font-mono grow ${Themes.BLUE.hoverCls}`} placeholder="Calculate..."/>
+        <Input id="calc" theme={Themes.BLUE} ctnClassName="grow" className={`font-xl font-nsm grow ${Themes.BLUE.hoverCls}`} placeholder="Calculate..."/>
         <Button type="submit" theme={Themes.BLUE}><GIcon theme={Themes.BLUE}>calculate</GIcon></Button>
       </form>
       <div>
-        <p id="calcRes" className={"p-2 w-full font-mono " + Themes.BLUE.textCls}>Result: <b>{calcRes}</b></p>
+        <p id="calcRes" className={"p-2 w-full font-nsm " + Themes.BLUE.textCls}>Result: <b>{calcRes}</b></p>
       </div>
     </div>
   </div>
