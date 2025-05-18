@@ -39,7 +39,7 @@ export const sizeTab = [
   {sz: 100, cost: 0.5, szName:"Tiny"},
   {sz: 900, cost: 0.3, szName:"Small"},
   {sz: 2500, cost:0.25, szName:"Medium"},
-  {sz: 6085, cost: 0.2, szName:"Large"}
+  {sz: 6401, cost: 0.2, szName:"Large"}
 ]
 
 function f(n:number, dprec:number=1) {
