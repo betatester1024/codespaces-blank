@@ -48,7 +48,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   id:string
 };
 
-export function Title({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourTheme, children?:ReactNode, extraClasses?:string}) {
+export function H1({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourTheme, children?:ReactNode, extraClasses?:string}) {
   return <h1 className={`text-lg font-medium ${theme.textCls} ${extraClasses}`}>{children}</h1>
 }
 

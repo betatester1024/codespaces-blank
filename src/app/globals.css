@@ -55,6 +55,9 @@ body {
   --secondaryAnim: scale-out-center 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 } */
 
+.indentleft {
+  @apply pl-1 m-1 border-l-[3px] rounded-[3px]
+}
 @keyframes rotate {
   0% {
     transform: rotate(0deg);

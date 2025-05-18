@@ -2,7 +2,7 @@
 
 import { Item } from "@/lib/dsabp";
 import { priceTab, sizeTab } from "@/lib/formcreator";
-import { Header, ItemImg, Lister, Title } from "@/lib/utils";
+import { Header, ItemImg, Lister, H1 } from "@/lib/utils";
 import { Themes } from "@/lib/Themes";
 
 function f(n:number, dprec:number=1) {
@@ -47,12 +47,12 @@ export default function Page() {
     <Lister className="border-[2px] p-2 rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">{itemCosts}</Lister>
     <div className="flex gap-1 flex-wrap" style={{gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr 1fr 1fr"}}>
       <div className="w-[300px] shrink grow">
-        <Title>BetaOS ProDSA Labour Rates</Title>
+        <H1>BetaOS ProDSA Labour Rates</H1>
         <p className={Themes.BLUE.textCls}>For construction requests only / Insurance labour rate capped at <b>15%</b></p>
         <Lister className="border-[2px] rounded-md" className_c="p-1" colLayout="2fr 1fr">{sizeCosts}</Lister>
       </div>
       <div className="w-[500px] shrink grow">
-        <Title>Other ProDSA costs</Title>
+        <H1>Other ProDSA costs</H1>
         <p className={Themes.BLUE.textCls}>All hourly rates have a minimum cost basis of <b>45 mins</b> unless otherwise specified.</p>
         <Lister className="border-[2px] rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">
           {otherRates}
@@ -60,7 +60,7 @@ export default function Page() {
       </div>
     </div>
     <div>
-      <Title></Title>
+      <H1></H1>
     </div>
   </div></>;
 }
