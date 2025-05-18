@@ -15,7 +15,7 @@ import { Item } from "@/lib/dsabp";
 let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Error processing blueprint."};
 
 enum ProcessingOptns  {
-  SORT, DISPLAY, SORT_SAFE, SORT_RESTORE
+  SORT = "Sort by item", DISPLAY="Display only", SORT_SAFE="Sort (safe)", SORT_RESTORE="Sort (restore)"
 
 }
 function isSort(a:ProcessingOptns|undefined) {
@@ -162,6 +162,8 @@ export default function Page() {
           formRes = buildCostForm(summary).form;
           break;
       }
+      if (cmdType == ProcessingOptns.SORT_RESTORE || cmdType == ProcessingOptns.SORT_SAFE) 
+        formRes = "This is (probably) not the mode you want.";
       setOutForm(formRes);
     } catch (e) {
       console.log(e);
@@ -340,10 +342,13 @@ export default function Page() {
     </div>
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
       <div className="flex gap-2">
-        <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
-          value={resBP} readOnly={true} placeholder="Result blueprint here..."
-          className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
-        </textarea>
+        <div className="flex flex-col gap-1 grow-1">
+          <p className={Themes.BLUE.textCls}>Sort mode: <b>{cmdType}</b></p>
+          <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+            value={resBP} readOnly={true} placeholder="Result blueprint here..."
+            className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
+          </textarea>
+        </div>
         <textarea id="outForm" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={outForm} readOnly={true} placeholder="Output form here..."
           className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
