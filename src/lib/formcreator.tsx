@@ -17,7 +17,7 @@ export const priceTab : Map<Item, costData> = new Map([
   [Item.RES_GUNPOWDER,          {bThres:-1,   value: 1/20, formattedName:"Explosives"}],
   [Item.RES_FLUX,               {bThres:-1,   value: 1,    formattedName:"Flux"}],
   [Item.RES_HYPER_RUBBER,       {bThres:1000, value: 0.8,  formattedName:"Rubber"}],
-  [Item.BLOCK_ICE_GLASS,        {bThres:2.000, value: 1/4,  formattedName:"Ice"}],
+  [Item.BLOCK_ICE_GLASS,        {bThres:2000, value: 1/4,  formattedName:"Ice"}],
   [Item.SHIELD_GENERATOR,       {bThres:50,   value: 3,    formattedName:"Generator"}],
   [Item.SHIELD_PROJECTOR,       {bThres:50,   value: 16,   formattedName:"Projector"}],
   [Item.TURRET_REMOTE,          {bThres:100,  value: 2,    formattedName:"Cannon, standard"}],
@@ -46,9 +46,13 @@ export const sizeTab = [
 function f(n:number, dprec:number=1) {
   return n.toLocaleString("en-CA", {maximumFractionDigits:dprec, minimumFractionDigits:dprec})
 }
-export function matsCostForm(bpsumm:BPSummary|null, header:boolean) {
+const errorHTML = <p className={Themes.RED.textCls}>No blueprint summary.</p>;
+/**
+ *  cost is always mats value + resupply cost and NOT rcd cost 
+ */
+export function matsCostForm(bpsumm:BPSummary|null, header:boolean, rcdCost:boolean=true) {
   if (!bpsumm || bpsumm.error) {
-    return {cost:0, form:"No blueprint summary.", html:<p className={Themes.RED.textCls}>No blueprint summary.</p>};
+    return {rawMatsCost:0, otherCosts:{rcd:0, resupply: 0}, form:"No blueprint summary.", html:errorHTML};
   }
   let out = "";
   let list : ReactNode[][] = [];
@@ -64,7 +68,7 @@ export function matsCostForm(bpsumm:BPSummary|null, header:boolean) {
         costBreakdown += "-# Bulk resupply cost incurred for entry below:\n";
         resup = true;
         resupplyCost += 100;
-        totalValue += 100;
+        totalValue;
       }
       if (data.formattedName != null) {
         costBreakdown += "-# "+data.formattedName +" cost: " + f(data.value * entry.ct) + " flux\n";
@@ -86,22 +90,20 @@ export function matsCostForm(bpsumm:BPSummary|null, header:boolean) {
   }
   if (header) out += `## Materials cost breakdown, form A1
 Total materials cost: ${f(totalValue, 2)} flux\n`;
-  out += costBreakdown;
-  out += `RCD cost: ${bpsumm.RCDCost} flux`;
-  if (resupplyCost > 0) out += `\nOther costs:\n-# Bulk resupply cost: ${f(resupplyCost, 2)} flux` 
-  return {cost:totalValue+resupplyCost, form:out, html:<>
-    {header ? <H1>Raw materials cost: {f(totalValue, 2)} flux</H1>: <></>}
+  out += costBreakdown.slice(0, -1); // remove trailing \n
+  out += `\nOther costs:\n-# Bulk resupply cost: ${f(resupplyCost, 2)} flux` 
+  if (rcdCost) out += `\nRCD cost: ${bpsumm.RCDCost} flux`;
+  return {rawMatsCost:totalValue, otherCosts:{rcd: bpsumm.RCDCost, resupply:resupplyCost}, form:out, html:<>
+    {/* <H1>Raw materials cost: {f(totalValue, 2)} flux</H1> */}
     <Lister theme={Themes.BLUE} colLayout="50px 2fr 1fr 2fr" className_c="p-2" className="font-nsm indentleft">
       {list}
     </Lister>
-    <p>RCD cost: <b>{bpsumm.RCDCost}</b> flux</p>
-    { 
-    resupplyCost > 0 ?<>
-      <H1>Other costs:</H1>
+    {/* <p>RCD cost: <b>{bpsumm.RCDCost}</b> flux</p> */}
+    <H1>Other costs:</H1>
+    { resupplyCost > 0 ?
       <div className="indentleft">
         Bulk resupply cost: <b>{f(resupplyCost, 2)} flux</b>
-      </div></>
-    : <></>
+      </div> : <></>
     }
   </>};
 }
@@ -122,8 +124,66 @@ BetaOS ProDSA Labour Cost (15%): VALUE
 -# Insurance usage scaler: 0.8
 Total: **VALUE**
 */
-export function insuranceForm(bpsumm:BPSummary|null) {
-  
+
+export const iData = {
+  matScl: 0.4,
+  rcdScl: 0.5,
+  deductibleFrac: 0.6,
+}
+export function insuranceForm(bpsumm:BPSummary|null, insurancePct:number, insuranceRA:number) {
+  if (bpsumm == null) return {form:"Blueprint summary required!", html:errorHTML}
+  let matsCost = matsCostForm(bpsumm, false, false);
+
+  let subtotal = matsCost.rawMatsCost * iData.matScl + matsCost.otherCosts.resupply + bpsumm.RCDCost*iData.rcdScl + insuranceRA;
+  let total = subtotal * 1.15 * insurancePct / 100.0;
+  let rounding = Math.round(total) - total;
+  let out = `## Cost breakdown, insurance form I2
+Raw materials cost: ${f(matsCost.rawMatsCost*iData.matScl, 2)} flux
+-# Field scale factor: ${iData.matScl}
+*Materials cost breakdown, form A1b*
+${matsCost.form}
+-# Repair accessiblity: ${f(insuranceRA, 2)} flux
+RCD cost: ${f(bpsumm.RCDCost*iData.rcdScl, 1)} flux
+-# Field scale factor: ${iData.rcdScl}
+=====
+-# Subtotal: ${f(subtotal, 2)} flux
+BetaOS ProDSA Labour Cost (15%): ${f(subtotal*0.15, 3)} flux
+-# Insurance usage scaler: ${insurancePct}%
+-# Rounding: ${rounding > 0 ? "+"+f(rounding, 3) : f(rounding, 3)} flux
+Total insurance cost: **${f(Math.round(total), 3)} flux/mo**
+Deductible (${iData.deductibleFrac*100}%) = ${f(total * iData.deductibleFrac, 2)} flux/repair
+Details: 5 repairs/mo 
+`;
+  return {form:out, html:<div className={Themes.BLUE.textCls}>
+    <H1>Raw materials cost: {f(matsCost.rawMatsCost*iData.matScl, 2)} flux</H1>
+    <small>Field scale factor: {iData.matScl}</small>
+    {matsCost.html}
+    <div className="indentleft">
+      Repair accessibility, typical: <b>{insuranceRA}</b> flux
+    </div>
+    <p>RCD cost: <b>{f(bpsumm.RCDCost*iData.rcdScl, 1)}</b> flux</p>
+    <small>Field scale factor: {iData.rcdScl}</small>
+    <p className="font-nsm text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
+      BetaOS ProDSA Labour Markup (15%): {f(subtotal*0.15, 3)} flux<br/>
+      <small>Rounding: {rounding > 0 ? "+"+f(rounding, 3) : f(rounding, 3)} flux</small><br/>
+      Total insurance cost: <b className="text-xl">{f(Math.round(total), 3)} flux/mo</b><br/>
+      Repair cost: Damage sustained or <b className="text-xl">{f(Math.round(total*iData.deductibleFrac), 3)} flux/repair</b>, whichever is less
+    </p>
+    <small>Subject to the 
+      <div className="ml-1 inline-flex gap-1">
+        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
+        <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
+      </div> and the 
+      <div className="ml-1 inline-flex gap-1">
+        <Link href="https://discord.com/channels/911997443179151461/1268253949048389682" target="_blank">ProDSA Services Insurance Terms</Link>
+        <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
+      </div>
+    </small>
+    <div className={`flex gap-1 text-xl ${Themes.GREEN.textCls}`}>
+      <Link href="https://dsc.gg/ProDSA" target="_blank">Farm with confidence. Insure today with ProDSA Services! </Link>
+      <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
+    </div>
+  </div>}
 }
 
 
@@ -138,9 +198,9 @@ Insurance: 15%
 */
 export function buildCostForm(bpsumm:BPSummary|null) {
   if (!bpsumm || bpsumm.error) {
-    return {cost: 0, form:"No blueprint summary.", html:<p className={Themes.RED.textCls}>No blueprint summary.</p>};
+    return {cost: 0, form:"No blueprint summary.", html:errorHTML};
   }
-  let matsCostData = matsCostForm(bpsumm, true);
+  let matsCostData = matsCostForm(bpsumm, false, true);
   let area = bpsumm.height * bpsumm.width;
   let multRate = 999;
   for (let i=0; i<sizeTab.length; i++) {
@@ -149,7 +209,7 @@ export function buildCostForm(bpsumm:BPSummary|null) {
       break;
     }
   }
-  let subtotal = matsCostData.cost + bpsumm.RCDCost;
+  let subtotal = matsCostData.rawMatsCost + bpsumm.RCDCost + matsCostData.otherCosts.resupply;
   let totalCost = subtotal * (1+multRate);
   let roundDelta = Math.round(totalCost) - totalCost;
   let htmlOut = <div>
@@ -167,13 +227,13 @@ export function buildCostForm(bpsumm:BPSummary|null) {
       </div>.
     Your minimum deposit is {totalCost > 2500 ? <b>75%</b> : <b>50%</b>}.
     </small>
-    <div className="flex gap-1">
+    <div className={`flex gap-1 text-xl ${Themes.GREEN.textCls}`}>
       <Link href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </Link>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>;
   let out = `## Cost breakdown
-Raw materials cost: ${f(matsCostData.cost, 2)} flux
+Raw materials cost: ${f(matsCostData.rawMatsCost, 2)} flux
 ${matsCostData.form}
 =====
 -# Subtotal: ${f(subtotal, 2)} flux

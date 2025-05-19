@@ -65,7 +65,7 @@ export function Input(props:InputProps) {
       // onClick={props.onClick}
       onChange={props.onChange}
       className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
-      rounded-sm p-2 transition-colors justify-center flex items-center ${props.className}`}
+      rounded-sm p-2 transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
     />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
 }
@@ -110,8 +110,8 @@ export function escapeRegExp(str:string) {
 }
 let zIdx = 1;
 type OptionElement = React.ReactElement<OptionProps>;
-export function Select({theme:clrTheme, children, className, defaultIdx, onChange, onSubmit} : 
-  {theme:ColourTheme, children:OptionElement[]|OptionElement, className?:string, defaultIdx?:number, onChange?:(n:any)=>any, onSubmit?:(e:ReactElement)=>any}) {
+export function Select({theme:clrTheme=Themes.BLUE, children, className, defaultIdx, onChange} : 
+  {theme?:ColourTheme, children:OptionElement[]|OptionElement, className?:string, defaultIdx?:number, onChange?:(n:any)=>any}) {
   let [active, setActive] = useState<boolean>(false);
   let [filter, setFilter] = useState<string>("");
   // INDEXED TO ACTUAL CHILD IDX
@@ -247,7 +247,7 @@ export function Select({theme:clrTheme, children, className, defaultIdx, onChang
   let clickComplete = false;
   let out = (
     <div className={`${clrTheme.textCls} focus-within:outline-2 
-    relative ${active ? "outline-solid" : "outline-none" } rounded-md rounded-b-none ${className??""}`}
+    relative ${active ? "outline-solid" : "outline-none" } h-[fit-content] rounded-md rounded-b-none ${className??""}`}
     >
       <div className="flex rounded-[inherit] overflow-clip">
       <input value={inputVal} readOnly={!active} onKeyDown={keydown} onChange={onKeyPress}

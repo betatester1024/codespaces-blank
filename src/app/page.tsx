@@ -5,7 +5,7 @@ import {Button, byId, Lister, Loader, Select, Option, GIcon, Input, escapeRegExp
 import { Themes } from "@/lib/Themes";
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
 import { BoMEntry, sortByItem, BuildEntry, BPSummary, sortConfig, getSummaryJSON } from "@/lib/bpprocessing";
-import { buildCostForm, matsCostForm } from "@/lib/formcreator";
+import { buildCostForm, insuranceForm, matsCostForm } from "@/lib/formcreator";
 import { Item } from "@/lib/dsabp";
 
 // const { decode, encode } = require("dsabp-js")
@@ -23,7 +23,7 @@ function isSort(a:ProcessingOptns|undefined) {
 }
 
 enum FormOptns {
-  MATSCOST, BUILD
+  MATSCOST, BUILD, INSURANCE
 }
 
 export default function Page() {
@@ -100,8 +100,12 @@ export default function Page() {
     process();
   }, [starterQ, sortY, aExpandoes])
 
+  function formProcess(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    process();
+  }
+
   async function process() {
-    // event.preventDefault();
     console.log("processing command", cmdType);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
@@ -160,6 +164,11 @@ export default function Page() {
           break;
         case FormOptns.BUILD:
           formRes = buildCostForm(summary).form;
+          break;
+        case FormOptns.INSURANCE:
+          let inp1 = byId("insurancePct") as HTMLInputElement;
+          let inp2 = byId("insuranceRA") as HTMLInputElement;
+          formRes = insuranceForm(summary, Number(inp1.value), Number(inp2.value)).form;
           break;
       }
       if (cmdType == ProcessingOptns.SORT_RESTORE || cmdType == ProcessingOptns.SORT_SAFE) 
@@ -265,7 +274,7 @@ export default function Page() {
   return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
     <title>ProDSA PrecisionEdit Tools | BetaOS ProDSA</title>
     <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by BetaOS ProDSA - thanks to libraries from @blueyescat"></Header>
-    <form onSubmit={(event:FormEvent)=>{event.preventDefault(); process()}}>
+    <form onSubmit={formProcess}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
           className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm`}>
@@ -286,16 +295,25 @@ export default function Page() {
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
         <div className="flex flex-col items-left grow">
-          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateProcessCommand} onSubmit={process}>
+          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateProcessCommand}>
             <Option value={ProcessingOptns.SORT}>Sort by item</Option>
             <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable loaders and hatches</Option>
             <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore loader and hatch settings</Option>
             <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>
           </Select>
-          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateFormCommand} onSubmit={process}>
-            <Option value={FormOptns.BUILD}>Build cost breakdown</Option>
-            <Option value={FormOptns.MATSCOST}>Materials cost only</Option>
-          </Select>
+          <div className="flex grow-1">
+            <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateFormCommand}>
+              <Option value={FormOptns.BUILD}>Build cost breakdown</Option>
+              <Option value={FormOptns.MATSCOST}>Materials cost only</Option>
+              <Option value={FormOptns.INSURANCE}>Insurance valuation</Option>
+            </Select>
+            <Input id="insurancePct" type="number" min={0} max={100} defaultValue={80} placeholder="Insurance %" theme={Themes.BLUE}
+            ctnClassName={`grow transition-all overflow-clip 
+            ${formType == FormOptns.INSURANCE ? "max-w-[200px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}/>
+            <Input theme={Themes.BLUE} id="insuranceRA" type="number" placeholder="Insurance repair accessibility (flux)" 
+            ctnClassName={`grow transition-all overflow-clip 
+            ${formType == FormOptns.INSURANCE ? "max-w-[350px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}/>
+          </div>
         </div>
         <div className="flex flex-col items-left">
           <Input theme={Themes.BLUE} type="checkbox" id="sortY" 
@@ -314,8 +332,8 @@ export default function Page() {
         </Button> 
       </div>
       <div className="flex pt-2 pb-2 gap-2">
-        <Input id="firstItems" defaultValue="block, walkway, ladder, net, starter" placeholder="First items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
-        <Input id="lastItems" defaultValue="expando, recycler" placeholder="Last items..." ctnClassName="grow" className="grow" theme={Themes.BLUE}/>
+        <Input id="firstItems" defaultValue="block, walkway, ladder, net, starter" placeholder="First items..." ctnClassName="grow" theme={Themes.BLUE}/>
+        <Input id="lastItems" defaultValue="expando, recycler" placeholder="Last items..." ctnClassName="grow" theme={Themes.BLUE}/>
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} font-nsm p-2 rounded-md border-[2px]`}>
@@ -397,7 +415,7 @@ export default function Page() {
     justify-center transition-all ${calcOpen ? "opacity-100 pointer-events-all" : "opacity-0 pointer-events-none"}`}>
     <div className="top-5 w-[90%] h-[fit-content] bg-gray-200 p-3 rounded-md"> 
       <form onSubmit={(event:FormEvent<HTMLFormElement>)=>{event.preventDefault(); runCalc();}} className="flex gap-2">
-        <Input id="calc" theme={Themes.BLUE} ctnClassName="grow" className={`font-xl font-nsm grow ${Themes.BLUE.hoverCls}`} placeholder="Calculate..."/>
+        <Input id="calc" theme={Themes.BLUE} ctnClassName={`grow font-xl font-nsm ${Themes.BLUE.hoverCls}`} placeholder="Calculate..."/>
         <Button type="submit" theme={Themes.BLUE}><GIcon theme={Themes.BLUE}>calculate</GIcon></Button>
       </form>
       <div>
