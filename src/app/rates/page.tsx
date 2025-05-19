@@ -41,13 +41,13 @@ export default function Page() {
   ];
 
   return <>
-  <title>Construction, Repair, Insurance and Design Rates | BetaOS ProDSA</title>
+  <title>Construction, Repair, Insurance and Design Rates | ProDSA Services</title>
   <div className="p-3 flex flex-col gap-2" >
-    <Header title="Construction, Repair, Insurance and Design Rates" subtitle="For all BetaOS ProDSA jobs"/>
+    <Header title="Construction, Repair, Insurance and Design Rates" subtitle="For all ProDSA Services jobs"/>
     <Lister className="border-[2px] p-2 rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">{itemCosts}</Lister>
     <div className="flex gap-1 flex-wrap" style={{gridTemplateColumns:"1fr 1fr", gridTemplateRows:"1fr 1fr 1fr"}}>
       <div className="w-[300px] shrink grow">
-        <H1>BetaOS ProDSA Labour Rates</H1>
+        <H1>ProDSA Services Labour Rates</H1>
         <p className={Themes.BLUE.textCls}>For construction requests only / Insurance labour rate capped at <b>15%</b></p>
         <Lister className="border-[2px] rounded-md" className_c="p-1" colLayout="2fr 1fr">{sizeCosts}</Lister>
       </div>

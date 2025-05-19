@@ -35,8 +35,8 @@ export default function Page() {
   
 
   return <div className="p-3 flex flex-col gap-2" >
-    <title>Blueprint Valuator | BetaOS ProDSA</title>
-    <Header title="Blueprint Valuator" subtitle="Tools by BetaOS ProDSA"/>
+    <title>Blueprint Valuator | ProDSA Services</title>
+    <Header title="Blueprint Valuator" subtitle="Tools by ProDSA Services"/>
     <form className="flex flex-col gap-1" onSubmit={(event:FormEvent<HTMLFormElement>)=>{
       event.preventDefault();
       valuate();

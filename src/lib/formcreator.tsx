@@ -120,7 +120,7 @@ Other costs: VALUE
 -# Non-RCDables: VALUE
 -# Repair accessiblity: VALUE
 =====
-BetaOS ProDSA Labour Cost (15%): VALUE
+ProDSA Services Labour Cost (15%): VALUE
 -# Insurance usage scaler: 0.8
 Total: **VALUE**
 */
@@ -147,7 +147,7 @@ RCD cost: ${f(bpsumm.RCDCost*iData.rcdScl, 1)} flux
 -# Field scale factor: ${iData.rcdScl}
 =====
 -# Subtotal: ${f(subtotal, 2)} flux
-BetaOS ProDSA Labour Cost (15%): ${f(subtotal*0.15, 3)} flux
+ProDSA Services Labour Cost (15%): ${f(subtotal*0.15, 3)} flux
 -# Insurance usage scaler: ${insurancePct}%
 -# Rounding: ${rounding > 0 ? "+"+f(rounding, 3) : f(rounding, 3)} flux
 Total insurance cost: **${f(Math.round(total), 3)} flux/mo**
@@ -164,7 +164,7 @@ Details: 5 repairs/mo
     <p>RCD cost: <b>{f(bpsumm.RCDCost*iData.rcdScl, 1)}</b> flux</p>
     <small>Field scale factor: {iData.rcdScl}</small>
     <p className="font-nsm text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
-      BetaOS ProDSA Labour Markup (15%): {f(subtotal*0.15, 3)} flux<br/>
+      ProDSA Services Labour Markup (15%): {f(subtotal*0.15, 3)} flux<br/>
       <small>Rounding: {rounding > 0 ? "+"+f(rounding, 3) : f(rounding, 3)} flux</small><br/>
       Total insurance cost: <b className="text-xl">{f(Math.round(total), 3)} flux/mo</b><br/>
       Repair cost: Damage sustained or <b className="text-xl">{f(Math.round(total*iData.deductibleFrac), 3)} flux/repair</b>, whichever is less
@@ -188,7 +188,7 @@ Details: 5 repairs/mo
 
 
 /*
-BetaOS ProDSA Labour Rates
+ProDSA Services Labour Rates
 Percentages provided for your reference.
 Tiny ships (100 sq tiles): 50%
 Small ships (100 to 900 sq tiles): 30%
@@ -217,18 +217,18 @@ export function buildCostForm(bpsumm:BPSummary|null) {
     <div className="">{matsCostData.html}</div>
     <hr className="border-[1px] rounded-[1px] mt-2 mb-2"/>
     <p className="font-nsm text-lg"><small>Subtotal: {f(subtotal, 2)} flux</small><br/>
-    BetaOS ProDSA Labour Markup ({multRate * 100}%): {f(subtotal * multRate, 3)} flux<br/>
+    ProDSA Services Labour Markup ({multRate * 100}%): {f(subtotal * multRate, 3)} flux<br/>
     <small>Rounding: {roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux</small><br/>
     Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>
     <small>Subject to the 
       <div className="ml-1 inline-flex gap-1">
-        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">BetaOS ProDSA Terms and Conditions</Link>
+        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
         <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
       </div>.
     Your minimum deposit is {totalCost > 2500 ? <b>75%</b> : <b>50%</b>}.
     </small>
     <div className={`flex gap-1 text-xl ${Themes.GREEN.textCls}`}>
-      <Link href="https://dsc.gg/ProDSA" target="_blank">Order today from BetaOS ProDSA! </Link>
+      <Link href="https://dsc.gg/ProDSA" target="_blank">Order today from ProDSA Services! </Link>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>;
@@ -237,7 +237,7 @@ Raw materials cost: ${f(matsCostData.rawMatsCost, 2)} flux
 ${matsCostData.form}
 =====
 -# Subtotal: ${f(subtotal, 2)} flux
-BetaOS ProDSA Labour Markup (${multRate * 100}%): ${f(subtotal * multRate, 3)} flux
+ProDSA Services Labour Markup (${multRate * 100}%): ${f(subtotal * multRate, 3)} flux
 -# Rounding: ${roundDelta > 0 ? "+"+f(roundDelta, 3) : f(roundDelta, 3)} flux
 Total job cost: **${f(Math.round(totalCost), 3)} flux**`;
   return {cost: totalCost, form:out, html:htmlOut};

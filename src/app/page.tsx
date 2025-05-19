@@ -273,8 +273,8 @@ export default function Page() {
     return val.toString() + (val >= 16 ? " ~"+Math.ceil(val/16)+"stk":"");
   }
   return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
-    <title>ProDSA PrecisionEdit Tools | BetaOS ProDSA</title>
-    <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by BetaOS ProDSA - thanks to libraries from @blueyescat"></Header>
+    <title>ProDSA PrecisionEdit Tools | ProDSA Services</title>
+    <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by ProDSA Services - thanks to libraries from @blueyescat"></Header>
     <form onSubmit={formProcess}>
       <div className="flex gap-1 flex-wrap relative items-center">
         <textarea id="inBlueprint" placeholder="DSA:..." 
