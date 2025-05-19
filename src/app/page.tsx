@@ -32,7 +32,7 @@ export default function Page() {
   const [processError, setProcessError] = useState<string>();
   const [processing, setProcessing] = useState<boolean>(false);
   const [loadingBP, setLoadingBP] = useState<boolean>(false);
-  const [resBP, setResBP] = useState<string>("");
+  const [resBP, setResBP] = useState<string[]>([""]);
   const [asyncSumm, setSummary] = useState<BPSummary>(errorSummary);
   const [cmdType, setComd] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
@@ -109,6 +109,7 @@ export default function Page() {
     console.log("processing command", cmdType);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
+    let bpout = {bps:[bp], combined:bp}; // default for display only
     let summary : BPSummary;
     let processed = false;
     try {
@@ -141,7 +142,7 @@ export default function Page() {
       setFirst(Array.from(firstItms));
       setLast(Array.from(lastItms));
       if (isSort(cmdType)) {
-        bp = await sortBP(tArea.value, {
+        bpout = await sortBP(tArea.value, {
           sortY:sortY, 
           safeMode:sMode, 
           restoreMode:rMode, 
@@ -153,8 +154,8 @@ export default function Page() {
       }
       let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
       let repairBP = repairMode ? tArea2.value : "";
-      console.log("inbp", bp.slice(0, 300));
-      summary = await getSummaryJSON(bp, starterQ, repairBP);
+      console.log("outbp", bp.slice(0, 300));
+      summary = await getSummaryJSON(bpout!.combined, starterQ, repairBP);
 
       let formRes = "";
       // form
@@ -178,7 +179,7 @@ export default function Page() {
       console.log(e);
       summary = errorSummary;
     }
-    if (!bp && processed) {
+    if (bpout!.bps.length == 0 && processed) {
       summary.error = "Sort operation failed.";
     }
     setSummary(summary);
@@ -211,12 +212,12 @@ export default function Page() {
       out.select();
       // location.href="#outBlueprint";
     }, 200);
-  }
+  } // process()
 
   async function sortBP(value:string, config?:sortConfig) {
     let summary = await sortByItem(value, config);
-    setResBP(summary.bp);
-    return summary.bp;
+    setResBP(summary.bps);
+    return summary;
   }
 
   function itemsToHTML(arr:Item[]) {
@@ -361,11 +362,18 @@ export default function Page() {
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
       <div className="flex gap-2">
         <div className="flex flex-col gap-1 grow-1">
-          <p className={Themes.BLUE.textCls}>Sort mode: <b>{cmdType}</b></p>
-          <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
-            value={resBP} readOnly={true} placeholder="Result blueprint here..."
-            className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
-          </textarea>
+          <p className={Themes.BLUE.textCls}>Sort mode: <b>{cmdType}</b> {resBP.length > 1 ? <span className={Themes.RED.textCls + " ml-1"}>Oversize blueprint, split into 2 parts</span> : <></>}</p>
+          <div className="flex gap-1">
+            <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
+              value={resBP[0]} readOnly={true} placeholder="Result blueprint here..."
+              className={`grow-1 font-nsm summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm p-1 mt-2 rounded-sm`}>
+            </textarea>
+            <textarea onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}} 
+              value={resBP[1] ?? ""} readOnly={true} placeholder="Second blueprint here..."
+              className={`${resBP.length > 1 ? "max-w-[400px]" : "max-w-[0px] !p-0" } grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} 
+              transition-all overflow-clip font-nsm p-1 mt-2 rounded-sm`}>
+            </textarea>
+          </div>
         </div>
         <textarea id="outForm" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
           value={outForm} readOnly={true} placeholder="Output form here..."

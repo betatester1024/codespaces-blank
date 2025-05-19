@@ -131,7 +131,7 @@ export const iData = {
   deductibleFrac: 0.6,
 }
 export function insuranceForm(bpsumm:BPSummary|null, insurancePct:number, insuranceRA:number) {
-  if (bpsumm == null) return {form:"Blueprint summary required!", html:errorHTML}
+  if (!bpsumm || bpsumm.error) return {form:"Blueprint summary required!", html:errorHTML}
   let matsCost = matsCostForm(bpsumm, false, false);
 
   let subtotal = matsCost.rawMatsCost * iData.matScl + matsCost.otherCosts.resupply + bpsumm.RCDCost*iData.rcdScl + insuranceRA;

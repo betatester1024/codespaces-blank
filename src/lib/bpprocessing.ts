@@ -280,15 +280,14 @@ function addConfigInfo(inCmds:BPCmd[], config:sortConfig) {
   return cmds;
 }
 
-export async function sortByItem(bString:string, 
-  config:sortConfig=noConfig
-) {
+export async function sortByItem(bString:string, config:sortConfig=noConfig) : Promise<{bps:string[], combined:string}> {
   console.log("config=", config);
   let bp = decode(bString);
-  if (!bp) return {bp:""};
+  if (!bp) return {bps:[""], combined:""};
 
   if (bp.commands == null) { // no commands to sort!
-    return {bp:new Encoder().encodeSync(bp)};
+    let out = new Encoder().encodeSync(bp);
+    return {bps:[out], combined:out};
   }
   // console.log(Item);
 
@@ -388,8 +387,17 @@ export async function sortByItem(bString:string,
       activeConfig = cmd.currConfig;
     }
   }
+  let enc = new Encoder();
   bp.commands = cmds;
-  return {bp:new Encoder().encodeSync(bp)};
+  let combined = enc.encodeSync(bp);
+  if (bp.commands.length > 1000) {
+    let bp2 = bp.clone();
+    bp2.commands = bp2.commands!.slice(1000);
+    bp.commands = bp.commands.slice(0, 1000);
+    
+    return {bps:[enc.encodeSync(bp), enc.encodeSync(bp2)], combined:combined}
+  }
+  else return {bps:[enc.encodeSync(bp)], combined:enc.encodeSync(bp)};
 }
 
 function compatibleItem(it: Item, config1:ConfigCmd, config2:ConfigCmd) {
