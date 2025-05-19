@@ -175,7 +175,7 @@ export function Select({theme:clrTheme=Themes.BLUE, children, className, default
       zIdx++;
       setFilter("");
       setInputVal("");
-      setHoveringIdx(0);
+      setHoveringIdx(selIdx);
     }
   }, [active])
 
