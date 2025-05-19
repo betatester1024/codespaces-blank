@@ -34,7 +34,7 @@ export default function Page() {
   const [loadingBP, setLoadingBP] = useState<boolean>(false);
   const [resBP, setResBP] = useState<string[]>([""]);
   const [asyncSumm, setSummary] = useState<BPSummary>(errorSummary);
-  const [cmdType, setComd] = useState<ProcessingOptns>();
+  const [cmd, setCmd] = useState<ProcessingOptns>();
   const [sortY, setsortY] = useState<boolean>(false);
   const [starterQ, setStarterQ] = useState<boolean>(true);
   const [aExpandoes, setSnap] = useState<boolean>(true);
@@ -85,7 +85,13 @@ export default function Page() {
 
   useEffect(()=>{
     process();
-  }, [cmdType, formType])
+  }, [cmd, formType])
+
+  useEffect(()=>{
+    if (!isSort(cmd)) {
+      setResBP(["No blueprint sorting selected"]);
+    }
+  }, [cmd])
 
   // useEffect(() => {
   //   document.addEventListener('keydown', handleKeyDown);
@@ -106,7 +112,7 @@ export default function Page() {
   }
 
   async function process() {
-    console.log("processing command", cmdType);
+    console.log("processing command", cmd);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
     let bpout = {bps:[bp], combined:bp}; // default for display only
@@ -115,7 +121,7 @@ export default function Page() {
     try {
       setProcessing(true);
       let sMode=false, rMode=false;
-      switch (cmdType) {
+      switch (cmd) {
         case ProcessingOptns.SORT: 
           break;
         case ProcessingOptns.SORT_SAFE:
@@ -141,7 +147,7 @@ export default function Page() {
           });
       setFirst(Array.from(firstItms));
       setLast(Array.from(lastItms));
-      if (isSort(cmdType)) {
+      if (isSort(cmd)) {
         bpout = await sortBP(tArea.value, {
           sortY:sortY, 
           safeMode:sMode, 
@@ -172,7 +178,7 @@ export default function Page() {
           formRes = insuranceForm(summary, Number(inp1.value), Number(inp2.value)).form;
           break;
       }
-      if (cmdType == ProcessingOptns.SORT_RESTORE || cmdType == ProcessingOptns.SORT_SAFE) 
+      if (cmd == ProcessingOptns.SORT_RESTORE || cmd == ProcessingOptns.SORT_SAFE) 
         formRes = "This is (probably) not the mode you want.";
       setOutForm(formRes);
     } catch (e) {
@@ -252,7 +258,7 @@ export default function Page() {
 
   function updateProcessCommand(n:ProcessingOptns) {
     console.log("command set!", n);
-    setComd(n);
+    setCmd(n);
   }
 
   function updateFormCommand(n:FormOptns) {
@@ -281,7 +287,7 @@ export default function Page() {
           className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm`}>
         </textarea>
         <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
-        className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink font-nsm transition-all overflow-clip 
+        className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink font-nsm transition-[max-width] overflow-clip 
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 
         <div className="flex flex-col">
@@ -340,7 +346,7 @@ export default function Page() {
     <div className={`${Themes.BLUE.textCls} font-nsm p-2 rounded-md border-[2px]`}>
       {
         processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
-        {isSort(cmdType) ? 
+        {isSort(cmd) ? 
           <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
             <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
               <span>First:</span>
@@ -362,7 +368,7 @@ export default function Page() {
     {/* <div className={`summaryContainer outline-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bg2}`}> */}
       <div className="flex gap-2">
         <div className="flex flex-col gap-1 grow-1">
-          <p className={Themes.BLUE.textCls}>Sort mode: <b>{cmdType}</b> {resBP.length > 1 ? <span className={Themes.RED.textCls + " ml-1"}>Oversize blueprint, split into 2 parts</span> : <></>}</p>
+          <p className={Themes.BLUE.textCls}>Sort mode: <b>{cmd}</b> {resBP.length > 1 ? <span className={Themes.RED.textCls + " ml-1"}>Oversize blueprint, split into 2 parts</span> : <></>}</p>
           <div className="flex gap-1">
             <textarea id="outBlueprint" onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}}
               value={resBP[0]} readOnly={true} placeholder="Result blueprint here..."
@@ -371,7 +377,7 @@ export default function Page() {
             <textarea onClick={(event:MouseEvent<HTMLTextAreaElement>)=>{let t = event.target as HTMLTextAreaElement; t.select();}} 
               value={resBP[1] ?? ""} readOnly={true} placeholder="Second blueprint here..."
               className={`${resBP.length > 1 ? "max-w-[400px]" : "max-w-[0px] !p-0" } grow-1 summaryContainer ${Themes.GREY.bgMain} ${Themes.BLUE.textCls} 
-              transition-all overflow-clip font-nsm p-1 mt-2 rounded-sm`}>
+              transition-[max-width] overflow-clip font-nsm p-1 mt-2 rounded-sm`}>
             </textarea>
           </div>
         </div>
