@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@import "./themes.css";
 /*https://redlib.freedit.eu/r/tailwindcss/comments/1hpvosi/hover_css_broken_in_tailwind_v4_need_help/*/
 @custom-variant hover (&:hover); 
 
@@ -12,7 +12,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* --font-nsd: var(--font-nsd); */
-  /* --font-nsm: "Noto Sans Mono"; */
+  /* --font-: "Noto Sans Mono"; */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,12 +22,40 @@
   }
 }
 
+.slideIn {
+  animation:slidein 500ms both;
+}
+
+@keyframes slidein {
+  0% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(0px);
+    opacity: 1;
+  }
+}
+
+b {
+  @apply font-bold;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Noto Sans Display", var(--font-nsd), sans-serif;
   transition: 0.2s ease;
   scroll-behavior: smooth;
+}
+
+hr {
+  outline: 1px solid currentColor;
+  border-radius: 1px;
+
 }
 
 * {
@@ -64,6 +92,51 @@ body {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+
+.summaryContainer {
+  flex-grow: 1;
+  border-radius: var(--radius-md);
+  outline-width: 2px;
+  /* margin: calc(2*var(--spacing)); */
+  padding: calc(2*var(--spacing));
+  overflow-y: scroll;
+  max-height: 70vh;
+  outline-style: --var(--tw-outline-style);
+}
+
+a {
+  text-decoration-line: underline;
+}
+
+@theme {
+  --color-lime-500: #00cc00;
+  /* --color-lime-400: #00cc00; */
+}
+
+textarea {
+  @apply p-1 grow-4 rounded-sm;
+  font-family: var(--font-nsm);
+}
+
+.font-raleway {
+  font-family: var(--font-raleway);
+}
+
+.animHighlight {
+  animation: highlight 5s both;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: var(--color-blue-200);
+    box-shadow: 0px 0px 3px 3px var(--color-blue-200);
+  }
+  100% {
+    background-color: #fff0;
+    box-shadow: 0px 0px 3px 3px #fff0;
   }
 }
 

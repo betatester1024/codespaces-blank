@@ -1,42 +1,32 @@
 @import "tailwindcss";
-@tailwind utilities;
 
-.summaryContainer {
-  flex-grow: 1;
-  border-radius: var(--radius-md);
-  outline-width: 2px;
-  /* margin: calc(2*var(--spacing)); */
-  padding: calc(2*var(--spacing));
-  overflow-y: scroll;
-  max-height: 70vh;
-  outline-style: --var(--tw-outline-style);
+.card {
+  @apply rounded-lg p-3;
+  width: 100%;
+  position:relative;
+  z-index: 0;
 }
 
-a {
-  text-decoration-line: underline;
+.lock-content {
+  @apply aspect-auto h-[unset];
+  width: unset;
 }
 
-@theme {
-  --color-lime-500: #00cc00;
-  /* --color-lime-400: #00cc00; */
+li {
+  @apply mt-1 mb-1;
 }
 
-textarea {
-  @apply p-1 grow-4 rounded-sm;
-  font-family: var(--font-nsm);
+.card:after {
+  @apply rounded-lg shadow-lg shadow-gray-500/80;
+  width: 100%; height: 100%;
+  @apply bg-white dark:bg-gray-700;
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index:-1;
 }
 
-.animHighlight {
-  animation: highlight 5s both;
-}
-
-@keyframes highlight {
-  0% {
-    background-color: var(--color-blue-200);
-    box-shadow: 0px 0px 3px 3px var(--color-blue-200);
-  }
-  100% {
-    background-color: #fff0;
-    box-shadow: 0px 0px 3px 3px #fff0;
-  }
+hr {
+  @apply m-4;
 }

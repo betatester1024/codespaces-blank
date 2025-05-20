@@ -2,10 +2,11 @@
 
 import { Button, byId, Header, Option, Select } from "@/lib/utils";
 import { Themes } from "@/lib/Themes";
-import "@/app/page.css";
+// import "@/app/page.css";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { buildCostForm, insuranceForm } from "@/lib/formcreator";
 import { getSummaryJSON, sortByItem } from "@/lib/bpprocessing";
+import { useSearchParams } from "next/navigation";
 
 
 enum estimateTypes {
@@ -13,7 +14,13 @@ enum estimateTypes {
 };
 export default function Page() {
 
+  let params = useSearchParams();
+  const modeNames = ["build", "insurance"];
+  let defaultModeIdx = modeNames.indexOf(params.get("mode") ?? "none");
+  if (defaultModeIdx < 0) defaultModeIdx = 0;
+
   async function valuate() {
+    
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let summ = await getSummaryJSON(tArea.value, false, "");
     let formData = {html:<>Invalid selection, contact jen</>};
@@ -46,7 +53,7 @@ export default function Page() {
         className={`w-full font-nsm ${Themes.BLUE.textCls} ${Themes.BLUE.bgMain}`}></textarea>
       </div>
       <div className="flex gap-1">
-        <Select onChange={setType} defaultIdx={0} className="grow">
+        <Select onChange={setType} defaultIdx={defaultModeIdx} className="grow">
           <Option value={estimateTypes.BUILD}>Construction</Option>
           <Option value={estimateTypes.INSURANCE}>Insurance</Option>
         </Select>
