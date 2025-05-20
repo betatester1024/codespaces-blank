@@ -12,6 +12,7 @@
 .lock-content {
   @apply aspect-auto h-[unset];
   width: unset;
+  object-fit:contain;
 }
 
 li {

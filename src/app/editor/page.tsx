@@ -298,7 +298,7 @@ export default function Page() {
           <Input theme={Themes.GREEN} type="checkbox" checked={repairMode} onChange={(event:ChangeEvent<HTMLInputElement>) => {setRepairMode(event.target.checked);}}
           ctnClassName="cursor-pointer" id="repairMode">Enter repair mode?</Input>
         </div>
-        {/* <Link href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
+        {/* <Link prefetch={false} href="/testbp.txt" className="text-blue-400 active:text-blue-200 cursor-pointer hover:text-blue-300" target="_blank">access test blueprint</a> */}
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
         <div className="flex flex-col items-left grow">

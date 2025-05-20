@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import { Noto_Sans_Display, Noto_Sans_Mono, Raleway } from "next/font/google";
 import { GIcon } from "@/lib/utils";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 const NotoSansDisplay = Noto_Sans_Display({
   variable: "--font-nsd",
@@ -33,13 +35,14 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
         <meta property="og:image" content="https://prodsatools.vercel.app/icon.png"/>
       </head>
       <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} ${RFont.variable} antialiased`}>
-        {children}
+        <Suspense fallback={<Loading/>}>{children}
+        </Suspense>
         <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center`}>
-          <Link className="blue active " href="/"><GIcon theme={Themes.BLUE}>home</GIcon></Link>
-          <Link className="blue active" href="/valuate">Ship cost calculator</Link>
-          <Link className="blue active" href="/rates">ProDSA Rates</Link>
-          <Link className="blue active " href="/editor">ProDSA PrecisionEdit Tools</Link>
-          <Link className="green text active" href="//dsc.gg/ProDSA" target="_blank">Order ships from ProDSA Services today!</Link>
+          <Link prefetch={false} className="blue active " href="/"><GIcon theme={Themes.BLUE}>home</GIcon></Link>
+          <Link prefetch={false} className="blue active" href="/valuate">Ship cost calculator</Link>
+          <Link prefetch={false} className="blue active" href="/rates">ProDSA Rates</Link>
+          <Link prefetch={false} className="blue active " href="/editor">ProDSA PrecisionEdit Tools</Link>
+          <Link prefetch={false} className="green text active" href="//dsc.gg/ProDSA" target="_blank">Order ships from ProDSA Services today!</Link>
           <span>Site design by ProDSA Services</span>
         </footer>
       </body>

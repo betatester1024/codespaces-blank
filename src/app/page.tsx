@@ -27,8 +27,8 @@ export default function Page() {
       <div className="slideIn grey text flex flex-col gap-1 card">
         <p className="slideIn blue text text-2xl">ProDSA PrecisionEdit <b>Construction</b> and <b>Repair</b></p>
         <p>Completing ships <b className="slideIn">faster</b> and <b className="slideIn">more efficiently</b></p>
-        <div className="slideIn relative flex gap-2 max-md:flex-wrap items-center">
-          <Image className="slideIn shrink min-w-[300px] lock-content grow" alt="An RCD builds a ship." src={constr}/>
+        <div className="slideIn relative flex gap-2 max-md:flex-wrap items-center justify-start">
+          <Image className="slideIn shrink min-w-[300px] max-h-[100px] lock-content" alt="An RCD builds a ship." src={constr}/>
           <div className="grey text mt-3">
             <ul>
               <li><b>&gt;300</b> ships built</li>
@@ -43,7 +43,7 @@ export default function Page() {
         <Button theme={Themes.GREEN} className="font-bold slideIn w-[fit-content] font-2xl green text hover active bgLight" onClick={()=>{window.open("https://dsc.gg/ProDSA")}}>
         Order a ship from ProDSA Services today!
         </Button>
-        <Link className="slideIn w-[fit-content] grey text rounded-sm p-1 hover active" href="/valuate">Estimate pricing before ordering</Link>
+        <Link prefetch={false} className="slideIn w-[fit-content] grey text rounded-sm p-1 hover active" href="/valuate">Estimate pricing before ordering</Link>
       </div>
       <div className="slideIn grey text flex flex-col gap-1 card">
         <p className="slideIn text-2xl blue text">ProDSA <b>Insurance</b></p>
@@ -60,7 +60,7 @@ export default function Page() {
         <Button theme={Themes.GREEN} className="slideIn font-bold w-[fit-content] font-2xl green text hover active bgLight" onClick={()=>{window.open("https://dsc.gg/ProDSA")}}>
         Order insurance from ProDSA Services today!
         </Button>
-        <Link className="slideIn w-[fit-content] blue rounded-sm p-1 hover active" href="/valuate?mode=insurance">Estimate insurance before ordering</Link>
+        <Link prefetch={false} className="slideIn w-[fit-content] blue rounded-sm p-1 hover active" href="/valuate?mode=insurance">Estimate insurance before ordering</Link>
       </div>
       <div className="slideIn grey text flex flex-col gap-1 card">
         <p className="slideIn text-2xl blue text">ProDSA <b>Designs</b> and <b>Upgrades</b></p>
