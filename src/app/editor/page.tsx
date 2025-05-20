@@ -84,7 +84,7 @@ export default function Page() {
   }, [repairMode])
 
   useEffect(()=>{
-    process();
+    runCmd();
   }, [cmd, formType])
 
   useEffect(()=>{
@@ -103,15 +103,15 @@ export default function Page() {
   // }, []); // Empty dependency array ensures this runs only on mount and unmount
 
   useEffect(()=>{
-    process();
+    runCmd();
   }, [starterQ, sortY, aExpandoes])
 
   function formProcess(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    process();
+    runCmd();
   }
 
-  async function process() {
+  async function runCmd() {
     console.log("processing command", cmd);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
@@ -291,7 +291,7 @@ export default function Page() {
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 
         <div className="flex flex-col">
-          <Button type="button" theme={Themes.BLUE} onClick={fillTemplateBP} className="h-[fit-content]">
+          <Button type="button" disabled={process.env.NEXT_PUBLIC_BRANCH == "production"} theme={Themes.BLUE} onClick={fillTemplateBP} className="h-[fit-content]">
             <Loader theme={Themes.BLUE} active={loadingBP}></Loader>
             Load test blueprint
           </Button>
