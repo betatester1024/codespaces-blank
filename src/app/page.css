@@ -5,6 +5,8 @@
   width: 100%;
   position:relative;
   z-index: 0;
+  margin-left: 0px;
+  transition: all 0.2s;
 }
 
 .lock-content {
@@ -25,6 +27,11 @@ li {
   top: 0px;
   left: 0px;
   z-index:-1;
+
+}
+
+.card:hover {
+  margin-left: 10px;
 }
 
 hr {
