@@ -6,6 +6,7 @@ import { Noto_Sans_Display, Noto_Sans_Mono, Raleway } from "next/font/google";
 import { GIcon } from "@/lib/utils";
 import { Suspense } from "react";
 import Loading from "./loading";
+import { Metadata } from "next";
 
 const NotoSansDisplay = Noto_Sans_Display({
   variable: "--font-nsd",
@@ -22,17 +23,22 @@ const RFont = Raleway({
   subsets: ["latin"]
 })
 
+export const metadata: Metadata = {
+  title: 'ProDSA Services Tools',
+  description: 'Welcome to ProDSA Services.'
+}
+
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
   return (
     <html lang="en">
       <head>
         <link rel="icon" href="/icon.png"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <meta name="description" content="Blueprint editor and valuator for ProDSA Services, a subsidiary of BetaOS Services."/>
+        <meta name="description" content="Welcome to ProDSA Services."/>
         <meta property="og:type" content="website"/>
         <meta property="og:title" content="ProDSA Services Tools"/>
-        <meta property="og:description" content="Blueprint editor and valuator for ProDSA Services, a subsidiary of BetaOS Services."/>
-        <meta property="og:image" content="https://prodsatools.vercel.app/icon.png"/>
+        <meta property="og:description" content="Welcome to ProDSA Services."/>
+        <meta property="og:image" content="https://prodsa.vercel.app/icon.png"/>
       </head>
       <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} ${RFont.variable} antialiased`}>
         <Suspense fallback={<Loading/>}>{children}
@@ -42,7 +48,7 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
           <Link prefetch={false} className="blue active" href="/valuate">Ship cost calculator</Link>
           <Link prefetch={false} className="blue active" href="/rates">ProDSA Rates</Link>
           <Link prefetch={false} className="blue active " href="/editor">ProDSA PrecisionEdit Tools</Link>
-          <Link prefetch={false} className="green text active" href="//dsc.gg/ProDSA" target="_blank">Order ships from ProDSA Services today!</Link>
+          <Link prefetch={false} className="green text active" href="//dsc.gg/order-now" target="_blank">Order ships from ProDSA Services today!</Link>
           <span>Site design by ProDSA Services</span>
         </footer>
       </body>

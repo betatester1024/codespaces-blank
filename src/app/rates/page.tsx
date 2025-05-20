@@ -51,7 +51,7 @@ export default function Page() {
         <p className={Themes.BLUE.textCls}>For construction requests only / Insurance labour rate capped at <b>15%</b></p>
         <Lister className="border-[2px] rounded-md" className_c="p-1" colLayout="2fr 1fr">{sizeCosts}</Lister>
       </div>
-      <div className="w-[500px] shrink grow">
+      <div className="w-[500px] shrink grow" id="othercosts">
         <H1>Other ProDSA costs</H1>
         <p className={Themes.BLUE.textCls}>All hourly rates have a minimum cost basis of <b>45 mins</b> unless otherwise specified.</p>
         <Lister className="border-[2px] rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">
