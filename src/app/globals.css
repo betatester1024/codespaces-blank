@@ -26,9 +26,50 @@
   animation:slidein 500ms both;
 }
 
+
+.card {
+  @apply rounded-lg p-3;
+  width: fit-content;
+  flex-grow: 1;
+  position:relative;
+  z-index: 0;
+  scale: 1;
+  transition: all 0.2s;
+}
+
+.card ul {
+  max-width: 300px;
+}
+
+.lock-content {
+  @apply aspect-auto h-[unset];
+  width: unset;
+  object-fit:contain;
+}
+
+li {
+  @apply mt-1 mb-1;
+}
+
+.card:after {
+  @apply rounded-lg shadow-lg shadow-gray-500/80;
+  width: 100%; height: 100%;
+  @apply bg-white dark:bg-gray-700;
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index:-1;
+
+}
+
+.card:hover {
+  scale: 1.02;
+}
+
 @keyframes slidein {
   0% {
-    transform: translateX(100vw);
+    transform: translateX(500px);
     opacity: 0;
   }
   50% {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Themes } from "@/lib/Themes";
-import { Button, byId, Header } from "@/lib/utils";
+import { Button, byId, GIcon, Header } from "@/lib/utils";
 import Image from "next/image";
 import "@/app/page.css";
 import Link from "next/link";
@@ -28,8 +28,12 @@ export default function Page() {
       <p className="slideIn grey text">Trusted by the community since <b>2021</b></p>
     </header>
     <hr className="grey text"/>
-    <div className="slideIn">
+    <div className="slideIn flex gap-3">
       <p className="text-3xl grey text">How can we help you today?</p>
+      <Button theme={Themes.GREEN} className="text-xl" onClick={()=>{window.open("/communitygiveback", "_self")}}>
+        You may be eligible for ProDSA Services Low-Income and New Player support - check now! 
+        <GIcon theme={Themes.GREEN}>arrow_forward_ios</GIcon>
+      </Button>
     </div>
     <div className="slideIn p-3 flex flex-wrap gap-3">
       <div className="slideIn grey text flex flex-col gap-1 card">
