@@ -20,7 +20,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function Header(props:{title:string|ReactNode, subtitle:string|ReactNode, className?:string}) {
   return  <header className={"flex flex-col justify-left text-2xl "+props.className}>
       <h1 className={`${Themes.BLUE.textCls}`}>{props.title}</h1>
-      <p className={`${Themes.BLUE.textCls} text-md`}>{props.subtitle}</p>
+      <p className={`${Themes.BLUE.textCls} text-base`}>{props.subtitle}</p>
     </header>
 }
 

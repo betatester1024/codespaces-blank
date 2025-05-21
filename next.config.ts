@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['localhost:3000'],
     },
   },
+  images:{
+    remotePatterns:[new URL("https://*.drednot.io/**")]
+  },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack } ) => {
     // Important: return the modified config
     config.optimization.minimize = false;
