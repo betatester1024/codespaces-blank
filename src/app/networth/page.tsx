@@ -8,7 +8,7 @@ export default function Page() {
 
   async function processShiplist() {
     let tArea = byId("shiplistIn") as HTMLTextAreaElement;
-    console.log(await strawbCmd({cmd:"valueTotal", shiplist:tArea.value}))
+    console.log(await strawbCmd({cmd:"ValueTotal", shiplist:tArea.value}))
   }
 
   return <div className="flex flex-col gap-1 m-3">

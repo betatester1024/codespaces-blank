@@ -657,11 +657,11 @@ if __name__ == "__main__":
     except:
         arg = ""
     try: 
-        currentShips = json.load(open("app/shiplist/savedata/ships.json"))
+        currentShips = json.load(open("src/shiplist/savedata/ships.json"))
     except:
         currentShips = {"dates": "", "ships": {}}
     
-    dbgLog = print#open('src/shiplist/output.txt', 'w').write
+    dbgLog = open('src/shiplist/output.txt', 'w').write
     fetchShips(dbgLog)
     sorted_items = sorted(currentShips["ships"].items(), key=lambda item: item[1]['w'], reverse=True)
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
