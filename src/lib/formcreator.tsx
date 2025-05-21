@@ -43,7 +43,7 @@ export const sizeTab = [
   {sz: 6401, cost: 0.2, szName:"Large"}
 ]
 
-function f(n:number, dprec:number=1) {
+export function f(n:number, dprec:number=1) {
   return n.toLocaleString("en-CA", {maximumFractionDigits:dprec, minimumFractionDigits:dprec})
 }
 const errorHTML = <p className={Themes.RED.textCls}>No blueprint summary.</p>;

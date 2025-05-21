@@ -650,7 +650,7 @@ class Econlogger:
 
 if __name__ == "__main__":
 
-    print("CWD=", os.getcwd())
+    # print("CWD=", os.getcwd())
     cmd = sys.argv[1]
     try:
         arg = open("./argument.txt").read();
