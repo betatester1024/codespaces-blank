@@ -18,8 +18,10 @@ export default function Page() {
   }
 
   return <div className="flex flex-col gap-1 m-3 font-raleway">
-    <textarea id="shiplistIn" className="grey bgLight hover active"></textarea>
-    <Button theme={Themes.BLUE} className="blue text hover active" onClick={()=>{processShiplist()}}>Process</Button>
+    <div className="flex gap-1 flex-wrap">
+      <textarea id="shiplistIn" className="grey bgMain" placeholder="Shiplist goes here..."></textarea>
+      <Button theme={Themes.BLUE} className="grow shrink blue text hover active" onClick={()=>{processShiplist()}}>Process</Button>
+    </div>
     <b>Your net worth is {netWorth}</b>
   </div>
 }
