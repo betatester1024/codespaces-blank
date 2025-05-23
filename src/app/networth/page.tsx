@@ -2,7 +2,7 @@
 
 import { f } from "@/lib/formcreator";
 import { Themes } from "@/lib/Themes";
-import { Button, byId, Loader} from "@/lib/utils";
+import { Button, byId, GIcon, H1, Header, Loader} from "@/lib/utils";
 import { strawbCmd } from "@/shiplist/shiplist";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,7 +33,7 @@ export default function Page() {
         <div>
           <p className="text-lg"><b className="blue text">{row.name}</b> <span>{'{'}{row.hex_code}{'}'}</span></p>
           <p>Last loaded: {row.load_time}</p>
-          <p>Value: <b className="blue text">{f(row.shipworth, 0)} flux</b> (#{row.placement})</p>
+          <p className="text-lg">Value: <b className="blue text">{f(row.shipworth, 0)} flux</b> (#{f(row.placement, 0)})</p>
         </div>
       </div>)
     }
@@ -44,15 +44,21 @@ export default function Page() {
   const [eligibility, setEligible] = useState<boolean>(false);
   const [entries, setEntries] = useState<ReactNode>(<>None yet</>);
   return <div className="flex flex-col gap-1 m-3 font-raleway">
+    <header className="slideIn font-raleway blue text">
+      <div className="text-4xl">ProDSA <b>Net Worth Valuator</b></div>
+      <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
+    </header>
     <div className="flex gap-1 flex-wrap">
-      <textarea id="shiplistIn" className="grey bgMain" placeholder="Shiplist goes here..."></textarea>
+      <textarea id="shiplistIn" className="grey bgMain text" placeholder="Shiplist goes here..."></textarea>
       <Button theme={Themes.BLUE} className="grow shrink blue text hover active" onClick={()=>{processShiplist()}}>
         <Loader active={loadingPending} theme={Themes.GREY}/>
         Process
       </Button>
     </div>
-    <p className="w-full m-3 text-2xl">Your net worth is <b className="blue text">{netWorth}</b> flux</p>
-    {eligibility ? <div className="w-full grey text">
+    <div className="w-full mb-3 mt-3 text-2xl darkgrey text flex align-baseline gap-1.5">
+      <GIcon theme={Themes.DARKGREY}>arrow_right</GIcon>Your net worth is <b className="blue text">{netWorth}</b> flux.
+    </div>
+    {eligibility ? <div className="w-full darkgrey text text-lg">
       You may be eligible for the&nbsp;
       <Link href="/communitygiveback" className="blue text"><b>Low-Income and New Player discounts</b></Link> program!
       Click the link to learn more.

@@ -7,7 +7,16 @@ import sys
 from datetime import timedelta, date, datetime
 
 import requests
+import os
+# from supabase import create_client, Client
 
+url: str = os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
+key: str = os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+
+from supabase._async.client import AsyncClient as Client, create_client
+
+async def create_supabase() -> Client:
+    return await create_client(url, key)
 worth = {
     216: 0,  # starter helm
     222: 0,  # starter hatch
@@ -120,13 +129,13 @@ def calculateNetworth(hexcode, items, full):
     return w
 FETCHING = False
 log = None
-def fetchShips(logger):
+async def fetchShips(logger):
     global FETCHING, log, sorted_items, LEADERBOARD_HEX
     log = logger
-    log("testing.")
+    log("fetch called.\n")
     if FETCHING: return
     FETCHING = True
-    today = datetime.utcnow().date()
+    today = datetime.datetime.date(datetime.datetime.now())
     if currentShips["dates"] == "":
         current_date = date(2022, 11, 23)
     else:
@@ -178,13 +187,43 @@ def fetchShips(logger):
         savecounter += 1
         if savecounter > 10:
             savecounter = 0
-            json.dump(currentShips, open("src/shiplist/savedata/ships.json", "w"))
-        log(f"Fetched {date_string} in {int(fetchtime*100)/100} sec // {total-daysleft}/{total} // est: {int(daysleft * averageFetchTime*1000)/1000} // Saved in {int((time.time() - st) * 1000)/1000} // Total ships: {len(currentShips['ships'])} v {len(data)}")
+            # try:
+            # supabase.table("shipsaves").update({"value":currentShips}).eq("id", "main").execute()
+            # except Exception as e:
+            #     dbgLog(str(e))
+            #     dbgLog("\n")
+            #     return
+            json.dump(currentShips, open("/tmp/savedata/ships.json", "w"))
+            
+            with open("/tmp/savedata/ships.json", "rb") as f:
+                (await supabase.storage
+                .from_("shipsaves")
+                .upload(
+                    file=f,
+                    path="ships.json",
+                    file_options={"cache-control": "3600", "upsert": "true"}
+                ))
+        log(f"Fetched {date_string} in {int(fetchtime*100)/100} sec // {total-daysleft}/{total} // est: {int(daysleft * averageFetchTime*1000)/1000} // Saved in {int((time.time() - st) * 1000)/1000} // Total ships: {len(currentShips['ships'])} v {len(data)}\n")
     if updated:
-        json.dump(currentShips, open("src/shiplist/savedata/ships.json", "w"))
+        # try:
+        json.dump(currentShips, open("/tmp/savedata/ships.json", "w"))
+        with open("/tmp/savedata/ships.json", "rb") as f:
+            (await supabase.storage
+            .from_("shipsaves")
+            .upload(
+                file=f,
+                path="ships.json",
+                file_options={"cache-control": "3600", "upsert": "true"}
+            ))
+        # except Exception as e:
+        #     dbgLog(str(e))
+        #     dbgLog("\n")
+        #     return
+        # json.dump(currentShips, open("src/shiplist/savedata/ships.json", "w"))
     sorted_items = sorted(currentShips["ships"].items(), key=lambda item: item[1]['w'], reverse=True)
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     FETCHING = False
+
 
 def calculateNetworthShiplist(shiplist):
     out = []
@@ -194,7 +233,7 @@ def calculateNetworthShiplist(shiplist):
             hex_code = shiplist["ships"][shiptag]["hex_code"]
             name = shiplist["ships"][shiptag]["team_name"]
             icon = shiplist["ships"][shiptag]["icon_path"]
-            load_time = datetime.utcfromtimestamp(shiplist["ships"][shiptag]["time"]).strftime('%Y-%m-%d')
+            load_time = datetime.datetime.fromtimestamp(shiplist["ships"][shiptag]["time"]).strftime('%Y-%m-%d')
             shipworth = round(currentShips["ships"][hex_code]["w"]) if hex_code in currentShips["ships"] else -1
             totalworth += max(shipworth, 0)
             placement = LEADERBOARD_HEX.index(hex_code) + 1 if hex_code in LEADERBOARD_HEX else -1
@@ -270,15 +309,22 @@ def getLeaderboardNetworth(page):
         content["ships"].append({"rank": LEADERBOARD_HEX.index(ship)+1, "shipData":createShipEntree(ship)});
     return content
 
-def start(logger):
+async def start(logger):
     global currentShips, sorted_items, LEADERBOARD_HEX
     try:
-        currentShips = json.load(open("src/shiplist/savedata/ships.json"))
+        # with open("/tmp/shipsaves/ships.json", "wb+") as f:
+        #     response = (
+        #         supabase.storage
+        #         .from_("avatars")
+        #         .download("folder/avatar1.png")
+        #     )
+        #     f.write(response)
+        currentShips = json.load(open("/tmp/savedata/ships.json"))
     except:
         currentShips = {"dates": "", "ships": {}}
     sorted_items = sorted(currentShips["ships"].items(), key=lambda item: item[1]['w'], reverse=True)
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
-    fetchShips(logger)
+    await fetchShips(logger)
     
 import json
 import requests
@@ -480,189 +526,224 @@ def _decode_entry(chunk):
 
 SERVER_TO_NAME = ["US", "EU", "AS"]
 
-class Econlogger:
-    def __init__(self, logger) -> None:
-        logger("Starting transfer logger, os: " + os.name)
-        self.log = logger
-        self.fetching = False
-        self.DATABASE_PATH = os.path.abspath("src/shiplist/savedata/strawblogs")
-        self.data = []
-        self.current_date = date(2022, 11, 23)
-        rawschema = requests.get('https://pub.drednot.io/prod/econ/item_schema.json').json()
-        self.schema = {}
-        self.loaded = False
-        for item in rawschema:
-            self.schema[item["id"]] = item
-        if not os.path.exists(self.DATABASE_PATH):
-            logger("Created database")
-            os.mkdir(self.DATABASE_PATH)
-        st = time.time()
-        logger("Starting loading shipname data")
-        if not os.path.exists(self.DATABASE_PATH + "/shipnames.strawblogs"):
-            with open(self.DATABASE_PATH + "/shipnames.strawblogs", "wb") as f:
-                f.write(lz4.compress(msgpack.dumps({"current_date": [2022, 11, 22]})))
-            self.shipnames = {"current_date": [2022, 11, 22]}
-            self.shipnamescurrentdate = date(2022, 11, 22)
-        else:
-            with open(self.DATABASE_PATH + "/shipnames.strawblogs", "rb") as f:
-                self.shipnames = msgpack.loads(lz4.decompress(f.read()))
-            d = self.shipnames["current_date"]
-            self.shipnamescurrentdate = date(d[0], d[1], d[2])
-        logger(f"Loaded shipname data in {round(time.time()-st)} sec.")
+# class Econlogger:
+#     def __init__(self, logger) -> None:
+#         logger("Starting transfer logger, os: " + os.name)
+#         self.log = logger
+#         self.fetching = False
+#         self.DATABASE_PATH = os.path.abspath("src/shiplist/savedata/strawblogs")
+#         self.data = []
+#         self.current_date = date(2022, 11, 23)
+#         rawschema = requests.get('https://pub.drednot.io/prod/econ/item_schema.json').json()
+#         self.schema = {}
+#         self.loaded = False
+#         for item in rawschema:
+#             self.schema[item["id"]] = item
+#         if not os.path.exists(self.DATABASE_PATH):
+#             logger("Created database")
+#             os.mkdir(self.DATABASE_PATH)
+#         st = time.time()
+#         logger("Starting loading shipname data")
+#         if not os.path.exists(self.DATABASE_PATH + "/shipnames.strawblogs"):
+#             with open(self.DATABASE_PATH + "/shipnames.strawblogs", "wb") as f:
+#                 f.write(lz4.compress(msgpack.dumps({"current_date": [2022, 11, 22]})))
+#             self.shipnames = {"current_date": [2022, 11, 22]}
+#             self.shipnamescurrentdate = date(2022, 11, 22)
+#         else:
+#             with open(self.DATABASE_PATH + "/shipnames.strawblogs", "rb") as f:
+#                 self.shipnames = msgpack.loads(lz4.decompress(f.read()))
+#             d = self.shipnames["current_date"]
+#             self.shipnamescurrentdate = date(d[0], d[1], d[2])
+#         logger(f"Loaded shipname data in {round(time.time()-st)} sec.")
 
-    def _get_ship_names(self, date_string):
-        st = time.time()
-        url = f"https://pub.drednot.io/prod/econ/{date_string}/ships.json.gz"
-        self.log("")
-        self.log(f"Fetching {url}")
-        timer_fetch = time.time()
-        fetch_raw = gzip.decompress(requests.get(url).content).decode("utf-8")
-        ship_logs = json.loads(fetch_raw)
-        timer_fetch = time.time() - timer_fetch
-        timer_process = time.time()
-        for ship in ship_logs:
-            hex_code = ship["hex_code"].strip("{}")
-            color = ship["color"]
-            name = ship["name"]
-            if hex_code in self.shipnames:
-                if self.shipnames[hex_code][-1][0] != name or self.shipnames[hex_code][-1][1] != color:
-                    self.shipnames[hex_code].append((name, color, date_string))
-            else:
-                self.shipnames[hex_code] = [(name, color, date_string)]
-        timer_process = time.time() - timer_process
-        d = [int(x) for x in date_string.split("_")]
-        self.shipnamescurrentdate = date(d[0], d[1], d[2])
-        self.shipnames["current_date"] = d
-        self.log(f"Processed in {round(time.time() - st, 2)} sec // "+\
-           f"Fetch {round(timer_fetch, 2)} // Process {round(timer_process, 2)}")
-        self.log(f"({len(ship_logs)} entries, {convert_size(len(fetch_raw))} -> {convert_size(len(lz4.compress(msgpack.dumps(self.shipnames))))})")
+#     def _get_ship_names(self, date_string):
+#         st = time.time()
+#         url = f"https://pub.drednot.io/prod/econ/{date_string}/ships.json.gz"
+#         self.log("")
+#         self.log(f"Fetching {url}")
+#         timer_fetch = time.time()
+#         fetch_raw = gzip.decompress(requests.get(url).content).decode("utf-8")
+#         ship_logs = json.loads(fetch_raw)
+#         timer_fetch = time.time() - timer_fetch
+#         timer_process = time.time()
+#         for ship in ship_logs:
+#             hex_code = ship["hex_code"].strip("{}")
+#             color = ship["color"]
+#             name = ship["name"]
+#             if hex_code in self.shipnames:
+#                 if self.shipnames[hex_code][-1][0] != name or self.shipnames[hex_code][-1][1] != color:
+#                     self.shipnames[hex_code].append((name, color, date_string))
+#             else:
+#                 self.shipnames[hex_code] = [(name, color, date_string)]
+#         timer_process = time.time() - timer_process
+#         d = [int(x) for x in date_string.split("_")]
+#         self.shipnamescurrentdate = date(d[0], d[1], d[2])
+#         self.shipnames["current_date"] = d
+#         self.log(f"Processed in {round(time.time() - st, 2)} sec // "+\
+#            f"Fetch {round(timer_fetch, 2)} // Process {round(timer_process, 2)}")
+#         self.log(f"({len(ship_logs)} entries, {convert_size(len(fetch_raw))} -> {convert_size(len(lz4.compress(msgpack.dumps(self.shipnames))))})")
 
-    def fetch(self):
-        if self.fetching:
-            return
-        if not self.loaded:
-            st = time.time()
-            self.log("Loading econlogger data to ram.")
-        self.fetching = True
-        today = datetime.now(timezone.utc).date()
-        needToSave = False
-        while self.current_date <= today:
-            date_string = f"{self.current_date.year}_{self.current_date.month}_{self.current_date.day}"
-            path = self.DATABASE_PATH + f"/{date_string}.strawblog"
-            # if not os.path.exists(path):
-            #     strawblog = _compress_log(date_string, path, self.log)
-            # else:
-            #     with open(path, 'rb') as f:
-            #         strawblog = lz4.decompress(f.read())
-            # self.data.append(strawblog)
+#     def fetch(self):
+#         if self.fetching:
+#             return
+#         if not self.loaded:
+#             st = time.time()
+#             self.log("Loading econlogger data to ram.")
+#         self.fetching = True
+#         today = datetime.now(timezone.utc).date()
+#         needToSave = False
+#         while self.current_date <= today:
+#             date_string = f"{self.current_date.year}_{self.current_date.month}_{self.current_date.day}"
+#             path = self.DATABASE_PATH + f"/{date_string}.strawblog"
+#             # if not os.path.exists(path):
+#             #     strawblog = _compress_log(date_string, path, self.log)
+#             # else:
+#             #     with open(path, 'rb') as f:
+#             #         strawblog = lz4.decompress(f.read())
+#             # self.data.append(strawblog)
 
-            if self.current_date > self.shipnamescurrentdate:
-                self._get_ship_names(date_string)
-                needToSave = True
+#             if self.current_date > self.shipnamescurrentdate:
+#                 self._get_ship_names(date_string)
+#                 needToSave = True
 
-            self.current_date += timedelta(days=1)
-        if needToSave:
-            with open(self.DATABASE_PATH + "/shipnames.strawblogs", "wb") as w:
-                w.write(lz4.compress(msgpack.dumps(self.shipnames)))
-        if not self.loaded:
-            self.log(f"Loaded trans log data to ram in {round(time.time() - st, 2)} seconds!")
-            self.loaded = True
-        self.fetching = False
+#             self.current_date += timedelta(days=1)
+#         if needToSave:
+#             with open(self.DATABASE_PATH + "/shipnames.strawblogs", "wb") as w:
+#                 w.write(lz4.compress(msgpack.dumps(self.shipnames)))
+#         if not self.loaded:
+#             self.log(f"Loaded trans log data to ram in {round(time.time() - st, 2)} seconds!")
+#             self.loaded = True
+#         self.fetching = False
     
-    def find_dst_by_hex(self, hex_code):
-        title = "DST Search of {" + hex_code + "}" 
-        hex_code = hex_code.strip("{} ")
-        print(f"Finding logs with destination {hex_code}")
-        res = self._find_by_index(_compress_hex(hex_code), 18)
-        if len(res) == 0:
-            return title, "Failed to find any results.", False
-        transfers = {}
-        for log in res:
-            w = networth.getworth(self.schema[log["item"]]) * log["count"]
-            if log["src"] in transfers:
-                transfers[log["src"]] += w
-            else:
-                transfers[log["src"]] = w
-        transfers = sorted(transfers.items(), key=lambda item: item[1], reverse=True)
-        transfers = transfers[:10] if len(transfers) > 10 else transfers
-        basic_desc = f"Results: `{len(res)}` results\n\n====================\n**Top ten most transfered:**\n====================\n"
-        for transfer in transfers:
-            if transfer[0] not in SOURCE_MAP:
-                basic_desc += f"**{self.shipnames[transfer[0]][-1][0]}** " + "`{" + transfer[0] + "}`"+ f": {round(transfer[1])} flux\n"
-            else:
-                basic_desc += f"**{transfer[0]}:** {round(transfer[1])} flux\n"
-        raw = self.create_detailed_logs(res)
-        return title, basic_desc, raw
+#     def find_dst_by_hex(self, hex_code):
+#         title = "DST Search of {" + hex_code + "}" 
+#         hex_code = hex_code.strip("{} ")
+#         print(f"Finding logs with destination {hex_code}")
+#         res = self._find_by_index(_compress_hex(hex_code), 18)
+#         if len(res) == 0:
+#             return title, "Failed to find any results.", False
+#         transfers = {}
+#         for log in res:
+#             w = networth.getworth(self.schema[log["item"]]) * log["count"]
+#             if log["src"] in transfers:
+#                 transfers[log["src"]] += w
+#             else:
+#                 transfers[log["src"]] = w
+#         transfers = sorted(transfers.items(), key=lambda item: item[1], reverse=True)
+#         transfers = transfers[:10] if len(transfers) > 10 else transfers
+#         basic_desc = f"Results: `{len(res)}` results\n\n====================\n**Top ten most transfered:**\n====================\n"
+#         for transfer in transfers:
+#             if transfer[0] not in SOURCE_MAP:
+#                 basic_desc += f"**{self.shipnames[transfer[0]][-1][0]}** " + "`{" + transfer[0] + "}`"+ f": {round(transfer[1])} flux\n"
+#             else:
+#                 basic_desc += f"**{transfer[0]}:** {round(transfer[1])} flux\n"
+#         raw = self.create_detailed_logs(res)
+#         return title, basic_desc, raw
     
-    def find_src_by_hex(self, hex_code):
-        title = "SRC Search of {" + hex_code + "}" 
-        hex_code = hex_code.strip("{} ")
-        res =  self._find_by_index(_compress_hex(hex_code), 12)
-        if len(res) == 0:
-            return title, "Failed to find any results.", False
-        transfers = {}
-        for log in res:
-            w = networth.getworth(self.schema[log["item"]]) * log["count"]
-            if log["dst"] in transfers:
-                transfers[log["dst"]] += w
-            else:
-                transfers[log["dst"]] = w
-        transfers = sorted(transfers.items(), key=lambda item: item[1], reverse=True)
-        transfers = transfers[:10] if len(transfers) > 10 else transfers
-        basic_desc = f"Results: `{len(res)}` results\n\n====================\n**Top ten most transfered:**\n====================\n"
-        for transfer in transfers:
-            if transfer[0] != "killed":
-                basic_desc += f"**{self.shipnames[transfer[0]][-1][0]}** " + "`{" + transfer[0] + "}`"+ f": {round(transfer[1])} flux\n"
-            else:
-                basic_desc += f"**Killed:** {round(transfer[1])} flux\n"
-        raw = self.create_detailed_logs(res)
-        return title, basic_desc, raw
+#     def find_src_by_hex(self, hex_code):
+#         title = "SRC Search of {" + hex_code + "}" 
+#         hex_code = hex_code.strip("{} ")
+#         res =  self._find_by_index(_compress_hex(hex_code), 12)
+#         if len(res) == 0:
+#             return title, "Failed to find any results.", False
+#         transfers = {}
+#         for log in res:
+#             w = networth.getworth(self.schema[log["item"]]) * log["count"]
+#             if log["dst"] in transfers:
+#                 transfers[log["dst"]] += w
+#             else:
+#                 transfers[log["dst"]] = w
+#         transfers = sorted(transfers.items(), key=lambda item: item[1], reverse=True)
+#         transfers = transfers[:10] if len(transfers) > 10 else transfers
+#         basic_desc = f"Results: `{len(res)}` results\n\n====================\n**Top ten most transfered:**\n====================\n"
+#         for transfer in transfers:
+#             if transfer[0] != "killed":
+#                 basic_desc += f"**{self.shipnames[transfer[0]][-1][0]}** " + "`{" + transfer[0] + "}`"+ f": {round(transfer[1])} flux\n"
+#             else:
+#                 basic_desc += f"**Killed:** {round(transfer[1])} flux\n"
+#         raw = self.create_detailed_logs(res)
+#         return title, basic_desc, raw
       
-    def _find_by_index(self, searcher, offsetIndex, past=0):
-        occurrences = []
-        r = range(0, len(self.data)) if past == 0 else range(len(self.data)-past, len(self.data))
-        for i in r:
-            log = self.data[i]
-            index = log.find(searcher)
-            while index != -1:
-                o = index - offsetIndex
-                if o % 24 == 0:
-                    occurrences.append(_decode_entry(log[o:o+24]))
-                index = log.find(searcher, index + 24)
-        return occurrences
+#     def _find_by_index(self, searcher, offsetIndex, past=0):
+#         occurrences = []
+#         r = range(0, len(self.data)) if past == 0 else range(len(self.data)-past, len(self.data))
+#         for i in r:
+#             log = self.data[i]
+#             index = log.find(searcher)
+#             while index != -1:
+#                 o = index - offsetIndex
+#                 if o % 24 == 0:
+#                     occurrences.append(_decode_entry(log[o:o+24]))
+#                 index = log.find(searcher, index + 24)
+#         return occurrences
     
-    def create_detailed_logs(self, data):
-        raw_log = "Detailed Logs:\nserver dd/mm/yyyy hh:mm UTC zone, src -> dst, of count item\n\n"
-        for log in data:
-            t = datetime.fromtimestamp(log["time"], timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
-            if log['src'] not in SOURCE_MAP:
-                src = self.shipnames[log['src']][-1][0] + " {" + log['src'] + "}"
-            else:
-                src = log["src"]
+#     def create_detailed_logs(self, data):
+#         raw_log = "Detailed Logs:\nserver dd/mm/yyyy hh:mm UTC zone, src -> dst, of count item\n\n"
+#         for log in data:
+#             t = datetime.fromtimestamp(log["time"], timezone.utc).strftime("%d/%m/%Y %H:%M UTC")
+#             if log['src'] not in SOURCE_MAP:
+#                 src = self.shipnames[log['src']][-1][0] + " {" + log['src'] + "}"
+#             else:
+#                 src = log["src"]
             
-            if log["dst"] != "killed":
-                dst = self.shipnames[log['dst']][-1][0] + " {" + log['dst'] + "}"
-            else:
-                dst = "killed"
-            l = f"{SERVER_TO_NAME[log['serv']]} {t} {log['zone']} {src} -> {dst} of {log['count']} {self.schema[log['item']]['name']}"
-            raw_log += l + "\n"
-        return raw_log
+#             if log["dst"] != "killed":
+#                 dst = self.shipnames[log['dst']][-1][0] + " {" + log['dst'] + "}"
+#             else:
+#                 dst = "killed"
+#             l = f"{SERVER_TO_NAME[log['serv']]} {t} {log['zone']} {src} -> {dst} of {log['count']} {self.schema[log['item']]['name']}"
+#             raw_log += l + "\n"
+#         return raw_log
 
-if __name__ == "__main__":
-
+def dbgLog(str):
+    dbgFile.write(str)
+    dbgFile.flush()
+    
+import datetime;
+async def init():
+    global currentShips, dbgFile, supabase, LEADERBOARD_HEX;
     # print("CWD=", os.getcwd())
+    supabase = await create_supabase()
     cmd = sys.argv[1]
     try:
         arg = open("./argument.txt").read();
     except:
         arg = ""
-    try: 
-        currentShips = json.load(open("src/shiplist/savedata/ships.json"))
-    except:
-        currentShips = {"dates": "", "ships": {}}
+    # try: 
+    # currentShips = (await supabase.table("shipsaves")
+    #                 .select("value")
+    #                 .execute()).data[0]["value"]; #json.load(open("src/shiplist/savedata/ships.json"))
     
-    dbgLog = open('src/shiplist/output.txt', 'w').write
-    fetchShips(dbgLog)
+    # try:
+    from pathlib import Path
+    output_file = Path("/tmp/savedata/ships.json")
+    output_file.parent.mkdir(exist_ok=True, parents=True)
+    open("/tmp/savedata/ships.json", "w+");
+    with open("/tmp/savedata/ships.json", "wb+") as f:
+        response = (
+            await supabase.storage
+            .from_("shipsaves")
+            .download("ships.json")
+        )
+        currentShips = json.loads(response)
+        f.write(response)
+    # currentShips = json.load(open("/tmp/shipsaves/ships.json"))
+    # except:
+    #     currentShips = {"dates": "", "ships": {}}
+    
+    dbgFile = open('src/shiplist/output.txt', 'w')
+    dbgLog("\n\n\nOPERATION RUNNING AT ");
+    dbgLog(str(datetime.datetime.now()));
+    dbgLog("\n dates=");
+    dbgLog(currentShips["dates"]);
+    # return
+    # return;
+    
+    # except e:
+    #     print(e)
+    #     currentShips = {"dates": "", "ships": {}}
+    
+    
+    await fetchShips(dbgLog)
     sorted_items = sorted(currentShips["ships"].items(), key=lambda item: item[1]['w'], reverse=True)
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     dbgLog("COMMAND="+cmd+"\n")
@@ -679,15 +760,18 @@ if __name__ == "__main__":
         print(json.dumps(getLeaderboardNetworth(arg)));
     elif (cmd == 'byHex'):
         print(json.dumps(safeGetEntree(arg)));
-    elif (cmd == 'pastNames'):
-        ECONOMY_MANAGER = Econlogger(log)
-        ECONOMY_MANAGER.fetch();
-        hex_code = "CA27D4"
-        if hex_code in ECONOMY_MANAGER.shipnames:
-            names = ECONOMY_MANAGER.shipnames[hex_code]
-            s = ""
-            for name in names:
-                s += f"**{name[2]}**: `{name[0]}` (Color: #{str(hex(name[1])).replace('0x', '').upper().zfill(6)})\n"
-            print(s)
-        else:
-            print("cannot find")
+    # elif (cmd == 'pastNames'):
+        # ECONOMY_MANAGER = Econlogger(log)
+        # ECONOMY_MANAGER.fetch();
+        # hex_code = "CA27D4"
+        # if hex_code in ECONOMY_MANAGER.shipnames:
+        #     names = ECONOMY_MANAGER.shipnames[hex_code]
+        #     s = ""
+        #     for name in names:
+        #         s += f"**{name[2]}**: `{name[0]}` (Color: #{str(hex(name[1])).replace('0x', '').upper().zfill(6)})\n"
+        #     print(s)
+        # else:
+        #     print("cannot find")
+
+import asyncio;
+if __name__ == "__main__": asyncio.run(init())

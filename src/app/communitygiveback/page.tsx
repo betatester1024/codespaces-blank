@@ -7,8 +7,8 @@ import Link from "next/link";
 
 export default function Page() {
   return <div className="flex flex-col gap-3 font-raleway p-3">
-    <header className="blue text slideIn">
-      <p className="text-4xl slideIn">ProDSA Services <b className="slideIn">Community Giveback</b></p>
+    <header className="grey text slideIn">
+      <p className="blue text text-4xl slideIn">ProDSA Services <b className="slideIn">Community Giveback</b></p>
       <p>Funding, discounts and more</p>
     </header>
     <div className="flex flex-col gap-2">

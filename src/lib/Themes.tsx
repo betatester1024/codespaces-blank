@@ -21,5 +21,10 @@ export const Themes: { [x: string]: ColourTheme; } = {
     textCls: "text-gray-400", activeCls: "active:text-gray-300",
     hoverCls: "hover:text-gray-500 hover:!bg-gray-200 focus:text-gray-500 focus:bg-gray-100",
     bgMain: "bg-gray-100", bgLight: "bg-gray-50", bgStrong: "bg-gray-200"
+  },
+  DARKGREY: {
+    textCls: "darkgrey text", activeCls: "darkgrey active",
+    hoverCls: "darkgrey hover",
+    bgMain: "darkgrey bgMain", bgLight: "darkgrey bgLight", bgStrong: "darkgrey bgStrong"
   }
 };

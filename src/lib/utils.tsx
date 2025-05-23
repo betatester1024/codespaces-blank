@@ -33,7 +33,7 @@ export function Button(props:ButtonProps) {
       tabIndex={props.tabIndex}
       onClick={props.onClick}
       disabled = {props.disabled}
-      className={`${props.className} ${props.theme.textCls} ${props.disabled ? "" : props.theme.activeCls} ${props.disabled ? "" : props.theme.hoverCls} 
+      className={`${props.className} ${props.theme.textCls} ${props.theme.bgLight} ${props.disabled ? "" : props.theme.activeCls} ${props.disabled ? "" : props.theme.hoverCls} 
       cursor-pointer rounded-sm p-2 transition-colors justify-center flex items-center `}
     >
       {props.children}
