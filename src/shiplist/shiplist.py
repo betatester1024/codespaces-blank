@@ -15,10 +15,10 @@ key: str = os.environ.get("SUPABASE_ANON_KEY")
 from supabase._async.client import AsyncClient as Client, create_client
 
 async def create_supabase() -> Client:
-    try:
-        return await create_client(url, key)
-    except:
-        return None
+    # try:
+    #     #return await create_client(url, key)
+    # except:
+    #     return None
 worth = {
     216: 0,  # starter helm
     222: 0,  # starter hatch
