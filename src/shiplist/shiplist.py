@@ -12,7 +12,6 @@ import os
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_ANON_KEY")
-
 from supabase._async.client import AsyncClient as Client, create_client
 
 async def create_supabase() -> Client:
@@ -705,7 +704,7 @@ async def init():
     supabase = await create_supabase()
     cmd = sys.argv[1]
     try:
-        arg = open("./argument.txt").read();
+        arg = open("/tmp/argument.txt").read();
     except:
         arg = ""
     # try: 
@@ -730,11 +729,13 @@ async def init():
     # except:
     #     currentShips = {"dates": "", "ships": {}}
     
-    dbgFile = open('src/shiplist/output.txt', 'w')
+    dbgFile = open('/tmp/output.txt', 'w')
     dbgLog("\n\n\nOPERATION RUNNING AT ");
     dbgLog(str(datetime.datetime.now()));
     dbgLog("\n dates=");
     dbgLog(currentShips["dates"]);
+    dbgLog("key="+url[0:3]+"\n")
+    dbgLog("key="+key[0:3]+"\n")
     # return
     # return;
     
@@ -748,7 +749,7 @@ async def init():
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     dbgLog("COMMAND="+cmd+"\n")
     if (cmd == 'ValueTotal'):
-        data = calculateNetworthShiplist(json.load(open('test.json', encoding="utf-8")))
+        data = calculateNetworthShiplist(json.load(open('/tmp/test.json', encoding="utf-8")))
         output = {"value": data[1], "date": data[0], "shipData":[]};# f"N={data[1]} \nD={data[0]}\n"
         for ship in data[2]:
            output["shipData"].append(ship);
