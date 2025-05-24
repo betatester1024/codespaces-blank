@@ -708,6 +708,7 @@ async def init():
         supabase = await create_supabase()
     except:
         print("error")
+        return
     
     cmd = sys.argv[1]
     try:
