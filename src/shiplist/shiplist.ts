@@ -18,7 +18,7 @@ export async function strawbCmd(data:{cmd:string, shiplist?:string, val?:string}
   }
   await fs2.writeFile("/tmp/argument.txt", (data.val??"").toString())
   try {
-    const out:{stdout:string} = await exec(`python3 src/shiplist/shiplist.py ${data.cmd}`);
+    const out:{stdout:string} = await exec(`python src/shiplist/shiplist.py ${data.cmd}`);
     
     let logs = await fs2.readFile("/tmp/output.txt");
     console.log(logs.toString());
