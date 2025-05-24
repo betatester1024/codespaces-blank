@@ -701,7 +701,11 @@ import datetime;
 async def init():
     global currentShips, dbgFile, supabase, LEADERBOARD_HEX;
     # print("CWD=", os.getcwd())
+    dbgFile = open('/tmp/output.txt', 'w')
+    dbgLog("url="+url[0:3]+"\n")
+    dbgLog("key="+key[0:3]+"\n")
     supabase = await create_supabase()
+    
     cmd = sys.argv[1]
     try:
         arg = open("/tmp/argument.txt").read();
@@ -729,13 +733,11 @@ async def init():
     # except:
     #     currentShips = {"dates": "", "ships": {}}
     
-    dbgFile = open('/tmp/output.txt', 'w')
+
     dbgLog("\n\n\nOPERATION RUNNING AT ");
     dbgLog(str(datetime.datetime.now()));
     dbgLog("\n dates=");
     dbgLog(currentShips["dates"]);
-    dbgLog("key="+url[0:3]+"\n")
-    dbgLog("key="+key[0:3]+"\n")
     # return
     # return;
     
