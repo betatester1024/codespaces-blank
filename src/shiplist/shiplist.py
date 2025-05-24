@@ -704,7 +704,10 @@ async def init():
     dbgFile = open('/tmp/output.txt', 'w')
     dbgLog("url="+url[0:3]+"\n")
     dbgLog("key="+key[0:3]+"\n")
-    supabase = await create_supabase()
+    try: 
+        supabase = await create_supabase()
+    except:
+        print("error")
     
     cmd = sys.argv[1]
     try:
