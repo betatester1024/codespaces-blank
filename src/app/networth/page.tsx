@@ -14,14 +14,23 @@ export default function Page() {
   async function processShiplist() {
     let tArea = byId("shiplistIn") as HTMLTextAreaElement;
     setLoading(true);
-    let dat = await strawbCmd({cmd:"ValueTotal", shiplist:tArea.value});
+    let resp = await fetch("/api/shipprocessing?cmd=ValueTotal", 
+      {
+        method:"POST", 
+        body:tArea.value, 
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+      //await strawbCmd({cmd:"ValueTotal", shiplist:tArea.value});
+    let ships = await resp.json();
     setLoading(false);
-    if (dat.status != "SUCCESS") {
-      setWorth("Error.");
-      return;
-    }
+    // if (dat.status != "SUCCESS") {
+    //   setWorth("Error.");
+    //   return;
+    // }
 
-    let ships = JSON.parse(dat.data.output);
+    // let ships = JSON.parse(dat.data.output);
     console.log(ships);
     setWorth(f(ships.value, 0));
     setEligible(ships.value < 5000);
