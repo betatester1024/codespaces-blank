@@ -15,10 +15,7 @@ key: str = os.environ.get("SUPABASE_ANON_KEY")
 from supabase._async.client import AsyncClient as Client, create_client
 
 async def create_supabase() -> Client:
-    # try:
-    #     #return await create_client(url, key)
-    # except:
-    #     return None
+    return await create_client(url, key)
 worth = {
     216: 0,  # starter helm
     222: 0,  # starter hatch
@@ -704,15 +701,7 @@ import datetime;
 async def init():
     global currentShips, dbgFile, supabase, LEADERBOARD_HEX;
     # print("CWD=", os.getcwd())
-    dbgFile = open('/tmp/output.txt', 'w')
-    dbgLog("url="+url[0:3]+"\n")
-    dbgLog("key="+key[0:3]+"\n")
-    try: 
-        supabase = await create_supabase()
-    except:
-        print("error")
-        return
-    
+    supabase = await create_supabase()
     cmd = sys.argv[1]
     try:
         arg = open("/tmp/argument.txt").read();
@@ -740,11 +729,13 @@ async def init():
     # except:
     #     currentShips = {"dates": "", "ships": {}}
     
-
+    dbgFile = open('/tmp/output.txt', 'w')
     dbgLog("\n\n\nOPERATION RUNNING AT ");
     dbgLog(str(datetime.datetime.now()));
     dbgLog("\n dates=");
     dbgLog(currentShips["dates"]);
+    dbgLog("key="+url[0:3]+"\n")
+    dbgLog("key="+key[0:3]+"\n")
     # return
     # return;
     

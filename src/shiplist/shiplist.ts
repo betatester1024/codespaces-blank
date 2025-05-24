@@ -7,8 +7,8 @@ import { createClient } from '@/lib/connectdb';
 import { cookies } from 'next/headers'
 
 export async function strawbCmd(data:{cmd:string, shiplist?:string, val?:string}) {
-  const cookieStore = await cookies()
-  const supabase = createClient(cookieStore);
+  // const cookieStore = await cookies()
+  // const supabase = createClient(cookieStore);
 
   // let { data: shipsaves, error } = await supabase.from('shipsaves').select('value');
   // console.log("saves", shipsaves, error);
