@@ -1,17 +1,22 @@
-from flask import Flask, request
-app = Flask(__name__)
-
-from urllib.parse import unquote
+try:
+    from flask import Flask
+    from flask import request
+    app = Flask(__name__)
+except:
+    print("Error.")
 
 
 
 @app.route("/api/shipprocessing", methods=['POST'])
-def hello_world():
+async def hello_world():
     ships = request.data
     
     cmd = request.args.get('cmd')
     val = request.args.get('val')
-    return processShiplist(cmd, val, ships)
+    try:
+        return await processShiplist(cmd, val, ships)
+    except:
+        return None
     # return "<p>Hello, World!</p>"
 
 
@@ -342,16 +347,19 @@ async def start(logger):
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     await fetchShips(logger)
     
-import json
-import requests
-from datetime import timedelta, date, datetime, timezone
-import os
-import time
-import gzip
-import math
-import lz4.frame as lz4
-import msgpack
-
+try:
+    import json
+    import requests
+    from datetime import timedelta, date, datetime, timezone
+    import os
+    import time
+    import gzip
+    import math
+    import lz4.frame as lz4
+    import msgpack
+except Exception as e:
+    print(e)
+    
 SOURCE_MAP = ["Orange Fool", "The Coward", 
               "Red Sentry", "Blue Rusher", "Aqua Shielder", "The Shield Master", "Shield Helper", 
               "Yellow Hunter", "Red Sniper", "The Lazer Enthusiast", "Yellow Mine Guard",
@@ -790,7 +798,5 @@ async def init(cmd, arg, shiplist):
         # else:
         #     print("cannot find")
 
-import asyncio;
-
-def processShiplist(cmd, arg, shiplist):
-    return asyncio.run(init(cmd, arg, shiplist))
+async def processShiplist(cmd, arg, shiplist):
+    return await init(cmd, arg, shiplist)

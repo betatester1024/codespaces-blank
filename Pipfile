@@ -1,0 +1,7 @@
+[packages]
+requests = "*"
+datetime = "*"
+lz4 = "*"
+flask = "*"
+
+[dev-packages]
