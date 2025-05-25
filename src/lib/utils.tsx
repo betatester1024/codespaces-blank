@@ -4,6 +4,7 @@
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 import { Item } from "./dsabp";
 import { Themes } from "./Themes";
+import Link from "next/link";
 
 export type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgMain:string, bgLight:string, bgStrong:string};
 
@@ -16,6 +17,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children?:ReactNode, 
   className?:string, 
 };
+
+export function ExternLink(props:{href:string, className?:string, children:string|ReactNode}) {
+  return <Link className={"inline-flex items-center !no-underline " + props.className} href={props.href} target="_blank" prefetch={false}>
+    <span className="underline">{props.children}</span>
+    <GIcon>open_in_new</GIcon>
+  </Link>
+}
 
 export function Header(props:{title:string|ReactNode, subtitle:string|ReactNode, className?:string}) {
   return  <header className={"flex flex-col justify-left text-2xl "+props.className}>
@@ -288,9 +296,9 @@ export function Select({theme:clrTheme=Themes.BLUE, children, className, default
   return out;
 }
 
-export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
-  return <div className={theme.textCls + " inline-flex justify-center items-center "+className} >
-    <span className="gicons no-underline">
+export function GIcon({theme, className, children}:{theme?:ColourTheme, className?:string, children:string}) {
+  return <div className={theme?.textCls + " inline-flex justify-center items-center "+className} >
+    <span className="gicons !no-underline">
       {children}
     </span>
   </div>

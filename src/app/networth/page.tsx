@@ -2,7 +2,7 @@
 
 import { f } from "@/lib/formcreator";
 import { Themes } from "@/lib/Themes";
-import { Button, byId, GIcon, H1, Header, Loader} from "@/lib/utils";
+import { Button, byId, GIcon, H1, Header, Loader, ExternLink} from "@/lib/utils";
 import { strawbCmd } from "@/shiplist/shiplist";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,6 +57,7 @@ export default function Page() {
       <div className="text-4xl">ProDSA <b>Net Worth Valuator</b></div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
     </header>
+    <div className="grey text text-lg">To find your shiplist information, click <ExternLink className="blue text" href="//drednot.io/shiplist?server=0">here</ExternLink> </div>
     <div className="flex gap-1 flex-wrap">
       <textarea id="shiplistIn" className="grey bgMain text" placeholder="Shiplist goes here..."></textarea>
       <Button theme={Themes.BLUE} className="grow shrink blue text hover active" onClick={()=>{processShiplist()}}>

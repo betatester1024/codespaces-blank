@@ -1,3 +1,8 @@
+#
+# WARNING!
+# For installing dependencies: pipenv install [packagename]!
+#
+
 try:
     from flask import Flask
     from flask import request
