@@ -2,6 +2,7 @@
 requests = "*"
 datetime = "*"
 lz4 = "*"
-flask = "*"
+supabase = "*"
+flask = {extras = ["async"], version = "*"}
 
 [dev-packages]
