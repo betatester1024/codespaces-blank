@@ -22,7 +22,7 @@
 .blue.bgMain { @apply bg-blue-100; }
 .blue.bgLight { @apply bg-blue-50; }
 .blue.bgStrong {@apply bg-blue-200; }
-.green.text { @apply text-lime-400; }
+.green.text { @apply text-lime-500; }
 .green.active { @apply active:text-lime-300; }
 .green.hover { @apply hover:text-lime-500 hover:bg-lime-200 focus:text-lime-500 focus:bg-lime-200 transition-colors; }
 .green.bgMain { @apply bg-lime-100; }

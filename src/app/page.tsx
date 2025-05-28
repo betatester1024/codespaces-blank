@@ -31,7 +31,7 @@ export default function Page() {
         <GIcon theme={Themes.GREEN}>arrow_forward_ios</GIcon>
       </Button>
     </div>
-    <div className="slideIn p-3 flex flex-wrap gap-3">
+    <div className="slideIn mt-3 flex flex-wrap gap-3">
       <div className="slideIn grey text flex flex-col gap-1 card">
         <p className="slideIn blue text text-2xl">ProDSA PrecisionEdit <b>Construction</b> and <b>Repair</b></p>
         <p>Completing ships <b className="slideIn">faster</b> and <b className="slideIn">more efficiently</b></p>
@@ -68,7 +68,7 @@ export default function Page() {
         <Button theme={Themes.GREEN} className="slideIn font-bold w-[fit-content] font-2xl green text hover active bgLight" onClick={()=>{window.open("https://dsc.gg/order-now")}}>
         Order insurance from ProDSA Services today!
         </Button>
-        <Link prefetch={false} className="slideIn w-[fit-content] blue rounded-sm p-1 hover active" href="/valuate?mode=insurance">Estimate insurance before ordering</Link>
+        <Link prefetch={false} className="slideIn w-[fit-content] rounded-sm p-1 grey hover active" href="/valuate?mode=insurance">Estimate insurance before ordering</Link>
       </div>
       <div className="slideIn grey text flex flex-col gap-1 card">
         <p className="slideIn text-2xl blue text">ProDSA <b>Blueprint Transcription</b></p>
