@@ -19,7 +19,7 @@ export default function Page() {
       <details className="w-full grey text border-2 rounded-md p-2 ">
         <summary className="grey hover active rounded-md cursor-pointer p-2">Eligiblity requirements</summary>
         <ul>
-          <li>Your net worth must not exceed 5,000 flux (<Link prefetch={false} href="/networth">Calculator</Link>)</li>
+          <li>Your net worth must not exceed 15,000 flux (<Link prefetch={false} href="/networth">Calculator</Link>)</li>
           <li>You must not have a history of griefing, scamming etc.</li>
           <li>You must be active in the last 7 days</li>
           <li>You must not be an alternate account of another user.</li>
