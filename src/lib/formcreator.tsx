@@ -16,7 +16,7 @@ export const priceTab : Map<Item, costData> = new Map([
   [Item.RES_METAL,              {bThres:-1,   value: 1/17, formattedName:"Iron"}],
   [Item.RES_GUNPOWDER,          {bThres:-1,   value: 1/20, formattedName:"Explosives"}],
   [Item.RES_FLUX,               {bThres:-1,   value: 1,    formattedName:"Flux"}],
-  [Item.RES_HYPER_RUBBER,       {bThres:1000, value: 0.8,  formattedName:"Rubber"}],
+  [Item.RES_HYPER_RUBBER,       {bThres:1000, value: 0.6,  formattedName:"Rubber"}],
   [Item.BLOCK_ICE_GLASS,        {bThres:2000, value: 1/4,  formattedName:"Ice"}],
   [Item.SHIELD_GENERATOR,       {bThres:50,   value: 3,    formattedName:"Generator"}],
   [Item.SHIELD_PROJECTOR,       {bThres:50,   value: 16,   formattedName:"Projector"}],
