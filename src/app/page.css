@@ -1,42 +1,6 @@
 @import "tailwindcss";
-@tailwind utilities;
 
-.summaryContainer {
-  flex-grow: 1;
-  border-radius: var(--radius-md);
-  outline-width: 2px;
-  /* margin: calc(2*var(--spacing)); */
-  padding: calc(2*var(--spacing));
-  overflow-y: scroll;
-  max-height: 70vh;
-  outline-style: --var(--tw-outline-style);
-}
 
-a {
-  text-decoration-line: underline;
-}
-
-@theme {
-  --color-lime-500: #00cc00;
-  /* --color-lime-400: #00cc00; */
-}
-
-textarea {
-  @apply p-1 grow-4 rounded-sm;
-  font-family: var(--font-nsm);
-}
-
-.animHighlight {
-  animation: highlight 5s both;
-}
-
-@keyframes highlight {
-  0% {
-    background-color: var(--color-blue-200);
-    box-shadow: 0px 0px 3px 3px var(--color-blue-200);
-  }
-  100% {
-    background-color: #fff0;
-    box-shadow: 0px 0px 3px 3px #fff0;
-  }
+hr {
+  @apply m-4;
 }

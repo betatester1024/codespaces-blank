@@ -8,13 +8,27 @@ const nextConfig: NextConfig = {
       allowedOrigins: ['localhost:3000'],
     },
   },
+  images:{
+    remotePatterns:[new URL("https://*.drednot.io/**")]
+  },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack } ) => {
     // Important: return the modified config
     config.optimization.minimize = false;
     // config.optimization.minimizer = [];
     return config
   },
-  turbopack: {}
+  turbopack: {},
+  rewrites: async () => {
+    return [
+      {
+        source: '/api/:path*',
+        destination:
+          process.env.NODE_ENV === 'development'
+            ? 'http://127.0.0.1:5328/api/:path*'
+            : '/api/',
+      },
+    ]
+  },
   /* config options here */
 };
 export default nextConfig;

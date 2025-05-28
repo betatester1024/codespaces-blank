@@ -4,6 +4,7 @@
 import React, { ButtonHTMLAttributes, ChangeEvent, FormEvent, HTMLProps, InputHTMLAttributes, KeyboardEvent, ReactElement, ReactNode, useEffect, useState } from "react";
 import { Item } from "./dsabp";
 import { Themes } from "./Themes";
+import Link from "next/link";
 
 export type ColourTheme = {textCls:string, activeCls:string, hoverCls:string, bgMain:string, bgLight:string, bgStrong:string};
 
@@ -17,22 +18,32 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   className?:string, 
 };
 
-export function Header(props:{title:string, subtitle:string}) {
-  return    <header className="flex flex-col justify-left">
-      <h1 className={`${Themes.BLUE.textCls} text-2xl`}>{props.title}</h1>
-      <p className={Themes.BLUE.textCls}>{props.subtitle}</p>
+export function ExternLink(props:{href:string, className?:string, children:string|ReactNode}) {
+  return <Link className={"inline-flex items-center !no-underline " + props.className} href={props.href} target="_blank" prefetch={false}>
+    <span className="underline">{props.children}</span>
+    <GIcon>open_in_new</GIcon>
+  </Link>
+}
+
+export function Header(props:{title:string|ReactNode, subtitle:string|ReactNode, className?:string}) {
+  return  <header className={"flex flex-col justify-left text-2xl "+props.className}>
+      <h1 className={`${Themes.BLUE.textCls}`}>{props.title}</h1>
+      <p className={`${Themes.BLUE.textCls} text-base`}>{props.subtitle}</p>
     </header>
 }
 
 export function Button(props:ButtonProps) {
+  let theme = props.theme;
+  if (props.disabled) theme = Themes.GREY;
   return (
     <button 
       type={props.type} 
       id={props.id}
       tabIndex={props.tabIndex}
       onClick={props.onClick}
-      className={`${props.className} ${props.theme.textCls} ${props.theme.activeCls} ${props.theme.hoverCls} 
-      cursor-pointer rounded-sm p-2 transition-colors justify-center flex items-center `}
+      disabled = {props.disabled}
+      className={`${props.className} ${theme.textCls} ${theme.bgLight} ${props.disabled ? "" : theme.activeCls} ${props.disabled ? "" : theme.hoverCls} 
+      ${props.disabled ? "" : "cursor-pointer"} rounded-sm p-2 transition-colors justify-center flex items-center `}
     >
       {props.children}
     </button>
@@ -286,9 +297,9 @@ export function Select({theme:clrTheme=Themes.BLUE, children, className, default
   return out;
 }
 
-export function GIcon({theme, className, children}:{theme:ColourTheme, className?:string, children:string}) {
-  return <div className={theme.textCls + " inline-flex justify-center items-center "+className} >
-    <span className="gicons no-underline">
+export function GIcon({theme, className, children}:{theme?:ColourTheme, className?:string, children:string}) {
+  return <div className={theme?.textCls + " inline-flex justify-center items-center "+className} >
+    <span className="gicons !no-underline">
       {children}
     </span>
   </div>

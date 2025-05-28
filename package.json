@@ -3,13 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "flask-dev": "FLASK_DEBUG=1 python3 -m flask --app api/index run -p 5328",
+    "next-dev": "next dev",
+    "dev": "concurrently \"pnpm run next-dev\" \"pnpm run flask-dev\"",
+    "dev-old": "next dev --turbopack",
     "build": "next build --experimental-build-mode=compile",
     "build-gen": "next build --experimental-build-mode=generate-env",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.6.1",
+    "concurrently": "^9.1.2",
     "dsabp-js": "^0.4.11",
     "fs": "^0.0.1-security",
     "next": "^15.3.2",
@@ -22,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "postcss-import": "^16.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

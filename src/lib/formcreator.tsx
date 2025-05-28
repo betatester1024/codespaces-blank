@@ -43,7 +43,7 @@ export const sizeTab = [
   {sz: 6401, cost: 0.2, szName:"Large"}
 ]
 
-function f(n:number, dprec:number=1) {
+export function f(n:number, dprec:number=1) {
   return n.toLocaleString("en-CA", {maximumFractionDigits:dprec, minimumFractionDigits:dprec})
 }
 const errorHTML = <p className={Themes.RED.textCls}>No blueprint summary.</p>;
@@ -171,16 +171,16 @@ Details: 5 repairs/mo
     </p>
     <small>Subject to the 
       <div className="ml-1 inline-flex gap-1">
-        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
+        <Link prefetch={false} href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
         <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
       </div> and the 
       <div className="ml-1 inline-flex gap-1">
-        <Link href="https://discord.com/channels/911997443179151461/1268253949048389682" target="_blank">ProDSA Services Insurance Terms</Link>
+        <Link prefetch={false} href="https://discord.com/channels/911997443179151461/1268253949048389682" target="_blank">ProDSA Services Insurance Terms</Link>
         <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
       </div>
     </small>
     <div className={`flex gap-1 text-xl ${Themes.GREEN.textCls}`}>
-      <Link href="https://dsc.gg/ProDSA" target="_blank">Farm with confidence. Insure today with ProDSA Services! </Link>
+      <Link prefetch={false} href="https://dsc.gg/ProDSA" target="_blank">Farm with confidence. Insure today with ProDSA Services! </Link>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>}
@@ -222,13 +222,13 @@ export function buildCostForm(bpsumm:BPSummary|null) {
     Total job cost: <b className="text-xl">{f(Math.round(totalCost), 3)} flux</b></p>
     <small>Subject to the 
       <div className="ml-1 inline-flex gap-1">
-        <Link href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
+        <Link prefetch={false} href="https://betaos-prodsa.glitch.me/terms" target="_blank">ProDSA Services Terms and Conditions</Link>
         <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
       </div>.
     Your minimum deposit is {totalCost > 2500 ? <b>75%</b> : <b>50%</b>}.
     </small>
     <div className={`flex gap-1 text-xl ${Themes.GREEN.textCls}`}>
-      <Link href="https://dsc.gg/ProDSA" target="_blank">Order today from ProDSA Services! </Link>
+      <Link prefetch={false} href="https://dsc.gg/ProDSA" target="_blank">Order today from ProDSA Services! </Link>
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>;
