@@ -8,6 +8,8 @@ import Link from "next/link";
 import constr from "../../public/construction.png";
 import insure from "../../public/insurance.png";
 import design from "../../public/design.png";
+import transcribe from "../../public/transcription.png";
+import otherservices from "../../public/otherservices.png";
 import { useEffect } from "react";
 
 export default function Page() {
@@ -78,7 +80,7 @@ export default function Page() {
         <p className="slideIn text-2xl blue text">ProDSA <b>Blueprint Transcription</b></p>
         <p>Blurry images no more!</p>
         <div className="slideIn relative grow items-start flex gap-2 max-md:flex-wrap justify-center">
-          <Image alt="A blurry image and a clear image." className="slideIn max-h-[300px] lock-content" width={300} height={400}/>
+          <Image alt="A blurry image and a clear image." className="slideIn max-h-[300px] lock-content" src={transcribe}/>
           <ul className="grey text">
             <li><b>Hourly rates</b> scale according to ship complexity</li>
             <li>Accurate conversion of images to blueprint</li>
@@ -111,7 +113,7 @@ export default function Page() {
         <p className="slideIn text-2xl blue text">Other ProDSA Services</p>
         <p><b>More services available on request!</b></p>
         <div className="slideIn relative grow items-start flex gap-2 max-md:flex-wrap justify-center">
-          <Image alt="Other ProDSA services." className="slideIn max-h-[300px] lock-content" src={null}/>
+          <Image alt="Other ProDSA services." className="slideIn max-h-[300px] lock-content" src={otherservices}/>
           <ul className="grey text">
             <li>Ship painting: Solid colour; patterns; custom images: <Link prefetch={false} href="/rates#othercosts">See rates</Link></li>
             <li>Ship refills: available on request</li>

@@ -4,6 +4,7 @@ import { Themes } from "@/lib/Themes";
 import { Button } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import giftcard from "../../../public/giftcard.png";
 
 export default function Page() {
   return <div className="flex flex-col gap-3 font-raleway p-3">
@@ -48,7 +49,7 @@ export default function Page() {
           <p>Can only be claimed once</p>
           <small>*Subject to change. Contact ProDSA Services for precise adjustments. </small>
         </div>
-        <Image className="lock-content grow min-w-[150px]" alt="Farmer with shielding" src={null}/>
+        <Image className="lock-content grow min-w-[150px]" alt="Farmer with shielding" src={giftcard}/>
       </div>
       <div className="flex gap-2 slideIn card grow" >
         <Image className="lock-content grow min-w-[150px]" src={null}/>
