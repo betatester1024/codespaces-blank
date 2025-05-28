@@ -14,12 +14,6 @@ import { useEffect } from "react";
 
 export default function Page() {
 
-  useEffect(()=>{
-    byId((new URL(document.URL)).hash)?.scrollIntoView({
-      block: "start",
-      behavior: "smooth",
-    });
-  }, [])
   return <div className="flex-col gap-1 p-3 font-raleway">
     <title>Welcome | ProDSA Services</title>
     {/* <Header className="font-raleway blue text slideIn !text-4xl" 
