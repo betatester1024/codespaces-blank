@@ -20,8 +20,8 @@ async def hello_world():
     val = request.args.get('val')
     try:
         return await processShiplist(cmd, val, ships)
-    except:
-        return None
+    except Exception as e:
+        return str(e)
     # return "<p>Hello, World!</p>"
 
 

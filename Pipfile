@@ -4,5 +4,7 @@ datetime = "*"
 lz4 = "*"
 supabase = "*"
 flask = {extras = ["async"], version = "*"}
+msgpack = "*"
+python-dotenv = "*"
 
 [dev-packages]
