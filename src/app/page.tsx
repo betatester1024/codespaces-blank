@@ -6,7 +6,7 @@ import Image from "next/image";
 import "@/app/page.css";
 import Link from "next/link";
 import constr from "../../public/construction.png";
-import insure from "../../public/insurance.png";
+import insure from "../../public/insurance3.png";
 import design from "../../public/design.png";
 import transcribe from "../../public/transcription.png";
 import otherservices from "../../public/otherservices.png";
