@@ -57,7 +57,7 @@ export default function Page() {
         <p className="slideIn text-2xl blue text">ProDSA <b>Insurance</b></p>
         <p>Farm with <b>confidence</b> with the <b>first insurance provider</b> in Dredark</p>
         <div className="slideIn relative grow flex gap-1 items-start max-md:flex-wrap justify-center">
-          <ul className="grey text mt-4">
+          <ul className="grey grow text mt-4">
             <li><b>5</b> repairs per month</li>
             <li><b>No-hassle repair</b> means no agonising over lost ships </li>
             <li>Affordable plans <b>scale</b> according to your needs</li>
@@ -75,7 +75,7 @@ export default function Page() {
         <p>Blurry images no more!</p>
         <div className="slideIn relative grow items-start flex gap-2 max-md:flex-wrap justify-center">
           <Image alt="A blurry image and a clear image." className="slideIn max-h-[300px] lock-content" src={transcribe}/>
-          <ul className="grey text">
+          <ul className="grey grow text">
             <li><b>Hourly rates</b> scale according to ship complexity</li>
             <li>Accurate conversion of images to blueprint</li>
             <li>Test ship provided including <b>non-RCDables</b></li>

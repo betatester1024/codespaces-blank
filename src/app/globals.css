@@ -26,6 +26,10 @@
   animation:slidein 500ms both;
 }
 
+#menubar {
+  outline: 1px solid currentColor;
+  @apply rounded-md;
+}
 
 .card {
   @apply rounded-lg p-3;

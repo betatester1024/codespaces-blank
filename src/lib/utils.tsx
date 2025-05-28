@@ -33,7 +33,8 @@ export function Header(props:{title:string|ReactNode, subtitle:string|ReactNode,
 }
 
 export function Button(props:ButtonProps) {
-  if (props.disabled) props.theme = Themes.GREY;
+  let theme = props.theme;
+  if (props.disabled) theme = Themes.GREY;
   return (
     <button 
       type={props.type} 
@@ -41,8 +42,8 @@ export function Button(props:ButtonProps) {
       tabIndex={props.tabIndex}
       onClick={props.onClick}
       disabled = {props.disabled}
-      className={`${props.className} ${props.theme.textCls} ${props.theme.bgLight} ${props.disabled ? "" : props.theme.activeCls} ${props.disabled ? "" : props.theme.hoverCls} 
-      cursor-pointer rounded-sm p-2 transition-colors justify-center flex items-center `}
+      className={`${props.className} ${theme.textCls} ${theme.bgLight} ${props.disabled ? "" : theme.activeCls} ${props.disabled ? "" : theme.hoverCls} 
+      ${props.disabled ? "" : "cursor-pointer"} rounded-sm p-2 transition-colors justify-center flex items-center `}
     >
       {props.children}
     </button>
