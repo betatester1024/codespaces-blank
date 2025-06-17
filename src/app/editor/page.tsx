@@ -27,6 +27,7 @@ enum FormOptns {
 }
 
 export default function Page() {
+  
   const [bomSummary, setBomSummary] = useState<ReactNode[][]>([]);
   const [buildSummary, setBuildSummary] = useState<ReactNode[][]>([]);
   const [processError, setProcessError] = useState<string>();
@@ -79,8 +80,12 @@ export default function Page() {
     }
   }, [calcOpen]);
 
+  let [prevStarterQ, setPSQ] = useState<boolean>(false)
   useEffect(()=>{
+    
+    setPSQ(starterQ);
     if (repairMode) setStarterQ(false);
+    else setStarterQ(prevStarterQ)
   }, [repairMode])
 
   useEffect(()=>{
@@ -326,9 +331,9 @@ export default function Page() {
           <Input theme={Themes.BLUE} type="checkbox" id="sortY" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} 
           ctnClassName="cursor-pointer">Sort by Y-coord?</Input>
-          <Input theme={Themes.BLUE} type="checkbox" checked={starterQ} id="starterQ" 
+          <Input theme={repairMode && starterQ ? Themes.RED : Themes.BLUE} type="checkbox" checked={starterQ} id="starterQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setStarterQ(event.target.checked);}} 
-          ctnClassName="cursor-pointer">From starter?</Input>
+          ctnClassName="cursor-pointer" >From starter?</Input>
           <Input theme={Themes.BLUE} type="checkbox" checked={aExpandoes}id="boxQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setSnap(event.target.checked);}} 
           ctnClassName="cursor-pointer">Snap boxes?</Input>
@@ -409,8 +414,8 @@ export default function Page() {
           <div className={`summaryContainer border-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
               <p className="text-blue-500 text-lg">Build order&nbsp;
-                {starterQ && !processing ? "(adjusted for starter items)" : ""} 
-                {repairMode && !processing ? "(adjusted for repair mode)" : ""}
+                {starterQ && !processing ? <>{"(adjusted for starter items)"}&nbsp;</> : ""} 
+                {repairMode && !processing ? <>{"(adjusted for repair mode)"}&nbsp;</> : ""}
               </p>
             </div>
             <div>

@@ -76,7 +76,7 @@ export function Input(props:InputProps) {
       // onClick={props.onClick}
       onChange={props.onChange}
       className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
-      rounded-sm p-2 transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
+      rounded-sm p-2 accent-current transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
     />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
 }

@@ -78,7 +78,7 @@ let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, err
 // }
 
 function getBuildEntries(bp:Blueprint) {
-  let itemCt : Map<any, number> = new Map();
+  let itemCt : Map<Item, number> = new Map();
   let commands : BuildEntry[] = [];
   for (const cmd of bp.commands!) {
     if (cmd instanceof BuildCmd) {
@@ -127,27 +127,22 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
   // let sCommands : BuildCmd_A[] = [];
   // if (subtractMode) sCommands = addConfigInfo(bp2!.commands!, noConfig) as BuildCmd_A[];
  
+  let out: BoMEntry[] = [];
+  
   if (subtractMode) {
     let sCommands = getBuildEntries(bp2!).commands;
     for (let sCmd of sCommands) {
       if (sCmd.count == 0) continue;
+      // remove from applicable build order
       for (let cmd of commands) {
         if (cmd.item == sCmd.item) { // don't even bother to check shape
           let delta = Math.min(cmd.count, sCmd.count);
           cmd.count -= delta;
           sCmd.count -= delta;
+          let iCt = itemCt.get(cmd.item);
+          itemCt.set(cmd.item, iCt - delta);
         }
       }
-      // let found = coordMap.get({x:sCmd.x!, y:sCmd.y!});
-      // if (found != null) {
-      //   for (let i=0; i<found.length; i++) {
-      //     let foundCmd = found[i];
-      //     if (foundCmd.currConfig.equals(sCmd.currConfig) && foundCmd.item == sCmd.item) {
-      //       found.splice(i, 1);
-      //       i--;
-      //     }
-      //   }
-      // }
     } // all sub commands
   }
 
@@ -162,6 +157,8 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
         let delta = Math.min(cmd.count, foundItem.ct);
         cmd.count -= delta;
         foundItem.ct -= delta;
+        let iCt = itemCt.get(cmd.item);
+        itemCt.set(cmd.item, iCt - delta);
       }
     }
     if (cmd.item == Item.PUSHER || cmd.item == Item.ITEM_HATCH || cmd.item == Item.LOADER_NEW || cmd.item == Item.LOADER) {
@@ -194,11 +191,22 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
       incr(matsCost, it.id, itemCt.get(key)!);
     }
   }
-  let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
     out.push({it: Item.getById(key), ct: matsCost.get(key)!});
     // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
+
+  // remove from bom
+  // if (subtractMode) {
+  //   let sCommands = getBuildEntries(bp2!).commands;
+  //   for (let sCmd of sCommands) {
+  //     let idx = out.findIndex((e:BoMEntry)=>{return e.it ==sCmd.item});
+  //     if (idx > 0) {
+  //       out[idx].ct -= sCmd.count;
+  //     }
+  //     else console.log("error in removing bom item", sCmd.item);
+  //   }
+  // }
   return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:rcdcost, error:undefined};
 }
 

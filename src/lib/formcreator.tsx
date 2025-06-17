@@ -200,6 +200,7 @@ export function buildCostForm(bpsumm:BPSummary|null) {
   if (!bpsumm || bpsumm.error) {
     return {cost: 0, form:"No blueprint summary.", html:errorHTML};
   }
+  console.log("summ=",bpsumm);
   let matsCostData = matsCostForm(bpsumm, false, true);
   let area = bpsumm.height * bpsumm.width;
   let multRate = 999;
