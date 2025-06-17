@@ -114,7 +114,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
     {it:Item.NAV_UNIT, ct:1},
   ];
   let matsCost = new Map();
-  if (bString == "") return {bom:[],order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"No blueprint provided."};
+  if (bString == "") return {bom:[],order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Blueprint processing error."};
   let bp = decode(bString);
   if (bp == null) return errorSummary;
 

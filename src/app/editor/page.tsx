@@ -89,7 +89,8 @@ export default function Page() {
   }, [repairMode])
 
   useEffect(()=>{
-    runCmd();
+    processBP();
+    delaySelectOutput();
   }, [cmd, formType])
 
   useEffect(()=>{
@@ -108,18 +109,24 @@ export default function Page() {
   // }, []); // Empty dependency array ensures this runs only on mount and unmount
 
   useEffect(()=>{
-    runCmd();
-  }, [starterQ, sortY, aExpandoes])
+    processBP();
+  }, [starterQ, sortY, aExpandoes, repairMode])
 
   function formProcess(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    runCmd();
+    processBP();
+    delaySelectOutput();
   }
 
-  async function runCmd() {
+  function formatBP(bp:string) {
+    return bp.trim().replaceAll("\n", "");
+  }
+
+  async function processBP() {
     console.log("processing command", cmd);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
+    bp = formatBP(bp)
     let bpout = {bps:[bp], combined:bp}; // default for display only
     let summary : BPSummary;
     let processed = false;
@@ -165,6 +172,7 @@ export default function Page() {
       }
       let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
       let repairBP = repairMode ? tArea2.value : "";
+      repairBP = formatBP(repairBP)
       console.log("outbp", bp.slice(0, 300));
       summary = await getSummaryJSON(bpout!.combined, starterQ, repairBP);
 
@@ -175,7 +183,7 @@ export default function Page() {
           formRes = matsCostForm(summary, true).form;
           break;
         case FormOptns.BUILD:
-          formRes = buildCostForm(summary).form;
+          formRes = buildCostForm(summary, repairMode).form;
           break;
         case FormOptns.INSURANCE:
           let inp1 = byId("insurancePct") as HTMLInputElement;
@@ -195,6 +203,12 @@ export default function Page() {
     }
     setSummary(summary);
     setProcessing(false);
+    setProcessError(summary.error);
+    if (summary.error) {
+      return;
+    }
+    ///////////// update html parts
+    
     let bomformatted = [];
     for (let entry of summary.bom) {
       bomformatted.push([
@@ -212,18 +226,21 @@ export default function Page() {
         <p>{entry.item.name}</p>
       ]);
     }
-    if (!summary.error) {
+    // if (!summary.error) {
       setBomSummary(bomformatted);
       setBuildSummary(buildformatted);
-    }
-    setProcessError(summary.error);
+    // }
+    // else {
+      // return;
+    // }
+  } // process()
+
+  function delaySelectOutput() {
     setTimeout(()=>{
       let out = byId("outBlueprint") as HTMLTextAreaElement;
-      // out.focus();
       out.select();
-      // location.href="#outBlueprint";
     }, 200);
-  } // process()
+  }
 
   async function sortBP(value:string, config?:sortConfig) {
     let summary = await sortByItem(value, config);
@@ -288,10 +305,10 @@ export default function Page() {
     <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by ProDSA Services - thanks to libraries from @blueyescat"></Header>
     <form onSubmit={formProcess}>
       <div className="flex gap-1 flex-wrap relative items-center">
-        <textarea id="inBlueprint" placeholder="DSA:..." 
+        <textarea id="inBlueprint" placeholder="DSA:..." onChange={()=>{processBP()}}
           className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm`}>
         </textarea>
-        <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
+        <textarea id="inBlueprintR" placeholder="Repair base blueprint" onChange={()=>{processBP()}}
         className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink font-nsm transition-[max-width] overflow-clip 
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 

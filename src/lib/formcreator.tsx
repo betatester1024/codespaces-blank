@@ -196,7 +196,7 @@ Medium ships (900 to 2,500 sq tiles): 25%
 Large ships (>2,500 sq tiles): 20%
 Insurance: 15%
 */
-export function buildCostForm(bpsumm:BPSummary|null) {
+export function buildCostForm(bpsumm:BPSummary|null, repairMode:boolean) {
   if (!bpsumm || bpsumm.error) {
     return {cost: 0, form:"No blueprint summary.", html:errorHTML};
   }
@@ -233,7 +233,7 @@ export function buildCostForm(bpsumm:BPSummary|null) {
       <GIcon theme={Themes.BLUE}>open_in_new</GIcon>
     </div>
   </div>;
-  let out = `## Cost breakdown
+  let out = `## Cost breakdown${repairMode ? ", form A4" : ""}
 Raw materials cost: ${f(matsCostData.rawMatsCost, 2)} flux
 ${matsCostData.form}
 =====
