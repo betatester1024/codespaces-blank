@@ -1,7 +1,7 @@
 "use client";
 
 import { Themes } from "@/lib/Themes";
-import { Button, byId, H1, Header, Input, Loader } from "@/lib/utils";
+import { Button, byId, GIcon, H1, Header, Input, Loader } from "@/lib/utils";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { MouseEvent, useState, useEffect, ReactElement, ReactNode, FormEvent } from "react";
 import { ShipView } from "../networth/page";
@@ -16,9 +16,10 @@ interface TabParams {
 export default function Page() {
 
   
+  const tabStyle = `p-3 rounded-t-md mb-[-2px] inline-block bgLight border-2 hover active text`;
   let states = [];
   function Tab(params:TabParams) {
-    return <a key={params.idx} href={"?tab="+params.idx} className={`p-3 rounded-t-md mb-[-2px] inline-block bgLight border-2 border-b-transparent hover active text ${params.active?"blue":"grey"}`} 
+    return <a key={params.idx} href={"?tab="+params.idx} className={tabStyle+` ${params.active?"blue border-b-transparent":"grey"}`} 
     onClick={params.onClick} id={"t-"+params.idx}>
       {tabs[params.idx]}
     </a>
@@ -129,7 +130,10 @@ export default function Page() {
   return <div className="p-5 font-raleway">
     <title>Strawberry Clan Services: Data Dump Processing</title>
     <Header title="Data Dump Tools" subtitle="Strawberry Clan Services"/>
-    <div className="flex grey text flex-wrap gap-1 border-b-2">{tabHTML}</div>
+    <div className="flex grey text flex-wrap gap-1 border-b-2">
+      <a href="https://dsc.gg/join-strawberry" className={tabStyle + " grey"}>Join 🍓 Strawberry today!</a>
+      {tabHTML}
+    </div>
     <div className="tab hidden">
       <form className="pt-3 pb-3 flex gap-2 w-full" onSubmit={(ev:FormEvent<HTMLFormElement>)=>{ev?.preventDefault()}}>
         <Input type="text" id="hexIn" theme={Themes.BLUE} ctnClassName="grow" placeholder="Enter hex codes, separated by comma..."/>
@@ -149,7 +153,11 @@ export default function Page() {
       </div>
     </div>
     <div className="tab hidden">
-      third div.
+      <form className="items-center pt-3 pb-3 flex gap-2 w-full" onSubmit={(ev:FormEvent<HTMLFormElement>)=>{ev?.preventDefault()}}>
+        <span>Load leaderboard page: </span>
+        <Input type="text" id="pageIn" theme={Themes.BLUE} ctnClassName="grow" placeholder="Page #..."/>
+        <Button theme={Themes.BLUE} onClick={processName}><Loader active={loading > 0} theme={Themes.BLUE}></Loader>Process</Button>
+      </form>
     </div>
   </div>
 }

@@ -10,33 +10,33 @@
 } */
 
 
-.red.text { @apply text-red-400; }
-.red.active { @apply active:text-red-300; }
+.red.text { @apply text-red-400; --baseclr:var(--color-red-400)}
 .red.hover { @apply hover:text-red-500 hover:bg-red-200 focus:text-red-500 focus:bg-red-200 transition-colors; }
+.red.active { @apply active:text-red-300; }
 .red.bgMain { @apply bg-red-100; }
 .red.bgLight { @apply bg-red-50; }
 .red.bgStrong {@apply bg-red-200; }
-.blue.text { @apply text-blue-400; }
-.blue.active { @apply active:text-blue-300; }
+.blue.text { @apply text-blue-400; --baseclr:var(--color-blue-400)}
 .blue.hover { @apply hover:text-blue-500 hover:bg-blue-200 focus:text-blue-500 focus:bg-blue-200 transition-colors; }
+.blue.active { @apply active:text-blue-300; }
 .blue.bgMain { @apply bg-blue-100; }
 .blue.bgLight { @apply bg-blue-50; }
 .blue.bgStrong {@apply bg-blue-200; }
-.green.text { @apply text-lime-500; }
-.green.active { @apply active:text-lime-300; }
+.green.text { @apply text-lime-500; --baseclr:var(--color-lime-500)}
 .green.hover { @apply hover:text-lime-500 hover:bg-lime-200 focus:text-lime-500 focus:bg-lime-200 transition-colors; }
+.green.active { @apply active:text-lime-300; }
 .green.bgMain { @apply bg-lime-100; }
 .green.bgLight { @apply bg-lime-50; }
 .green.bgStrong {@apply bg-lime-200; }
-.grey.text { @apply text-gray-400; }
-.grey.active { @apply active:text-gray-300; }
+.grey.text { @apply text-gray-400; --baseclr:var(--color-gray-400)}
 .grey.hover { @apply hover:text-gray-500 hover:bg-gray-200 focus:text-gray-500 focus:bg-gray-200 transition-colors; }
+.grey.active { @apply active:text-gray-300; }
 .grey.bgMain { @apply bg-gray-100; }
 .grey.bgLight { @apply bg-gray-50; }
 .grey.bgStrong {@apply bg-gray-200; }
-.darkgrey.text { @apply text-gray-600; }
-.darkgrey.active { @apply active:text-gray-400; }
+.darkgrey.text { @apply text-gray-600; --baseclr:var(--color-gray-600)}
 .darkgrey.hover { @apply hover:text-gray-800 hover:bg-gray-300 focus:text-gray-800 focus:bg-gray-300 transition-colors; }
+.darkgrey.active { @apply active:text-gray-400; }
 .darkgrey.bgMain { @apply bg-gray-200; }
 .darkgrey.bgLight { @apply bg-gray-100; }
 .darkgrey.bgStrong {@apply bg-gray-300; }
