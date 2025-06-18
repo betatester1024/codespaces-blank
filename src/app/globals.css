@@ -31,6 +31,37 @@
   @apply rounded-md;
 }
 
+.input::after {
+  --barsz: 4px;
+  width: 0%;
+  transition: width ease 1s;
+  height: var(--barsz);
+  margin: var(--barsz);
+  margin-left: 0px;
+  content: "";
+  position: absolute;
+  background-color: currentColor;
+  left: 0px;
+  bottom: calc(-1 * var(--barsz));
+  border-radius: 0px 0px calc(var(--barsz)) calc(var(--barsz));
+}
+
+*:focus-visible {
+  outline: unset;
+}
+
+
+*:focus {
+  outline: 2px solid var(--baseclr);
+  outline-offset: 0px;
+}
+
+
+
+.input:hover::after, .input:focus-within::after {
+  width: 100%;
+}
+
 .card {
   @apply rounded-lg p-3;
   width: fit-content;
@@ -105,7 +136,7 @@ hr {
 
 * {
   /* outline: 2px solid transparent; */
-  outline-width: 2px;
+  /* outline-width: 2px; */
 }
 
 .focusable:focus {

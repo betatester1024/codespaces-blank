@@ -65,19 +65,21 @@ export function H1({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourT
 
 export function Input(props:InputProps) {
   return (
-    <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName}`}><input 
-      type={props.type}
-      id={props.id}
-      tabIndex={props.tabIndex}
-      defaultChecked={props.defaultChecked}
-      checked = {props.checked}
-      defaultValue={props.defaultValue}
-      placeholder={props.placeholder}
-      // onClick={props.onClick}
-      onChange={props.onChange}
-      className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
-      rounded-sm p-2 accent-current transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
-    />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
+    <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName} relative ${props.children ? "" : "input flex-col"}`}>
+      <input 
+        type={props.type}
+        id={props.id}
+        tabIndex={props.tabIndex}
+        defaultChecked={props.defaultChecked}
+        checked = {props.checked}
+        defaultValue={props.defaultValue}
+        placeholder={props.placeholder}
+        // onClick={props.onClick}
+        onChange={props.onChange}
+        className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
+        rounded-sm p-2 accent-current outline-current transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
+      />
+      {props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
 }
 

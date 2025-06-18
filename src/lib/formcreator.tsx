@@ -198,7 +198,7 @@ Insurance: 15%
 */
 export function buildCostForm(bpsumm:BPSummary|null, repairMode:boolean=false) {
   if (!bpsumm || bpsumm.error) {
-    return {cost: 0, form:"No blueprint summary.", html:errorHTML};
+    return {cost: 0, form:"No blueprint summary available.", html:errorHTML};
   }
   console.log("summ=",bpsumm);
   let matsCostData = matsCostForm(bpsumm, false, true);
