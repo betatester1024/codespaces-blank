@@ -1,7 +1,7 @@
 "use client";
 
 import { Themes } from "@/lib/Themes";
-import { Button, byId, Header, Input, Loader } from "@/lib/utils";
+import { Button, byId, H1, Header, Input, Loader } from "@/lib/utils";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { MouseEvent, useState, useEffect, ReactElement, ReactNode, FormEvent } from "react";
 import { ShipView } from "../networth/page";
@@ -24,7 +24,7 @@ export default function Page() {
     </a>
   }
 
-  let tabs = ["Hex search", "Hex search", "Leaderboard"];
+  let tabs = ["Hex search", "Name search", "Leaderboard"];
   let tabHTML : ReactElement<TabParams>[] = [];
   for (let i=0; i<tabs.length; i++) {
     states.push(useState<boolean>(false));
@@ -66,26 +66,46 @@ export default function Page() {
     let hexIn = inp.value;
     let hexes = hexIn.split(",");
     // for (let i=0; i<hexes.length; i++)
-    let outs = await loadPOST("byHex", JSON.stringify(hexes))
+    let outs = await loadPOST("byHex", hexes)
     let outHTML = [];
     for (let i=0; i<outs.length; i++) {
-      console.log(JSON.parse(outs[i]));
-      let rawDat = JSON.parse(outs[i]).shipData;
-      if (!rawDat) {
+      let rawDat = JSON.parse(outs[i]);
+      let sDat = rawDat.shipData;
+      if (!sDat) {
         outHTML.push(<ShipView row={hexes[i]} key={i}/>);
         continue;
       }
       let currRow = {
-        hex_code: rawDat.hex, 
+        hex_code: sDat.hex, 
         icon: "/404strawberry.png",
         load_time: "Unknown",
-        shipworth: rawDat.value,
-        placement: -1,
-        name: rawDat.name
+        shipworth: sDat.value,
+        placement: rawDat.rank,
+        name: sDat.name
       }
       outHTML.push(<ShipView row={currRow} key={i}/>)
     }
-    setSummaryHTML(outHTML);
+    setOutHex(outHTML);
+  }
+
+  async function processName() {
+    let inp = byId("nameIn") as HTMLInputElement;
+    let name = inp.value;
+    let outs = await loadPOST("NameSearch", {name:name});
+    let ships = outs.ships;
+    let outHTML = [];
+    for (let i=0; i<ships.length; i++) {
+      let currRow = {
+        hex_code: ships[i].shipData.hex, 
+        icon: "/404strawberry.png",
+        load_time: "Unknown",
+        shipworth: ships[i].shipData.value,
+        placement: ships[i].rank,
+        name: ships[i].shipData.name
+      }
+      outHTML.push(<ShipView row={currRow} key={i}/>);
+    }
+    setOutName(outHTML);
   }
 
   async function loadPOST(cmd:string, body:any) {
@@ -93,7 +113,7 @@ export default function Page() {
     let resp = await fetch("/api/shipprocessing?cmd="+cmd, 
       {
         method:"POST", 
-        body:body, 
+        body:JSON.stringify(body), 
         headers: {
           "Content-Type": "application/json",
         }
@@ -104,7 +124,8 @@ export default function Page() {
   }
 
   const [loading, setLoading] = useState<number>(0);
-  const [summaryHTML, setSummaryHTML] = useState<ReactNode>();
+  const [outHex, setOutHex] = useState<ReactNode>();
+  const [outName, setOutName] = useState<ReactNode>();
   return <div className="p-5 font-raleway">
     <title>Strawberry Clan Services: Data Dump Processing</title>
     <Header title="Data Dump Tools" subtitle="Strawberry Clan Services"/>
@@ -115,11 +136,17 @@ export default function Page() {
         <Button theme={Themes.BLUE} onClick={processHex}><Loader active={loading > 0} theme={Themes.BLUE}></Loader> Process</Button>
       </form>
       <div id="res1" className="flex flex-col gap-2">
-        {summaryHTML}
+        {outHex}
       </div>
     </div>
     <div className="tab hidden">
-      second div.
+      <form className="pt-3 pb-3 flex gap-2 w-full" onSubmit={(ev:FormEvent<HTMLFormElement>)=>{ev?.preventDefault()}}>
+        <Input type="text" id="nameIn" theme={Themes.BLUE} ctnClassName="grow" placeholder="Enter ship name or fragment..."/>
+        <Button theme={Themes.BLUE} onClick={processName}><Loader active={loading > 0} theme={Themes.BLUE}></Loader> Process</Button>
+      </form>
+      <div id="res1" className="flex flex-col gap-2">
+        {outName}
+      </div>
     </div>
     <div className="tab hidden">
       third div.

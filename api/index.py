@@ -788,8 +788,10 @@ async def init(cmd, arg, body):
            output["shipData"].append(ship);
         return (json.dumps(output))
     elif (cmd == 'NameSearch'):
-        data = text_findshipbyname(arg)
-        return (data)
+        iStr = json.loads(body)
+        dbgLog(iStr['name'])
+        data = text_findshipbyname(iStr['name'])
+        return data
     elif (cmd == 'leaderboard'):
         return (json.dumps(getLeaderboardNetworth(arg)));
     elif (cmd == 'byHex'):

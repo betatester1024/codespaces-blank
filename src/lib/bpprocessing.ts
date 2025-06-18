@@ -140,7 +140,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
           cmd.count -= delta;
           sCmd.count -= delta;
           let iCt = itemCt.get(cmd.item);
-          itemCt.set(cmd.item, iCt - delta);
+          if (iCt != undefined) itemCt.set(cmd.item, iCt - delta);
         }
       }
     } // all sub commands
@@ -158,7 +158,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
         cmd.count -= delta;
         foundItem.ct -= delta;
         let iCt = itemCt.get(cmd.item);
-        itemCt.set(cmd.item, iCt - delta);
+        if (iCt != undefined) itemCt.set(cmd.item, iCt - delta);
       }
     }
     if (cmd.item == Item.PUSHER || cmd.item == Item.ITEM_HATCH || cmd.item == Item.LOADER_NEW || cmd.item == Item.LOADER) {
@@ -183,7 +183,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
     let it = key;
     if (it.recipe != null) {
       let inputs = it.recipe.input;
-      for (let i of inputs) {
+      for (let i of inputs!) {
         incr(matsCost, i.item, i.count * itemCt.get(key)!);
       }
     }

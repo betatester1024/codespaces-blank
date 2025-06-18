@@ -196,7 +196,7 @@ Medium ships (900 to 2,500 sq tiles): 25%
 Large ships (>2,500 sq tiles): 20%
 Insurance: 15%
 */
-export function buildCostForm(bpsumm:BPSummary|null, repairMode:boolean) {
+export function buildCostForm(bpsumm:BPSummary|null, repairMode:boolean=false) {
   if (!bpsumm || bpsumm.error) {
     return {cost: 0, form:"No blueprint summary.", html:errorHTML};
   }

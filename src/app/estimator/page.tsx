@@ -35,7 +35,7 @@ export default function Page() {
     setSummary(formData.html);
   }
   const [estimateType, setType] = useState<estimateTypes>();
-  const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Valuate" to start...</>);
+  const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Estimate" to start...</>);
   useEffect(()=>{
     valuate();
   }, [estimateType])
@@ -57,7 +57,7 @@ export default function Page() {
           <Option value={estimateTypes.BUILD}>Construction</Option>
           <Option value={estimateTypes.INSURANCE}>Insurance</Option>
         </Select>
-        <Button theme={Themes.GREEN}>Valuate!</Button>
+        <Button theme={Themes.GREEN}>Estimate pricing!</Button>
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} border-[2px] p-3 rounded-md`} id="formOut">
