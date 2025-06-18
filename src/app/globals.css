@@ -34,7 +34,7 @@
 .input::after {
   --barsz: 4px;
   width: 0%;
-  transition: width ease 1s;
+  transition: width ease 0.75s;
   height: var(--barsz);
   margin: var(--barsz);
   margin-left: 0px;
@@ -46,12 +46,12 @@
   border-radius: 0px 0px calc(var(--barsz)) calc(var(--barsz));
 }
 
-*:focus-visible {
+/* *:focus-visible {
   outline: unset;
-}
+} */
 
 
-*:focus {
+*:focus-visible {
   outline: 2px solid var(--baseclr);
   outline-offset: 0px;
 }

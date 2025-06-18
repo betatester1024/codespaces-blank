@@ -74,6 +74,8 @@ export function Input(props:InputProps) {
         checked = {props.checked}
         defaultValue={props.defaultValue}
         placeholder={props.placeholder}
+        min={props.min}
+        max={props.max}
         // onClick={props.onClick}
         onChange={props.onChange}
         className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}

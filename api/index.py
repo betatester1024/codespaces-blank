@@ -18,10 +18,10 @@ async def hello_world():
     
     cmd = request.args.get('cmd')
     val = request.args.get('val')
-    # try:
-    return await processShiplist(cmd, val, ships)
-    # except Exception as e:
-        # return str(e)
+    try:
+        return await processShiplist(cmd, val, ships)
+    except Exception as e:
+        return str(e)
     # return "<p>Hello, World!</p>"
 
 
@@ -789,11 +789,11 @@ async def init(cmd, arg, body):
         return (json.dumps(output))
     elif (cmd == 'NameSearch'):
         iStr = json.loads(body)
-        dbgLog(iStr['name'])
         data = text_findshipbyname(iStr['name'])
         return data
     elif (cmd == 'leaderboard'):
-        return (json.dumps(getLeaderboardNetworth(arg)));
+        iStr = json.loads(body)
+        return (json.dumps(getLeaderboardNetworth(iStr['page'])));
     elif (cmd == 'byHex'):
         out = []
         for iStr in json.loads(body):
