@@ -178,7 +178,10 @@ export default function Page() {
   const [pageN, setPage] = useState<number>(1)
   return <div className="p-5 font-raleway">
     <title>Strawberry Clan Services: Data Dump Processing</title>
-    <Header title="Data Dump Tools" subtitle="Strawberry Clan Services"/>
+    <header className="slideIn font-raleway blue text mb-3">
+      <div className="text-4xl">Data dump tools</div>
+      <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
+    </header>
     <div className="flex grey text flex-wrap gap-1 pl-2 border-b-2">
       {tabHTML}
       <a href="https://dsc.gg/join-strawberry" target="_blank" className={tabStyle + " grey"}>Join 🍓 Strawberry today!</a>
