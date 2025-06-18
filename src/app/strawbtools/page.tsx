@@ -6,12 +6,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { MouseEvent, useState, useEffect, ReactElement, ReactNode, FormEvent } from "react";
 import { ShipView } from "../networth/page";
 
-import { Metadata } from 'next';
- 
-export const metadata: Metadata = {
-  title: 'Strawberry Clan Services Data Dump Tools',
-  description: "Hex search, name search, leaderboards."
-};
+
 
 
 interface TabParams {
@@ -22,8 +17,6 @@ interface TabParams {
 }
 
 export default function Page() {
-
-  
   const tabStyle = `p-3 rounded-t-md mb-[-2px] inline-block bgLight border-2 hover active text`;
   let states = [];
   function Tab(params:TabParams) {
@@ -185,9 +178,8 @@ export default function Page() {
   const [LBData, setLBData] = useState<ReactNode>();
   const [pageN, setPage] = useState<number>(1)
   return <div className="p-5 font-raleway">
-    <title>Strawberry Clan Services: Data Dump Processing</title>
     <header className="slideIn font-raleway blue text mb-3">
-      <div className="text-4xl">Data dump tools</div>
+      <div className="text-4xl">Econ dump tools</div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
     </header>
     <div className="flex grey text flex-wrap gap-1 pl-2 border-b-2">
