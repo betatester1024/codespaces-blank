@@ -364,6 +364,7 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
   });
   let activeConfig = new ConfigCmd();
   let lastBuildCmd : BuildCmd_A = cmds[0] as BuildCmd_A;
+  // console.log("lbc=",lastBuildCmd);
   for (let i=0; i<cmds.length; i++) {
     let cmd = cmds[i] as BuildCmd_A;
     // snap expandoes if delta < 5 degrees
@@ -373,24 +374,25 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
         cmd.currConfig.angle = 0;
       }
     }
-    if (i != 0 && lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && 
-      cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
-      compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
-      let dist = 0;
-      let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
-      dist = x2>x1 ? x2-x1+lastBuildCmd.bits!.toString().length-1 : x1-x2+cmd.bits!.toString().length-1;
-      if (dist <= 64) {
-        lastBuildCmd.bits = new BuildBits(
-          (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
-          : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
-        ); 
-        console.log("optimised!", lastBuildCmd.bits.toString());
-        cmds.splice(i, 1);
-        i--;
-      }
-
-    }
-    else if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
+    // optimisation broken, fix before putting it back, if ever. in any case, it appears the rcd does this optimisation already.
+    // if (i != 0 && lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && 
+    //   cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
+    //   compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
+    //   console.log("x=", cmd.x);
+    //   let dist = 0;
+    //   let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
+    //   dist = x2>x1 ? x2-x1+lastBuildCmd.bits!.toString().length-1 : x1-x2+cmd.bits!.toString().length-1;
+    //   if (dist <= 64) {
+    //     lastBuildCmd.bits = new BuildBits(
+    //       (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+    //       : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+    //     ); 
+    //     console.log("optimised!", lastBuildCmd.bits.toString());
+    //     cmds.splice(i, 1);
+    //     i--;
+    //   }
+    // }
+    if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
       cmds.splice(i, 0, cmd.currConfig);
       activeConfig = cmd.currConfig;
     }

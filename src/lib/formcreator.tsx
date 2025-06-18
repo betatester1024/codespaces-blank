@@ -10,7 +10,7 @@ import { Themes } from "./Themes";
 interface costData {
   value:number,
   formattedName:string|null,
-  bThres:number
+  bThres:number // bulk threshold
 }
 export const priceTab : Map<Item, costData> = new Map([
   [Item.RES_METAL,              {bThres:-1,   value: 1/17, formattedName:"Iron"}],
@@ -18,11 +18,11 @@ export const priceTab : Map<Item, costData> = new Map([
   [Item.RES_FLUX,               {bThres:-1,   value: 1,    formattedName:"Flux"}],
   [Item.RES_HYPER_RUBBER,       {bThres:1000, value: 0.6,  formattedName:"Rubber"}],
   [Item.BLOCK_ICE_GLASS,        {bThres:2000, value: 1/4,  formattedName:"Ice"}],
-  [Item.SHIELD_GENERATOR,       {bThres:50,   value: 3,    formattedName:"Generator"}],
-  [Item.SHIELD_PROJECTOR,       {bThres:50,   value: 16,   formattedName:"Projector"}],
-  [Item.TURRET_REMOTE,          {bThres:100,  value: 2,    formattedName:"Cannon, standard"}],
+  [Item.SHIELD_GENERATOR,       {bThres:50,   value: 2,    formattedName:"Generator"}],
+  [Item.SHIELD_PROJECTOR,       {bThres:30,   value: 16,   formattedName:"Projector"}],
+  [Item.TURRET_REMOTE,          {bThres:100,  value: 1.5,    formattedName:"Cannon, standard"}],
   [Item.TURRET_BURST,           {bThres:30,   value: 20,   formattedName:"Cannon, burst"}],
-  [Item.TURRET_AUTO,            {bThres:30,   value: 50,   formattedName:"Cannon, machine"}],
+  [Item.TURRET_AUTO,            {bThres:30,   value: 48,   formattedName:"Cannon, machine"}],
   [Item.TURRET_OBTUSE,          {bThres:30,   value: 20,   formattedName:"Cannon, obtuse"}],
   [Item.TURRET_ACUTE,           {bThres:30, value: 20,   formattedName:"Cannon, acute"}],
   [Item.TURRET_CONTROLLER_NEW,  {bThres:20, value: 3, formattedName:"Controller, turret"}],
