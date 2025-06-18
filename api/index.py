@@ -18,10 +18,10 @@ async def hello_world():
     
     cmd = request.args.get('cmd')
     val = request.args.get('val')
-    try:
-        return await processShiplist(cmd, val, ships)
-    except Exception as e:
-        return str(e)
+    # try:
+    return await processShiplist(cmd, val, ships)
+    # except Exception as e:
+        # return str(e)
     # return "<p>Hello, World!</p>"
 
 
@@ -68,6 +68,8 @@ worth = {
     303: 0,  # Eternal flux
 
     323: 0, # Red Gremlin (r/place ship)
+    324: 0, # Orange Gremlin (r/place ship)
+    325: 0, # Yellow Gremlin (r/place ship)
     121: 0, # Sandbox RCD
 
     1: 1 / 24,  # metal
@@ -727,8 +729,10 @@ def dbgLog(str):
     dbgFile.write(str)
     dbgFile.flush()
     
+    
+import re
 import datetime;
-async def init(cmd, arg, shiplist):
+async def init(cmd, arg, body):
     global currentShips, dbgFile, supabase, LEADERBOARD_HEX;
     # print("CWD=", os.getcwd())
     supabase = await create_supabase()
@@ -778,7 +782,7 @@ async def init(cmd, arg, shiplist):
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     dbgLog("COMMAND="+cmd+"\n")
     if (cmd == 'ValueTotal'):
-        data = calculateNetworthShiplist(json.loads(shiplist))# open('/tmp/test.json', encoding="utf-8")*/))
+        data = calculateNetworthShiplist(json.loads(body))# open('/tmp/test.json', encoding="utf-8")*/))
         output = {"value": data[1], "date": data[0], "shipData":[]};# f"N={data[1]} \nD={data[0]}\n"
         for ship in data[2]:
            output["shipData"].append(ship);
@@ -789,7 +793,10 @@ async def init(cmd, arg, shiplist):
     elif (cmd == 'leaderboard'):
         return (json.dumps(getLeaderboardNetworth(arg)));
     elif (cmd == 'byHex'):
-        return (json.dumps(safeGetEntree(arg)));
+        out = []
+        for iStr in json.loads(body):
+            out.append(json.dumps(safeGetEntree(iStr)));
+        return out
     # elif (cmd == 'pastNames'):
         # ECONOMY_MANAGER = Econlogger(log)
         # ECONOMY_MANAGER.fetch();
@@ -803,5 +810,5 @@ async def init(cmd, arg, shiplist):
         # else:
         #     print("cannot find")
 
-async def processShiplist(cmd, arg, shiplist):
-    return await init(cmd, arg, shiplist)
+async def processShiplist(cmd, arg, body):
+    return await init(cmd, arg, body)

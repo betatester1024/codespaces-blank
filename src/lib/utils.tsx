@@ -56,7 +56,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   className?:string, 
   children?:ReactNode,
   ctnClassName?:string,
-  id:string
+  id?:string
 };
 
 export function H1({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourTheme, children?:ReactNode, extraClasses?:string}) {
