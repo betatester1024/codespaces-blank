@@ -6,6 +6,14 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { MouseEvent, useState, useEffect, ReactElement, ReactNode, FormEvent } from "react";
 import { ShipView } from "../networth/page";
 
+import { Metadata } from 'next';
+ 
+export const metadata: Metadata = {
+  title: 'Strawberry Clan Services Data Dump Tools',
+  description: "Hex search, name search, leaderboards."
+};
+
+
 interface TabParams {
   onClick:(e:MouseEvent)=>any
   idx:number,

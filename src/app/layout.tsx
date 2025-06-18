@@ -25,7 +25,10 @@ const RFont = Raleway({
 })
 
 export const metadata: Metadata = {
-  title: 'ProDSA Services Tools',
+  title: {
+    template: '%s | ProDSA Services',
+    default: "Welcome to ProDSA Services." 
+  },
   description: 'Welcome to ProDSA Services.'
 }
 
