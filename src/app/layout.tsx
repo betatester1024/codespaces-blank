@@ -24,13 +24,13 @@ const RFont = Raleway({
   subsets: ["latin"]
 })
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | ProDSA Services',
-    default: "Welcome to ProDSA Services." 
-  },
-  description: 'Welcome to ProDSA Services.'
-}
+// export const metadata: Metadata = {
+//   title: {
+//     template: '%s | ProDSA Services',
+//     default: "Welcome to ProDSA Services." 
+//   },
+//   description: 'Welcome to ProDSA Services.'
+// }
 
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
   return (
@@ -38,10 +38,10 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
       <head>
         <link rel="icon" href="/icon.png"/>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <meta name="description" content="Welcome to ProDSA Services."/>
+        {/* <meta name="description" content="Welcome to ProDSA Services."/> */}
         <meta property="og:type" content="website"/>
-        <meta property="og:title" content="ProDSA Services Tools"/>
-        <meta property="og:description" content="Welcome to ProDSA Services."/>
+        {/* <meta property="og:title" content="ProDSA Services Tools"/> */}
+        {/* <meta property="og:description" content="Welcome to ProDSA Services."/> */}
         <meta property="og:image" content="https://prodsa.vercel.app/icon.png"/>
       </head>
       <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} ${RFont.variable} antialiased`}>

@@ -174,6 +174,8 @@ export default function Page() {
   const [LBData, setLBData] = useState<ReactNode>();
   const [pageN, setPage] = useState<number>(1)
   return  <div className="p-5 font-raleway">
+    <title>title test</title>
+    <meta name="description" content="test2"/>
     <header className="slideIn font-raleway blue text mb-3">
       <div className="text-4xl">Econ dump tools</div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
