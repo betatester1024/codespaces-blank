@@ -201,6 +201,10 @@ textarea {
   font-family: var(--font-raleway);
 }
 
+.font-nsm {
+  font-family: var(--font-nsm);
+}
+
 .animHighlight {
   animation: highlight 5s both;
 }
