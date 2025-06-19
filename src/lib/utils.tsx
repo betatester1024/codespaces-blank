@@ -288,7 +288,7 @@ export function Select({theme:clrTheme=Themes.BLUE, children, className, default
       <div tabIndex={-1} className={
         `w-[100%] h-[fit-content] ${active ? "max-h-[50vh]" : "max-h-[0px]"} flex flex-col 
         overflow-scroll absolute transition-all duration-350 rounded-b-sm shadow-lg/40
-        ${active ? "outline-solid":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}
+        ${active ? "outline-solid outline-1":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}
         style={{zIndex:zIdx}}>
         { 
           matchOptns.length == 0 ?

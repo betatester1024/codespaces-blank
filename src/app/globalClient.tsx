@@ -16,10 +16,10 @@ export default function GlobalClient(props:{children:ReactNode}) {
   const [menuActive, setMenuActive] = useState<boolean>(false);
   return <>{props.children}
   <div id="menubar" className="grey text fixed right-3 top-3">
-    <Button onClick={()=>{setMenuActive(!menuActive)}} theme={Themes.GREY}>
+    <Button onClick={()=>{setMenuActive(!menuActive)}} className="outline-0" theme={Themes.GREY}>
       <GIcon theme={Themes.GREY} className="text-2xl">menu</GIcon>
     </Button>
-    <div className={`${menuActive ? "max-h-[100vh] p-3 border-2 shadow-lg" : "p-0 max-h-[0px]"} font-raleway flex flex-col gap-1 grey text w-[350px] overflow-hidden h-[fit-content] grey bgMain mt-1 rounded-md fixed right-0 transition-all`}>
+    <div className={`${menuActive ? "max-h-[100vh] p-3 border-2 shadow-lg" : "p-0 max-h-[0px]"} font-raleway flex flex-col gap-1 grey text w-[350px] overflow-hidden h-[fit-content] grey bgMain mt-1 rounded-md fixed right-3 transition-all`}>
       <p className="grey text slideIn text-xl">Welcome to <b className="blue text">ProDSA Services</b></p>
       <Link onClick={()=>{setMenuActive(false)}} href="/" prefetch={false}>ProDSA Services Home</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/communitygiveback" prefetch={false}>ProDSA LI/NP Discount Program</Link>
