@@ -1,10 +1,12 @@
-import { Metadata } from 'next';
+
+import { Metadata } from "next";
 import Page from './page';
-export const metadata: Metadata = {
-  title: 'Econ Dump Tools by Strawberry Clan Services',
-  description: "Hex search, name search, leaderboards."
+
+export const metadata : Metadata = {
+  title: "Econ Dumps",
+  description: "this is a desc"
 };
 
 export default function PageLayout() {
-  return (<Page/>)
+  return (<Page/>);
 }

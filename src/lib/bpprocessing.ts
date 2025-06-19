@@ -370,8 +370,8 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
     // snap expandoes if delta < 5 degrees
     if (cmd.item == Item.EXPANDO_BOX && config.alignExpandoes) {
       cmd.currConfig.angle! %= 90;
-      if (Math.abs(cmd.currConfig.angle!) < 5) {
-        cmd.currConfig.angle = 0;
+      if (Math.abs(cmd.currConfig.angle!) < 2) {
+        cmd.currConfig.angle = 0.001; // to prevent the weird thing where the rcd stops responding
       }
     }
     // optimisation broken, fix before putting it back, if ever. in any case, it appears the rcd does this optimisation already.

@@ -1,13 +1,9 @@
-"use client";
-
+"use client"
 import { Themes } from "@/lib/Themes";
 import { Button, byId, GIcon, H1, Header, Input, Loader } from "@/lib/utils";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { MouseEvent, useState, useEffect, ReactElement, ReactNode, FormEvent } from "react";
 import { ShipView } from "../networth/page";
-
-
-
 
 interface TabParams {
   onClick:(e:MouseEvent)=>any
@@ -177,7 +173,7 @@ export default function Page() {
   const [outCtName, setOutCtName] = useState<number>(0);
   const [LBData, setLBData] = useState<ReactNode>();
   const [pageN, setPage] = useState<number>(1)
-  return <div className="p-5 font-raleway">
+  return  <div className="p-5 font-raleway">
     <header className="slideIn font-raleway blue text mb-3">
       <div className="text-4xl">Econ dump tools</div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>
