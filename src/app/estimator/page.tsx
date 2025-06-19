@@ -42,7 +42,8 @@ export default function Page() {
   
 
   return <div className="p-3 flex flex-col gap-2" >
-    <title>Blueprint Valuator | ProDSA Services</title>
+    <title>Blueprint Pricing Estimator | ProDSA Services</title>
+    <meta name="description" content="Blueprint pricing estimator. For precise pricing, open a ticket."/>
     <Header title="Blueprint Valuator" subtitle="Tools by ProDSA Services"/>
     <form className="flex flex-col gap-1" onSubmit={(event:FormEvent<HTMLFormElement>)=>{
       event.preventDefault();

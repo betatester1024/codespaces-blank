@@ -72,6 +72,8 @@ export default function Page() {
   const [eligibility, setEligible] = useState<boolean>(false);
   const [entries, setEntries] = useState<ReactNode>(<>None yet</>);
   return <div className="flex flex-col gap-1 m-3 font-raleway">
+    <title>ProDSA Net Worth Valuator</title>
+    <meta name="description" content="Net worth valuator by Strawberry Clan Services - thank you to @xendyos for econ processing scripts!"/>
     <header className="slideIn font-raleway blue text">
       <div className="text-4xl">ProDSA <b>Net Worth Valuator</b></div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>

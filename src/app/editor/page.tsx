@@ -302,6 +302,7 @@ export default function Page() {
   }
   return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
     <title>ProDSA PrecisionEdit Tools | ProDSA Services</title>
+    <meta name="description" content="PrecisionEdit blueprint editing for ProDSA Services use"/>
     <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by ProDSA Services - thanks to libraries from @blueyescat"></Header>
     <form onSubmit={formProcess}>
       <div className="flex gap-1 flex-wrap relative items-center">

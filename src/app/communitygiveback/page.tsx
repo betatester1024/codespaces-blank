@@ -10,6 +10,8 @@ import discounts from "../../../public/discounts.png";
 
 export default function Page() {
   return <div className="flex flex-col gap-3 font-raleway p-3">
+    <title>ProDSA Services Community Giveback programs</title>
+    <meta name="description" content="Also known as the LI/NP program. Funding, discounts and more! Check if you qualify here."/>
     <header className="grey text slideIn">
       <p className="blue text text-4xl slideIn">ProDSA Services <b className="slideIn">Community Giveback</b></p>
       <p>Funding, discounts and more</p>

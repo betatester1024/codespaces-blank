@@ -26,6 +26,7 @@ export default function GlobalClient(props:{children:ReactNode}) {
       <Link onClick={()=>{setMenuActive(false)}} href="/rates" prefetch={false}>ProDSA Rates</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/estimator" prefetch={false}>ProDSA Pricing and Insurance Estimator</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/editor" prefetch={false}>PrecisionEdit Blueprinting Tools</Link>
+      <Link onClick={()=>{setMenuActive(false)}} href="/strawbtools" prefetch={false}>Strawberry Clan Services Econ Dump Tools</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/networth" prefetch={false}>Net Worth Calculator</Link>
       <ExternLink href="//dsc.gg/order-now" className="green text">Order from ProDSA Services now!</ExternLink>
     </div>
