@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 
 export default function Page() {
   function Section(props:{title:string, children:ReactNode}) {
-    return <div className="w-full  darkgrey text mb-2">
+    return <div className="w-full  darkgrey text mb-2" id={props.title.toLowerCase()}>
       <h1 className="text-xl font-bold blue text text-raleway">{props.title}</h1>
       <kbd className="pl-2 block whitespace-pre-line font-nsm">{props.children}</kbd>
     </div>;

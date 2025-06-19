@@ -51,6 +51,7 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
         <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center font-raleway`}>
           <Link prefetch={false} className="blue active flex items-baseline" href="/">ProDSA Services</Link>
           <Link prefetch={false} className="blue active" href="/estimator">Estimate pricing</Link> 
+          <Link prefetch={false} className="grey active" href="/terms">Terms</Link> 
           <ExternLink className="green text active" href="//dsc.gg/order-now">Order ships from ProDSA Services today!</ExternLink>
           <span>Site design by <span className="green text">Jennifer Green</span></span>
         </footer>
