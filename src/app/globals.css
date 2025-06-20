@@ -205,6 +205,17 @@ textarea {
   font-family: var(--font-nsm);
 }
 
+.subgridparent {
+  display: grid;
+  
+  /* grid-template-rows: repeat(2, 1fr); */
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* .subgridparent > div {
+  grid-row: span 2;
+} */
+
 .animHighlight {
   animation: highlight 5s both;
 }

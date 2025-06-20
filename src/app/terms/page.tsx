@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { ReactNode } from "react";
 
+export function Section(props:{title:string, className?:string, children:ReactNode}) {
+  return <div className={"w-full  darkgrey text mb-2 "+(props.className??"")} id={props.title.toLowerCase()}>
+    <h1 className="text-xl font-bold blue text text-raleway">{props.title}</h1>
+    <kbd className="pl-2 block whitespace-pre-line font-nsm">{props.children}</kbd>
+  </div>;
+}
 
 export default function Page() {
-  function Section(props:{title:string, children:ReactNode}) {
-    return <div className="w-full  darkgrey text mb-2" id={props.title.toLowerCase()}>
-      <h1 className="text-xl font-bold blue text text-raleway">{props.title}</h1>
-      <kbd className="pl-2 block whitespace-pre-line font-nsm">{props.children}</kbd>
-    </div>;
-  }
+  
    return  <div className="p-5 font-raleway">
     <title>ProDSA Services: General Terms and Conditions</title>
     <meta name="description" content="Please read these terms carefully, as they govern your relationship with ProDSA Services."/>
