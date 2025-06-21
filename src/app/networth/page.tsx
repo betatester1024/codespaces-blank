@@ -3,7 +3,6 @@
 import { f } from "@/lib/formcreator";
 import { Themes } from "@/lib/Themes";
 import { Button, byId, GIcon, H1, Header, Loader, ExternLink} from "@/lib/utils";
-import { strawbCmd } from "@/shiplist/shiplist";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
