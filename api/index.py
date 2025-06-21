@@ -2,7 +2,8 @@
 # WARNING!
 # For installing dependencies: pipenv install [packagename]!
 #
-
+import os
+branch: str = os.environ.get("NEXT_PUBLIC_BRANCH")
 try:
     from flask import Flask
     from flask import request
@@ -21,7 +22,10 @@ async def hello_world():
     try:
         return await processShiplist(cmd, val, ships)
     except Exception as e:
-        return str(e)
+        if branch == "testing":
+            return str(e)
+        else:
+            return "An error has occurred, but exception details are hidden in production."
     # return "<p>Hello, World!</p>"
 
 
@@ -34,7 +38,7 @@ import sys
 from datetime import timedelta, date, datetime
 
 import requests
-import os
+
 # from supabase import create_client, Client
 
 url: str = os.environ.get("SUPABASE_URL")
