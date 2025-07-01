@@ -14,12 +14,12 @@ import { Item } from "@/lib/dsabp";
 
 let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Error processing blueprint."};
 
-enum ProcessingOptns  {
-  SORT = "Sort by item", DISPLAY="Display only", SORT_SAFE="Sort (safe)", SORT_RESTORE="Sort (restore)"
-
+export enum ProcessingOptns  {
+  SORT = "Sort by item", DISPLAY="Display only", SORT_SAFE="Sort (safe)", SORT_RESTORE="Sort (restore)",
+  ENTERREPAIRMODE = "Enter Repair Mode"
 }
 function isSort(a:ProcessingOptns|undefined) {
-  return a == ProcessingOptns.SORT || a == ProcessingOptns.SORT_SAFE || a == ProcessingOptns.SORT_RESTORE;
+  return a == ProcessingOptns.SORT || a == ProcessingOptns.SORT_SAFE || a == ProcessingOptns.SORT_RESTORE || a == ProcessingOptns.ENTERREPAIRMODE;
 }
 
 enum FormOptns {
@@ -132,17 +132,6 @@ export default function Page() {
     let processed = false;
     try {
       setProcessing(true);
-      let sMode=false, rMode=false;
-      switch (cmd) {
-        case ProcessingOptns.SORT: 
-          break;
-        case ProcessingOptns.SORT_SAFE:
-          sMode = true;
-          break;
-        case ProcessingOptns.SORT_RESTORE:
-          rMode = true;
-          break;
-      };
       let firstStrs = (byId("firstItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
       let lastStrs = (byId("lastItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
       let firstItms = new Set<Item>(), lastItms = new Set<Item>();
@@ -159,20 +148,21 @@ export default function Page() {
           });
       setFirst(Array.from(firstItms));
       setLast(Array.from(lastItms));
-      if (isSort(cmd)) {
-        bpout = await sortBP(tArea.value, {
-          sortY:sortY, 
-          safeMode:sMode, 
-          restoreMode:rMode, 
-          alignExpandoes:aExpandoes, 
-          firstItems:Array.from(firstItms),
-          lastItems:Array.from(lastItms)
-        });
-        processed = true;
-      }
       let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
       let repairBP = repairMode ? tArea2.value : "";
       repairBP = formatBP(repairBP)
+      if (isSort(cmd)) {
+        bpout = await sortBP(tArea.value, {
+          sortY:sortY, 
+          mode: cmd,
+          alignExpandoes:aExpandoes, 
+          firstItems:Array.from(firstItms),
+          lastItems:Array.from(lastItms),
+          repairBP:repairBP
+        });
+        processed = true;
+      }
+
       console.log("outbp", bp.slice(0, 300));
       summary = await getSummaryJSON(bpout!.combined, starterQ, repairBP);
 
@@ -325,8 +315,9 @@ export default function Page() {
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
         <div className="flex flex-col items-left grow">
-          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateProcessCommand}>
+          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={2} onChange={updateProcessCommand}>
             <Option value={ProcessingOptns.SORT}>Sort by item</Option>
+            <Option value={ProcessingOptns.ENTERREPAIRMODE}>(Repair Mode) Disable loaders and hatches for repairs</Option>
             <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable loaders and hatches</Option>
             <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore loader and hatch settings</Option>
             <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>

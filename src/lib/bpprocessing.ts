@@ -1,4 +1,5 @@
 'use client';
+import { ProcessingOptns } from '@/app/editor/page';
 import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode, BuildBits } from './dsabp';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
@@ -238,20 +239,20 @@ class BuildCmd_A extends BuildCmd
 
 export interface sortConfig {
   sortY:boolean,
-  safeMode:boolean,
-  restoreMode:boolean,
+  mode: ProcessingOptns|null
   alignExpandoes:boolean,
   firstItems:Item[],
   lastItems:Item[],
+  repairBP:string
 }
 
 const noConfig: sortConfig = {
   sortY:false,
-  safeMode:false,
-  restoreMode:false,
+  mode:null,
   alignExpandoes:false,
   firstItems:[],
-  lastItems:[]
+  lastItems:[],
+  repairBP:""
 }
 
 interface Coord {
@@ -271,7 +272,7 @@ function addConfigInfo(inCmds:BPCmd[], config:sortConfig) {
     else if (cmd instanceof BuildCmd) {
       let bcmd = cmd as BuildCmd_A;
       bcmd.currConfig = activeConfig;
-      if (config.safeMode && bcmd.item != Item.PUSHER) {
+      if ((config.mode == ProcessingOptns.SORT_SAFE || config.mode == ProcessingOptns.ENTERREPAIRMODE)&& bcmd.item != Item.PUSHER) {
         bcmd.currConfig.filterMode = FilterMode.BLOCK_ALL;
         // cmd.pusher = {maxBeamLength:0};
       }
@@ -302,12 +303,22 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
   // store the active configuration for every command to be compressed later
   let cmds = addConfigInfo(bp.commands, config);
   let cmds2 : BuildCmd_A[] = [];
-  if (config.restoreMode) 
+  if (config.mode == ProcessingOptns.SORT_RESTORE) 
     cmds = cmds.filter((i:any) => {
       return i.item == Item.LOADER_NEW || 
               i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
               i.item == Item.LOADER;
     })
+  
+  if (config.mode == ProcessingOptns.ENTERREPAIRMODE) {
+    let repairBP = new Decoder().decodeSync(config.repairBP);
+    cmds = addConfigInfo(repairBP.commands!, config);
+    cmds = cmds.filter((i:any) => {
+      return i.item == Item.LOADER_NEW || 
+              i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
+              i.item == Item.LOADER;
+    })
+  }
   // remove all (now-redundant) config commands
   console.log(cmds);
   let coordMap = new Map<Coord, BuildCmd_A[]>()
