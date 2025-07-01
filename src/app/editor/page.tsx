@@ -80,7 +80,7 @@ export default function Page() {
     }
   }, [calcOpen]);
 
-  let [prevStarterQ, setPSQ] = useState<boolean>(false)
+  let [prevStarterQ, setPSQ] = useState<boolean>(true)
   useEffect(()=>{
     
     setPSQ(starterQ);
@@ -275,7 +275,7 @@ export default function Page() {
     
     tArea.value = str;
     setLoadingBP(false);
-    console.log("loaded!");
+    processBP()
   }
 
   function updateProcessCommand(n:ProcessingOptns) {
@@ -368,7 +368,9 @@ export default function Page() {
     </form>
     <div className={`${Themes.BLUE.textCls} font-nsm p-2 rounded-md border-[2px]`}>
       {
-        processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
+        // processError ? <span className={Themes.RED.textCls}>{processError}</span> : <></>
+      }{
+        <>
         {isSort(cmd) ? 
           <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
             <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
@@ -448,7 +450,7 @@ export default function Page() {
     }
   </div>
   <div id="calcCtn" onClick={(event:MouseEvent<HTMLDivElement>)=>{if ((event.target as HTMLDivElement).id == "calcCtn") setCalcOpen(false);}} 
-    className={`w-full h-full absolute bg-gray-200/75 top-0 flex items-center 
+    className={`w-full h-full fixed bg-gray-200/75 top-0 flex items-center 
     justify-center transition-all ${calcOpen ? "opacity-100 pointer-events-all" : "opacity-0 pointer-events-none"}`}>
     <div className="top-5 w-[90%] h-[fit-content] bg-gray-200 p-3 rounded-md"> 
       <form onSubmit={(event:FormEvent<HTMLFormElement>)=>{event.preventDefault(); runCalc();}} className="flex gap-2">

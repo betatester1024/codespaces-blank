@@ -216,9 +216,7 @@ textarea {
   grid-row: span 2;
 } */
 
-.animHighlight {
-  animation: highlight 5s both;
-}
+
 
 @keyframes highlight {
   0% {
