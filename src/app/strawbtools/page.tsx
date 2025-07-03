@@ -79,7 +79,7 @@ export default function Page() {
     setOutHex(<Loader theme={Themes.BLUE} active={true}/>)
     let outs = null;
     try {
-      outs = await loadPOST("byHex", hexes)
+      outs = await loadPOST("byHex", {dat:hexes})
     } catch (e) {return;}
     
     let outHTML = [];

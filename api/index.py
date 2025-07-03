@@ -298,7 +298,7 @@ def createShipEntree(hex_code):
 
 def safeGetEntree(hex_code: str):
     hex_code = hex_code.upper().strip().replace("{", "").replace("}", "")
-    sres = re.search("^[a-f0-9]$", hex_code)
+    sres = re.search("^[A-F0-9]+$", hex_code)
     if sres == None: return {"shipData":None}
     if hex_code in LEADERBOARD_HEX:
         return {"shipData":createShipEntree(hex_code), "rank":LEADERBOARD_HEX.index(hex_code) + 1}
@@ -802,7 +802,7 @@ async def init(cmd, arg, body):
         return (json.dumps(getLeaderboardNetworth(iStr['page'])));
     elif (cmd == 'byHex'):
         out = []
-        for iStr in json.loads(body):
+        for iStr in json.loads(body)["dat"]:
             out.append(json.dumps(safeGetEntree(iStr)));
         return out
     # elif (cmd == 'pastNames'):
