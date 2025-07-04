@@ -33,6 +33,7 @@ const RFont = Raleway({
 // }
 
 export default function RootLayout({children}: Readonly<{children:React.ReactNode}>) {
+  process.env.NEXT_PUBLIC_BRANCH;
   return (
     <html lang="en">
       <head>

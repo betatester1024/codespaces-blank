@@ -119,7 +119,7 @@ export default function Page() {
   }
 
   function formatBP(bp:string) {
-    return bp.trim().replaceAll("\n", "");
+    return bp.replaceAll("\n", "").trim();
   }
 
   async function processBP() {
@@ -152,7 +152,7 @@ export default function Page() {
       let repairBP = repairMode ? tArea2.value : "";
       repairBP = formatBP(repairBP)
       if (isSort(cmd)) {
-        bpout = await sortBP(tArea.value, {
+        bpout = await sortBP(bp, {
           sortY:sortY, 
           mode: cmd,
           alignExpandoes:aExpandoes, 
