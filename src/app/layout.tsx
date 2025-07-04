@@ -47,7 +47,7 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
       <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} ${RFont.variable} antialiased`}>
         <Suspense fallback={<Loading/>}>{
           <div className="flex relative">
-            <div><GlobalClient>{children}</GlobalClient></div>
+            <div className="grow z-1"><GlobalClient>{children}</GlobalClient></div>
             {process.env.NEXT_PUBLIC_BRANCH != "stable" ? <div className="sticky w-[fit-content] h-[100vh] bg-yellow-200/40 text-center" style={{writingMode:"vertical-rl"}}>You are in the {process.env.NEXT_PUBLIC_BRANCH} branch! Changes are unstable and may break in weird ways! <ExternLink href="//prodsa.vercel.app/">Switch to stable!</ExternLink></div> : <></>}
           </div>
         }

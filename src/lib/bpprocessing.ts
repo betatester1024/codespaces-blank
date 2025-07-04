@@ -311,7 +311,7 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
     })
   
   if (config.mode == ProcessingOptns.ENTERREPAIRMODE) {
-    let repairBP = new Decoder().decodeSync(config.repairBP);
+    let repairBP = new Decoder().decodeSync((config.repairBP ? config.repairBP : bString));
     cmds = addConfigInfo(repairBP.commands!, config);
     cmds = cmds.filter((i:any) => {
       return i.item == Item.LOADER_NEW || 

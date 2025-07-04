@@ -13,8 +13,8 @@ export default function GlobalClient(props:{children:ReactNode}) {
     });
   }, [])
   
-  let branch = process.env.NEXT_PUBLIC_BRANCH;
-  console.log("branch=",branch)
+  // let branch = process.env.NEXT_PUBLIC_BRANCH;
+  // console.log("branch=",branch)
   const [menuActive, setMenuActive] = useState<boolean>(false);
   return <>{props.children}
   
@@ -38,8 +38,8 @@ export default function GlobalClient(props:{children:ReactNode}) {
       <Link onClick={()=>{setMenuActive(false)}} href="/editor" prefetch={false}>PrecisionEdit Blueprinting Tools</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/strawbtools" prefetch={false}>Strawberry Clan Services Econ Dump Tools</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/networth" prefetch={false}>Net Worth Calculator</Link>
-      <p>Current branch: {branch}</p>
-      <Link onClick={()=>{setMenuActive(false)}} href={branch == "stable" ? "//prodsa-beta.vercel.app" : "//prodsa.vercel.app"} prefetch={false}>Switch to {branch == "stable" ? "unstable" : "stable"} branch</Link>
+      <p>Current branch: {process.env.NEXT_PUBLIC_BRANCH}</p>
+      <Link onClick={()=>{setMenuActive(false)}} href={process.env.NEXT_PUBLIC_BRANCH == "stable" ? "//prodsa-beta.vercel.app" : "//prodsa.vercel.app"} prefetch={false}>Switch to {process.env.NEXT_PUBLIC_BRANCH == "stable" ? "unstable" : "stable"} branch</Link>
       <ExternLink href="//dsc.gg/order-now" className="green text">Order from ProDSA Services now!</ExternLink>
     </div>
     
