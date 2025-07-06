@@ -42,6 +42,7 @@ export default function Page() {
 
   return <>
   <title>Construction, Repair, Insurance and Design Rates | ProDSA Services</title>
+    <meta name="description" content="Authoritative pricing chart for all ProDSA Services."/>
   <div className="p-3 flex flex-col gap-2" >
     <Header title="Construction, Repair, Insurance and Design Rates" subtitle="For all ProDSA Services jobs"/>
     <Lister className="border-[2px] p-2 rounded-md" className_c="p-1" colLayout="50px 1fr 1fr">{itemCosts}</Lister>

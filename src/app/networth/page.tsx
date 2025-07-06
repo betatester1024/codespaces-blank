@@ -3,10 +3,35 @@
 import { f } from "@/lib/formcreator";
 import { Themes } from "@/lib/Themes";
 import { Button, byId, GIcon, H1, Header, Loader, ExternLink} from "@/lib/utils";
-import { strawbCmd } from "@/shiplist/shiplist";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
+
+interface ShipData {
+  hex_code:string,
+  icon:string,
+  load_time:string,
+  shipworth:number,
+  placement:number,
+  name:string
+}
+
+export function ShipView(props:{row:ShipData|string}) {
+  let row = props.row;
+  let error = typeof row == "string";
+  return <div className={`flex gap-2 rounded-md p-3 border-1 ${error ? "red" : "grey"} text hover transition-colors`}>
+    {
+      typeof row == "string" ? <>
+      Requested ship <kbd>{row}</kbd> not found.</>: 
+      <><Image alt={"Ship ID "+row.hex_code} src={row.icon} height={100} width={100}/> 
+      <div>
+        <p className="text-lg"><b className="blue text">{row.name}</b> <span>{'{'}{row.hex_code}{'}'}</span></p>
+        <p>Last loaded: {row.load_time}</p>
+        <p className="text-lg">Value: <b className="blue text">{f(row.shipworth, 0)} flux</b> ({row.placement < 0 ? "Unknown placement" : "#"+f(row.placement, 0)})</p>
+      </div></>
+    }
+  </div>
+}
 
 export default function Page() {
 
@@ -37,14 +62,7 @@ export default function Page() {
     let eOut = [];
     for (let i=0; i<ships.shipData.length; i++) {
       let row = ships.shipData[i];
-      eOut.push(<div key={i} className="flex gap-2 rounded-md p-3 border-1 grey text hover:bg-gray-200 transition-colors">
-        <Image alt={"Ship ID "+row.hex_code} src={row.icon} height={100} width={100}/> 
-        <div>
-          <p className="text-lg"><b className="blue text">{row.name}</b> <span>{'{'}{row.hex_code}{'}'}</span></p>
-          <p>Last loaded: {row.load_time}</p>
-          <p className="text-lg">Value: <b className="blue text">{f(row.shipworth, 0)} flux</b> (#{f(row.placement, 0)})</p>
-        </div>
-      </div>)
+      eOut.push(<ShipView row={row} key={i}/>)
     }
     setEntries(eOut);
   }
@@ -53,6 +71,8 @@ export default function Page() {
   const [eligibility, setEligible] = useState<boolean>(false);
   const [entries, setEntries] = useState<ReactNode>(<>None yet</>);
   return <div className="flex flex-col gap-1 m-3 font-raleway">
+    <title>ProDSA Net Worth Valuator</title>
+    <meta name="description" content="Net worth valuator by Strawberry Clan Services - thank you to @xendyos for econ processing scripts!"/>
     <header className="slideIn font-raleway blue text">
       <div className="text-4xl">ProDSA <b>Net Worth Valuator</b></div>
       <p className="slideIn grey text">Thank you to <b className="blue slideIn text">@xendyos</b> for econ processing scripts. By Strawberry Web Services: Everything you could ever want. And prisms.</p>

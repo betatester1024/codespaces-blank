@@ -29,6 +29,15 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/valuate',
+        destination: '/estimator',
+        permanent: true,
+      },
+    ]
+  },
   /* config options here */
 };
 export default nextConfig;

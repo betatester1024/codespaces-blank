@@ -14,12 +14,12 @@ import { Item } from "@/lib/dsabp";
 
 let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Error processing blueprint."};
 
-enum ProcessingOptns  {
-  SORT = "Sort by item", DISPLAY="Display only", SORT_SAFE="Sort (safe)", SORT_RESTORE="Sort (restore)"
-
+export enum ProcessingOptns  {
+  SORT = "Sort by item", DISPLAY="Display only", SORT_SAFE="Sort (safe)", SORT_RESTORE="Sort (restore)",
+  ENTERREPAIRMODE = "Enter Repair Mode"
 }
 function isSort(a:ProcessingOptns|undefined) {
-  return a == ProcessingOptns.SORT || a == ProcessingOptns.SORT_SAFE || a == ProcessingOptns.SORT_RESTORE;
+  return a == ProcessingOptns.SORT || a == ProcessingOptns.SORT_SAFE || a == ProcessingOptns.SORT_RESTORE || a == ProcessingOptns.ENTERREPAIRMODE;
 }
 
 enum FormOptns {
@@ -27,6 +27,7 @@ enum FormOptns {
 }
 
 export default function Page() {
+  
   const [bomSummary, setBomSummary] = useState<ReactNode[][]>([]);
   const [buildSummary, setBuildSummary] = useState<ReactNode[][]>([]);
   const [processError, setProcessError] = useState<string>();
@@ -79,12 +80,17 @@ export default function Page() {
     }
   }, [calcOpen]);
 
+  let [prevStarterQ, setPSQ] = useState<boolean>(true)
   useEffect(()=>{
+    
+    setPSQ(starterQ);
     if (repairMode) setStarterQ(false);
+    else setStarterQ(prevStarterQ)
   }, [repairMode])
 
   useEffect(()=>{
-    runCmd();
+    processBP();
+    delaySelectOutput();
   }, [cmd, formType])
 
   useEffect(()=>{
@@ -103,34 +109,29 @@ export default function Page() {
   // }, []); // Empty dependency array ensures this runs only on mount and unmount
 
   useEffect(()=>{
-    runCmd();
-  }, [starterQ, sortY, aExpandoes])
+    processBP();
+  }, [starterQ, sortY, aExpandoes, repairMode])
 
   function formProcess(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    runCmd();
+    processBP();
+    delaySelectOutput();
   }
 
-  async function runCmd() {
+  function formatBP(bp:string) {
+    return bp.replaceAll("\n", "").trim();
+  }
+
+  async function processBP() {
     console.log("processing command", cmd);
     let tArea = byId("inBlueprint") as HTMLTextAreaElement;
     let bp = tArea.value;
+    bp = formatBP(bp)
     let bpout = {bps:[bp], combined:bp}; // default for display only
     let summary : BPSummary;
     let processed = false;
     try {
       setProcessing(true);
-      let sMode=false, rMode=false;
-      switch (cmd) {
-        case ProcessingOptns.SORT: 
-          break;
-        case ProcessingOptns.SORT_SAFE:
-          sMode = true;
-          break;
-        case ProcessingOptns.SORT_RESTORE:
-          rMode = true;
-          break;
-      };
       let firstStrs = (byId("firstItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
       let lastStrs = (byId("lastItems") as HTMLInputElement).value.replaceAll(" ", "").split(",");
       let firstItms = new Set<Item>(), lastItms = new Set<Item>();
@@ -147,19 +148,21 @@ export default function Page() {
           });
       setFirst(Array.from(firstItms));
       setLast(Array.from(lastItms));
+      let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
+      let repairBP = repairMode ? tArea2.value : "";
+      repairBP = formatBP(repairBP)
       if (isSort(cmd)) {
-        bpout = await sortBP(tArea.value, {
+        bpout = await sortBP(bp, {
           sortY:sortY, 
-          safeMode:sMode, 
-          restoreMode:rMode, 
+          mode: cmd,
           alignExpandoes:aExpandoes, 
           firstItems:Array.from(firstItms),
-          lastItems:Array.from(lastItms)
+          lastItems:Array.from(lastItms),
+          repairBP:repairBP
         });
         processed = true;
       }
-      let tArea2 = byId("inBlueprintR") as HTMLTextAreaElement;
-      let repairBP = repairMode ? tArea2.value : "";
+
       console.log("outbp", bp.slice(0, 300));
       summary = await getSummaryJSON(bpout!.combined, starterQ, repairBP);
 
@@ -170,7 +173,7 @@ export default function Page() {
           formRes = matsCostForm(summary, true).form;
           break;
         case FormOptns.BUILD:
-          formRes = buildCostForm(summary).form;
+          formRes = buildCostForm(summary, repairMode).form;
           break;
         case FormOptns.INSURANCE:
           let inp1 = byId("insurancePct") as HTMLInputElement;
@@ -190,6 +193,12 @@ export default function Page() {
     }
     setSummary(summary);
     setProcessing(false);
+    setProcessError(summary.error);
+    if (summary.error) {
+      return;
+    }
+    ///////////// update html parts
+    
     let bomformatted = [];
     for (let entry of summary.bom) {
       bomformatted.push([
@@ -207,18 +216,21 @@ export default function Page() {
         <p>{entry.item.name}</p>
       ]);
     }
-    if (!summary.error) {
+    // if (!summary.error) {
       setBomSummary(bomformatted);
       setBuildSummary(buildformatted);
-    }
-    setProcessError(summary.error);
+    // }
+    // else {
+      // return;
+    // }
+  } // process()
+
+  function delaySelectOutput() {
     setTimeout(()=>{
       let out = byId("outBlueprint") as HTMLTextAreaElement;
-      // out.focus();
       out.select();
-      // location.href="#outBlueprint";
     }, 200);
-  } // process()
+  }
 
   async function sortBP(value:string, config?:sortConfig) {
     let summary = await sortByItem(value, config);
@@ -253,7 +265,7 @@ export default function Page() {
     
     tArea.value = str;
     setLoadingBP(false);
-    console.log("loaded!");
+    processBP()
   }
 
   function updateProcessCommand(n:ProcessingOptns) {
@@ -280,13 +292,14 @@ export default function Page() {
   }
   return (<div tabIndex={0}><div className="flex flex-col gap-2 p-3">
     <title>ProDSA PrecisionEdit Tools | ProDSA Services</title>
+    <meta name="description" content="PrecisionEdit blueprint editing for ProDSA Services use"/>
     <Header title="ProDSA PrecisionEdit Tools" subtitle="Developed by ProDSA Services - thanks to libraries from @blueyescat"></Header>
     <form onSubmit={formProcess}>
       <div className="flex gap-1 flex-wrap relative items-center">
-        <textarea id="inBlueprint" placeholder="DSA:..." 
+        <textarea id="inBlueprint" placeholder="DSA:..." onChange={()=>{processBP()}}
           className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} font-nsm`}>
         </textarea>
-        <textarea id="inBlueprintR" placeholder="Repair base blueprint" 
+        <textarea id="inBlueprintR" placeholder="Repair base blueprint" onChange={()=>{processBP()}}
         className={`${Themes.GREY.bgMain} ${Themes.BLUE.textCls} shrink font-nsm transition-[max-width] overflow-clip 
         ${repairMode ? "max-w-[400px] pr-1 pl-1" : "max-w-[0px] !pl-0 !pr-0"}`}>
         </textarea> 
@@ -302,8 +315,9 @@ export default function Page() {
       </div>
       <div className="w-full flex gap-1 flex-wrap mt-2 items-center">
         <div className="flex flex-col items-left grow">
-          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={0} onChange={updateProcessCommand}>
+          <Select theme={Themes.BLUE} className="grow-1" defaultIdx={2} onChange={updateProcessCommand}>
             <Option value={ProcessingOptns.SORT}>Sort by item</Option>
+            <Option value={ProcessingOptns.ENTERREPAIRMODE}>(Repair Mode) Disable loaders and hatches for repairs</Option>
             <Option value={ProcessingOptns.SORT_SAFE}>(Safe mode) Disable loaders and hatches</Option>
             <Option value={ProcessingOptns.SORT_RESTORE}>(Restore mode) Restore loader and hatch settings</Option>
             <Option value={ProcessingOptns.DISPLAY}>No processing - display only</Option>
@@ -326,9 +340,9 @@ export default function Page() {
           <Input theme={Themes.BLUE} type="checkbox" id="sortY" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setsortY(event.target.checked);}} 
           ctnClassName="cursor-pointer">Sort by Y-coord?</Input>
-          <Input theme={Themes.BLUE} type="checkbox" checked={starterQ} id="starterQ" 
+          <Input theme={repairMode && starterQ ? Themes.RED : Themes.BLUE} type="checkbox" checked={starterQ} id="starterQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setStarterQ(event.target.checked);}} 
-          ctnClassName="cursor-pointer">From starter?</Input>
+          ctnClassName="cursor-pointer" >From starter?</Input>
           <Input theme={Themes.BLUE} type="checkbox" checked={aExpandoes}id="boxQ" 
           onChange={(event:ChangeEvent<HTMLInputElement>) => {setSnap(event.target.checked);}} 
           ctnClassName="cursor-pointer">Snap boxes?</Input>
@@ -345,7 +359,9 @@ export default function Page() {
     </form>
     <div className={`${Themes.BLUE.textCls} font-nsm p-2 rounded-md border-[2px]`}>
       {
-        processError ? <span className={Themes.RED.textCls}>{processError}</span> : <>
+        // processError ? <span className={Themes.RED.textCls}>{processError}</span> : <></>
+      }{
+        <>
         {isSort(cmd) ? 
           <div className="grid" style={{gridTemplateColumns:"0fr 1fr"}}>
             <div className="mb-1 grid grid-cols-subgrid gap-2 items-center" style={{gridColumn:"span 2"}}>
@@ -409,8 +425,8 @@ export default function Page() {
           <div className={`summaryContainer border-[2px] ${Themes.BLUE.textCls} ${Themes.BLUE.bgLight}`}>
             <div className="w-full flex justify-center">
               <p className="text-blue-500 text-lg">Build order&nbsp;
-                {starterQ && !processing ? "(adjusted for starter items)" : ""} 
-                {repairMode && !processing ? "(adjusted for repair mode)" : ""}
+                {starterQ && !processing ? <>{"(adjusted for starter items)"}&nbsp;</> : ""} 
+                {repairMode && !processing ? <>{"(adjusted for repair mode)"}&nbsp;</> : ""}
               </p>
             </div>
             <div>
@@ -425,7 +441,7 @@ export default function Page() {
     }
   </div>
   <div id="calcCtn" onClick={(event:MouseEvent<HTMLDivElement>)=>{if ((event.target as HTMLDivElement).id == "calcCtn") setCalcOpen(false);}} 
-    className={`w-full h-full absolute bg-gray-200/75 top-0 flex items-center 
+    className={`w-full h-full fixed bg-gray-200/75 top-0 flex items-center 
     justify-center transition-all ${calcOpen ? "opacity-100 pointer-events-all" : "opacity-0 pointer-events-none"}`}>
     <div className="top-5 w-[90%] h-[fit-content] bg-gray-200 p-3 rounded-md"> 
       <form onSubmit={(event:FormEvent<HTMLFormElement>)=>{event.preventDefault(); runCalc();}} className="flex gap-2">

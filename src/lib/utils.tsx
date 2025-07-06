@@ -27,7 +27,7 @@ export function ExternLink(props:{href:string, className?:string, children:strin
 
 export function Header(props:{title:string|ReactNode, subtitle:string|ReactNode, className?:string}) {
   return  <header className={"flex flex-col justify-left text-2xl "+props.className}>
-      <h1 className={`${Themes.BLUE.textCls}`}>{props.title}</h1>
+      <h1 className={`${Themes.BLUE.textCls} font-bold`}>{props.title}</h1>
       <p className={`${Themes.BLUE.textCls} text-base`}>{props.subtitle}</p>
     </header>
 }
@@ -56,7 +56,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   className?:string, 
   children?:ReactNode,
   ctnClassName?:string,
-  id:string
+  id?:string
 };
 
 export function H1({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourTheme, children?:ReactNode, extraClasses?:string}) {
@@ -65,19 +65,23 @@ export function H1({theme=Themes.BLUE, children, extraClasses} : {theme?:ColourT
 
 export function Input(props:InputProps) {
   return (
-    <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName}`}><input 
-      type={props.type}
-      id={props.id}
-      tabIndex={props.tabIndex}
-      defaultChecked={props.defaultChecked}
-      checked = {props.checked}
-      defaultValue={props.defaultValue}
-      placeholder={props.placeholder}
-      // onClick={props.onClick}
-      onChange={props.onChange}
-      className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
-      rounded-sm p-2 transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
-    />{props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
+    <div className={`text-md ${props.theme.textCls} flex ${props.ctnClassName} relative ${props.children ? "" : "input flex-col"}`}>
+      <input 
+        type={props.type}
+        id={props.id}
+        tabIndex={props.tabIndex}
+        defaultChecked={props.defaultChecked}
+        checked = {props.checked}
+        defaultValue={props.defaultValue}
+        placeholder={props.placeholder}
+        min={props.min}
+        max={props.max}
+        // onClick={props.onClick}
+        onChange={props.onChange}
+        className={`${props.theme.textCls} ${props.theme.hoverCls} ${props.theme.bgLight}
+        rounded-sm p-2 accent-current outline-current transition-colors justify-center flex items-center ${props.className} ${props.children ? "" : "grow"}`}
+      />
+      {props.children ? <label htmlFor={props.id} className="inline-block h-[100%] ml-1 cursor-pointer">{props.children}</label>: <></>}</div>
   );
 }
 
@@ -284,7 +288,7 @@ export function Select({theme:clrTheme=Themes.BLUE, children, className, default
       <div tabIndex={-1} className={
         `w-[100%] h-[fit-content] ${active ? "max-h-[50vh]" : "max-h-[0px]"} flex flex-col 
         overflow-scroll absolute transition-all duration-350 rounded-b-sm shadow-lg/40
-        ${active ? "outline-solid":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}
+        ${active ? "outline-solid outline-1":""} ${matchOptns.length == 0 ? Themes.RED.textCls : ""}`}
         style={{zIndex:zIdx}}>
         { 
           matchOptns.length == 0 ?

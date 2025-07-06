@@ -16,6 +16,7 @@ export default function Page() {
 
   return <div className="flex-col gap-1 p-3 font-raleway">
     <title>Welcome | ProDSA Services</title>
+    <meta name="description" content="Welcome to ProDSA Services. All your shipbuilding, design, insurance, repair and paint needs in one centralised location."/>
     {/* <Header className="font-raleway blue text slideIn !text-4xl" 
       title={<>Welcome to <b>ProDSA Services</b></>} 
       subtitle={<>Trusted by the community since <b>2021</b></>}/> */}

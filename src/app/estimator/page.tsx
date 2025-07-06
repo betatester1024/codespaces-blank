@@ -35,14 +35,15 @@ export default function Page() {
     setSummary(formData.html);
   }
   const [estimateType, setType] = useState<estimateTypes>();
-  const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Valuate" to start...</>);
+  const [summaryOut, setSummary] = useState<ReactNode>(<>Press "Estimate" to start...</>);
   useEffect(()=>{
     valuate();
   }, [estimateType])
   
 
   return <div className="p-3 flex flex-col gap-2" >
-    <title>Blueprint Valuator | ProDSA Services</title>
+    <title>Blueprint Pricing Estimator | ProDSA Services</title>
+    <meta name="description" content="Blueprint pricing estimator. For precise pricing, open a ticket."/>
     <Header title="Blueprint Valuator" subtitle="Tools by ProDSA Services"/>
     <form className="flex flex-col gap-1" onSubmit={(event:FormEvent<HTMLFormElement>)=>{
       event.preventDefault();
@@ -57,7 +58,7 @@ export default function Page() {
           <Option value={estimateTypes.BUILD}>Construction</Option>
           <Option value={estimateTypes.INSURANCE}>Insurance</Option>
         </Select>
-        <Button theme={Themes.GREEN}>Valuate!</Button>
+        <Button theme={Themes.GREEN}>Estimate pricing!</Button>
       </div>
     </form>
     <div className={`${Themes.BLUE.textCls} border-[2px] p-3 rounded-md`} id="formOut">

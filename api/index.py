@@ -2,7 +2,8 @@
 # WARNING!
 # For installing dependencies: pipenv install [packagename]!
 #
-
+import os
+branch: str = os.environ.get("NEXT_PUBLIC_BRANCH")
 try:
     from flask import Flask
     from flask import request
@@ -11,7 +12,7 @@ except:
     print("Error.")
 
 
-
+ 
 @app.route("/api/shipprocessing", methods=['POST'])
 async def hello_world():
     ships = request.data
@@ -21,7 +22,10 @@ async def hello_world():
     try:
         return await processShiplist(cmd, val, ships)
     except Exception as e:
-        return str(e)
+        if branch == "testing":
+            return str(e)
+        else:
+            return "An error has occurred, but exception details are hidden in production."
     # return "<p>Hello, World!</p>"
 
 
@@ -34,7 +38,7 @@ import sys
 from datetime import timedelta, date, datetime
 
 import requests
-import os
+
 # from supabase import create_client, Client
 
 url: str = os.environ.get("SUPABASE_URL")
@@ -68,6 +72,8 @@ worth = {
     303: 0,  # Eternal flux
 
     323: 0, # Red Gremlin (r/place ship)
+    324: 0, # Orange Gremlin (r/place ship)
+    325: 0, # Yellow Gremlin (r/place ship)
     121: 0, # Sandbox RCD
 
     1: 1 / 24,  # metal
@@ -292,6 +298,8 @@ def createShipEntree(hex_code):
 
 def safeGetEntree(hex_code: str):
     hex_code = hex_code.upper().strip().replace("{", "").replace("}", "")
+    sres = re.search("^[A-F0-9]+$", hex_code)
+    if sres == None: return {"shipData":None}
     if hex_code in LEADERBOARD_HEX:
         return {"shipData":createShipEntree(hex_code), "rank":LEADERBOARD_HEX.index(hex_code) + 1}
     else:
@@ -727,8 +735,10 @@ def dbgLog(str):
     dbgFile.write(str)
     dbgFile.flush()
     
+    
+import re
 import datetime;
-async def init(cmd, arg, shiplist):
+async def init(cmd, arg, body):
     global currentShips, dbgFile, supabase, LEADERBOARD_HEX;
     # print("CWD=", os.getcwd())
     supabase = await create_supabase()
@@ -778,18 +788,23 @@ async def init(cmd, arg, shiplist):
     LEADERBOARD_HEX = [item[0] for item in sorted_items]
     dbgLog("COMMAND="+cmd+"\n")
     if (cmd == 'ValueTotal'):
-        data = calculateNetworthShiplist(json.loads(shiplist))# open('/tmp/test.json', encoding="utf-8")*/))
+        data = calculateNetworthShiplist(json.loads(body))# open('/tmp/test.json', encoding="utf-8")*/))
         output = {"value": data[1], "date": data[0], "shipData":[]};# f"N={data[1]} \nD={data[0]}\n"
         for ship in data[2]:
            output["shipData"].append(ship);
         return (json.dumps(output))
     elif (cmd == 'NameSearch'):
-        data = text_findshipbyname(arg)
-        return (data)
+        iStr = json.loads(body)
+        data = text_findshipbyname(iStr['name'])
+        return data
     elif (cmd == 'leaderboard'):
-        return (json.dumps(getLeaderboardNetworth(arg)));
+        iStr = json.loads(body)
+        return (json.dumps(getLeaderboardNetworth(iStr['page'])));
     elif (cmd == 'byHex'):
-        return (json.dumps(safeGetEntree(arg)));
+        out = []
+        for iStr in json.loads(body)["dat"]:
+            out.append(json.dumps(safeGetEntree(iStr)));
+        return out
     # elif (cmd == 'pastNames'):
         # ECONOMY_MANAGER = Econlogger(log)
         # ECONOMY_MANAGER.fetch();
@@ -803,5 +818,5 @@ async def init(cmd, arg, shiplist):
         # else:
         #     print("cannot find")
 
-async def processShiplist(cmd, arg, shiplist):
-    return await init(cmd, arg, shiplist)
+async def processShiplist(cmd, arg, body):
+    return await init(cmd, arg, body)

@@ -1,4 +1,5 @@
 'use client';
+import { ProcessingOptns } from '@/app/editor/page';
 import {Item, Decoder, Encoder, Blueprint, BPCmd, BuildCmd, ConfigCmd, FixedAngle, LoaderConfig, PusherConfig, FilterMode, BuildBits } from './dsabp';
 
 function incr(map: Map<any, any>, key:any, by:number=1) {
@@ -78,7 +79,7 @@ let errorSummary = {bom:[], order:[], width:0, height:0, cmdCt:0, RCDCost:0, err
 // }
 
 function getBuildEntries(bp:Blueprint) {
-  let itemCt : Map<any, number> = new Map();
+  let itemCt : Map<Item, number> = new Map();
   let commands : BuildEntry[] = [];
   for (const cmd of bp.commands!) {
     if (cmd instanceof BuildCmd) {
@@ -114,7 +115,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
     {it:Item.NAV_UNIT, ct:1},
   ];
   let matsCost = new Map();
-  if (bString == "") return {bom:[],order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"No blueprint provided."};
+  if (bString == "") return {bom:[],order:[], width:0, height:0, cmdCt:0, RCDCost:0, error:"Blueprint processing error."};
   let bp = decode(bString);
   if (bp == null) return errorSummary;
 
@@ -127,27 +128,22 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
   // let sCommands : BuildCmd_A[] = [];
   // if (subtractMode) sCommands = addConfigInfo(bp2!.commands!, noConfig) as BuildCmd_A[];
  
+  let out: BoMEntry[] = [];
+  
   if (subtractMode) {
     let sCommands = getBuildEntries(bp2!).commands;
     for (let sCmd of sCommands) {
       if (sCmd.count == 0) continue;
+      // remove from applicable build order
       for (let cmd of commands) {
         if (cmd.item == sCmd.item) { // don't even bother to check shape
           let delta = Math.min(cmd.count, sCmd.count);
           cmd.count -= delta;
           sCmd.count -= delta;
+          let iCt = itemCt.get(cmd.item);
+          if (iCt != undefined) itemCt.set(cmd.item, iCt - delta);
         }
       }
-      // let found = coordMap.get({x:sCmd.x!, y:sCmd.y!});
-      // if (found != null) {
-      //   for (let i=0; i<found.length; i++) {
-      //     let foundCmd = found[i];
-      //     if (foundCmd.currConfig.equals(sCmd.currConfig) && foundCmd.item == sCmd.item) {
-      //       found.splice(i, 1);
-      //       i--;
-      //     }
-      //   }
-      // }
     } // all sub commands
   }
 
@@ -162,6 +158,8 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
         let delta = Math.min(cmd.count, foundItem.ct);
         cmd.count -= delta;
         foundItem.ct -= delta;
+        let iCt = itemCt.get(cmd.item);
+        if (iCt != undefined) itemCt.set(cmd.item, iCt - delta);
       }
     }
     if (cmd.item == Item.PUSHER || cmd.item == Item.ITEM_HATCH || cmd.item == Item.LOADER_NEW || cmd.item == Item.LOADER) {
@@ -186,7 +184,7 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
     let it = key;
     if (it.recipe != null) {
       let inputs = it.recipe.input;
-      for (let i of inputs) {
+      for (let i of inputs!) {
         incr(matsCost, i.item, i.count * itemCt.get(key)!);
       }
     }
@@ -194,11 +192,22 @@ export async function getSummaryJSON(bString:string, starterQ:boolean, subtractB
       incr(matsCost, it.id, itemCt.get(key)!);
     }
   }
-  let out: BoMEntry[] = [];
   for (let key of matsCost.keys()) {
     out.push({it: Item.getById(key), ct: matsCost.get(key)!});
     // console.log("itemID", Item.getById(key).name, "x", matsCost.get(key))
   }
+
+  // remove from bom
+  // if (subtractMode) {
+  //   let sCommands = getBuildEntries(bp2!).commands;
+  //   for (let sCmd of sCommands) {
+  //     let idx = out.findIndex((e:BoMEntry)=>{return e.it ==sCmd.item});
+  //     if (idx > 0) {
+  //       out[idx].ct -= sCmd.count;
+  //     }
+  //     else console.log("error in removing bom item", sCmd.item);
+  //   }
+  // }
   return {bom:out, order:commands, width:bp.width!, height:bp.height!, cmdCt:bp.commands!.length, RCDCost:rcdcost, error:undefined};
 }
 
@@ -230,20 +239,20 @@ class BuildCmd_A extends BuildCmd
 
 export interface sortConfig {
   sortY:boolean,
-  safeMode:boolean,
-  restoreMode:boolean,
+  mode: ProcessingOptns|null
   alignExpandoes:boolean,
   firstItems:Item[],
   lastItems:Item[],
+  repairBP:string
 }
 
 const noConfig: sortConfig = {
   sortY:false,
-  safeMode:false,
-  restoreMode:false,
+  mode:null,
   alignExpandoes:false,
   firstItems:[],
-  lastItems:[]
+  lastItems:[],
+  repairBP:""
 }
 
 interface Coord {
@@ -263,7 +272,7 @@ function addConfigInfo(inCmds:BPCmd[], config:sortConfig) {
     else if (cmd instanceof BuildCmd) {
       let bcmd = cmd as BuildCmd_A;
       bcmd.currConfig = activeConfig;
-      if (config.safeMode && bcmd.item != Item.PUSHER) {
+      if ((config.mode == ProcessingOptns.SORT_SAFE || config.mode == ProcessingOptns.ENTERREPAIRMODE)&& bcmd.item != Item.PUSHER) {
         bcmd.currConfig.filterMode = FilterMode.BLOCK_ALL;
         // cmd.pusher = {maxBeamLength:0};
       }
@@ -294,12 +303,22 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
   // store the active configuration for every command to be compressed later
   let cmds = addConfigInfo(bp.commands, config);
   let cmds2 : BuildCmd_A[] = [];
-  if (config.restoreMode) 
+  if (config.mode == ProcessingOptns.SORT_RESTORE) 
     cmds = cmds.filter((i:any) => {
       return i.item == Item.LOADER_NEW || 
               i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
               i.item == Item.LOADER;
     })
+  
+  if (config.mode == ProcessingOptns.ENTERREPAIRMODE) {
+    let repairBP = new Decoder().decodeSync((config.repairBP ? config.repairBP : bString));
+    cmds = addConfigInfo(repairBP.commands!, config);
+    cmds = cmds.filter((i:any) => {
+      return i.item == Item.LOADER_NEW || 
+              i.item == Item.ITEM_HATCH || i.item == Item.ITEM_HATCH_STARTER ||
+              i.item == Item.LOADER;
+    })
+  }
   // remove all (now-redundant) config commands
   console.log(cmds);
   let coordMap = new Map<Coord, BuildCmd_A[]>()
@@ -356,33 +375,35 @@ export async function sortByItem(bString:string, config:sortConfig=noConfig) : P
   });
   let activeConfig = new ConfigCmd();
   let lastBuildCmd : BuildCmd_A = cmds[0] as BuildCmd_A;
+  // console.log("lbc=",lastBuildCmd);
   for (let i=0; i<cmds.length; i++) {
     let cmd = cmds[i] as BuildCmd_A;
     // snap expandoes if delta < 5 degrees
     if (cmd.item == Item.EXPANDO_BOX && config.alignExpandoes) {
       cmd.currConfig.angle! %= 90;
-      if (Math.abs(cmd.currConfig.angle!) < 5) {
-        cmd.currConfig.angle = 0;
+      if (Math.abs(cmd.currConfig.angle!) < 2) {
+        cmd.currConfig.angle = 0.001; // to prevent the weird thing where the rcd stops responding
       }
     }
-    if (i != 0 && lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && 
-      cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
-      compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
-      let dist = 0;
-      let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
-      dist = x2>x1 ? x2-x1+lastBuildCmd.bits!.toString().length-1 : x1-x2+cmd.bits!.toString().length-1;
-      if (dist <= 64) {
-        lastBuildCmd.bits = new BuildBits(
-          (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
-          : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
-        ); 
-        console.log("optimised!", lastBuildCmd.bits.toString());
-        cmds.splice(i, 1);
-        i--;
-      }
-
-    }
-    else if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
+    // optimisation broken, fix before putting it back, if ever. in any case, it appears the rcd does this optimisation already.
+    // if (i != 0 && lastBuildCmd.bits && cmd.bits && cmd.y == lastBuildCmd.y && 
+    //   cmd.item == lastBuildCmd.item && cmd.shape == lastBuildCmd.shape && 
+    //   compatibleItem(cmd.item!, cmd.currConfig, activeConfig)) {
+    //   console.log("x=", cmd.x);
+    //   let dist = 0;
+    //   let x1 = cmd.x!+0.5, x2 = lastBuildCmd.x!+0.5;
+    //   dist = x2>x1 ? x2-x1+lastBuildCmd.bits!.toString().length-1 : x1-x2+cmd.bits!.toString().length-1;
+    //   if (dist <= 64) {
+    //     lastBuildCmd.bits = new BuildBits(
+    //       (x2 > x1) ? cmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+    //       : lastBuildCmd.bits!.toString() +zeroes(Math.max(x1, x2)-Math.min(x1, x2)) + lastBuildCmd.bits?.toString()
+    //     ); 
+    //     console.log("optimised!", lastBuildCmd.bits.toString());
+    //     cmds.splice(i, 1);
+    //     i--;
+    //   }
+    // }
+    if (!configFrag(cmd.item, cmd.currConfig).equals(configFrag(cmd.item, activeConfig))) {
       cmds.splice(i, 0, cmd.currConfig);
       activeConfig = cmd.currConfig;
     }
