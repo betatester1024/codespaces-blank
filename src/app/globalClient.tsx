@@ -18,13 +18,6 @@ export default function GlobalClient(props:{children:ReactNode}) {
   const [menuActive, setMenuActive] = useState<boolean>(false);
   return <>{props.children}
   
-  <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center font-raleway`}>
-      <Link prefetch={false} className="blue active flex items-baseline" href="/">ProDSA Services</Link>
-      <Link prefetch={false} className="blue active" href="/estimator">Estimate pricing</Link> 
-      <Link prefetch={false} className="grey active" href="/terms">Terms</Link> 
-      <ExternLink className="green text active" href="//dsc.gg/order-now">Order ships from ProDSA Services today!</ExternLink>
-      <span>Site design by <span className="green text">Jennifer Green</span></span>
-  </footer>
   <div id="menubar" className="grey text fixed right-3 top-3">
     <Button onClick={()=>{setMenuActive(!menuActive)}} className="outline-0" theme={Themes.GREY}>
       <GIcon theme={Themes.GREY} className="text-2xl">menu</GIcon>
@@ -38,8 +31,6 @@ export default function GlobalClient(props:{children:ReactNode}) {
       <Link onClick={()=>{setMenuActive(false)}} href="/editor" prefetch={false}>PrecisionEdit Blueprinting Tools</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/strawbtools" prefetch={false}>Strawberry Clan Services Econ Dump Tools</Link>
       <Link onClick={()=>{setMenuActive(false)}} href="/networth" prefetch={false}>Net Worth Calculator</Link>
-      <p>Current branch: {process.env.NEXT_PUBLIC_BRANCH}</p>
-      <Link onClick={()=>{setMenuActive(false)}} href={process.env.NEXT_PUBLIC_BRANCH == "stable" ? "//prodsa-beta.vercel.app" : "//prodsa.vercel.app"} prefetch={false}>Switch to {process.env.NEXT_PUBLIC_BRANCH == "stable" ? "unstable" : "stable"} branch</Link>
       <ExternLink href="//dsc.gg/order-now" className="green text">Order from ProDSA Services now!</ExternLink>
     </div>
     
