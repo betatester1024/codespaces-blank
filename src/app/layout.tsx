@@ -48,8 +48,20 @@ export default function RootLayout({children}: Readonly<{children:React.ReactNod
       <body className={`${NotoSansDisplay.variable} ${NotoSansMono.variable} ${RFont.variable} antialiased`}>
         <Suspense fallback={<Loading/>}>{
           <div className="flex relative">
-            <div className="grow z-1"><GlobalClient>{children}</GlobalClient></div>
+            <div className="grow z-1">
+              <GlobalClient>{children}</GlobalClient>
+              <footer className={`${Themes.BLUE.textCls} p-3 flex gap-2 flex-wrap justify-center font-raleway`}>
+                <Link prefetch={false} className="blue active flex items-baseline" href="/">ProDSA Services</Link>
+                <Link prefetch={false} className="blue active" href="/estimator">Estimate pricing</Link> 
+                <Link prefetch={false} className="grey active" href="/terms">Terms</Link> 
+                <ExternLink className="green text active" href="//dsc.gg/order-now">Order ships from ProDSA Services today!</ExternLink>
+                <p>Current branch: {process.env.NEXT_PUBLIC_BRANCH}</p>
+                <ExternLink href={process.env.NEXT_PUBLIC_BRANCH == "stable" ? "//prodsa-beta.vercel.app" : "//prodsa.vercel.app"}>Switch to {process.env.NEXT_PUBLIC_BRANCH == "stable" ? "unstable" : "stable"} branch</ExternLink>
+                <span>Site design by <span className="green text">Jennifer Green</span></span>
+              </footer>
+            </div>
             {process.env.NEXT_PUBLIC_BRANCH != "stable" ? <div className="sticky w-[fit-content] h-[100vh] bg-yellow-200/40 text-center top-0" style={{writingMode:"vertical-rl"}}>You are in the {process.env.NEXT_PUBLIC_BRANCH} branch! Changes are unstable and may break in weird ways! <ExternLink className="green text" href="//prodsa.vercel.app/">Switch to stable!</ExternLink></div> : <></>}
+            
           </div>
         }
         </Suspense>
